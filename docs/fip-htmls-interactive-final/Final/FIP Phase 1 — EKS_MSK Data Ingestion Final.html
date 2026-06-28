@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!-- saved from url=(0205)file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FIP Phase 1 — EKS/MSK Data Ingestion Final</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--border:#30363d;--accent:#f78166;--accent2:#79c0ff;--accent3:#56d364;--accent4:#d2a8ff;--accent5:#ffa657;--text:#e6edf3;--muted:#8b949e;--dim:#6e7681;--mono:'JetBrains Mono','Fira Code','Consolas',monospace;--ui:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ui);font-size:15px;line-height:1.65}.topbar{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:54px;padding:0 24px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:13px;font-weight:900;color:var(--accent);letter-spacing:.07em;text-transform:uppercase}.phase{font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px}.layout{display:flex;min-height:calc(100vh - 54px)}.sidebar{width:275px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:54px;height:calc(100vh - 54px);overflow:auto;padding:18px 0}.side-label{font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;padding:12px 18px 5px}.sidebar a{display:block;text-decoration:none;color:var(--muted);font-size:13px;padding:8px 18px;border-left:3px solid transparent}.sidebar a:hover{background:var(--surface2);color:var(--text);border-left-color:var(--accent)}.main{flex:1;max-width:1100px;padding:42px 48px 90px}.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 40px;margin-bottom:34px;position:relative;overflow:hidden}.hero:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent4),var(--accent2))}.badge{display:inline-flex;color:var(--accent);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}h1{font-size:32px;line-height:1.15;margin:0 0 12px}h1 span{color:var(--accent2)}.hero p{max-width:820px;color:var(--muted);margin:0}.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:26px;background:var(--border)}.meta{background:var(--surface2);padding:14px;text-align:center}.meta .k{font-size:10px;color:var(--dim);text-transform:uppercase;font-weight:800}.meta .v{font-size:13px;color:var(--accent2);font-weight:800}.section{margin-bottom:54px;scroll-margin-top:75px}.section-header{display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:20px}.num{font-size:11px;font-weight:900;color:var(--accent);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.25);border-radius:7px;padding:5px 10px;min-width:42px;text-align:center}.section h2{font-size:21px;margin:0 0 3px}.section-header p{font-size:13px;color:var(--muted);margin:0}.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}.card h3{font-size:15px;color:var(--accent2);margin:0 0 8px}.card p,.card li{font-size:13.5px;color:var(--muted)}.callout{border-radius:12px;border:1px solid rgba(121,192,255,.25);background:rgba(121,192,255,.06);padding:15px 18px;color:#a5d6ff;margin:16px 0}.callout.warn{border-color:rgba(255,166,87,.3);background:rgba(255,166,87,.06);color:#ffd1a1}.callout.good{border-color:rgba(86,211,100,.3);background:rgba(86,211,100,.06);color:#a8f0b4}.code-block{background:#0d1117;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}.code-header{display:flex;align-items:center;gap:10px;background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 12px}.code-lang{font-size:11px;font-weight:900;color:var(--accent5);text-transform:uppercase;letter-spacing:.05em}.code-file{font-size:11px;color:var(--dim);font-family:var(--mono);margin-left:auto}.code-header button{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer}.code-header button:hover{border-color:var(--accent2);color:var(--accent2)}pre{margin:0;padding:16px;overflow:auto;color:#c9d1d9;font-family:var(--mono);font-size:12.5px;line-height:1.55}.file-path,code.inline{display:inline-block;font-family:var(--mono);color:var(--accent5);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}th{background:var(--surface2);color:var(--accent2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}td{color:var(--muted)}.phase-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:40px}.phase-nav a{background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;padding:14px 16px}.phase-nav .k{display:block;font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}.phase-nav .t{display:block;color:var(--text);font-weight:800}@media(max-width:900px){.layout{display:block}.sidebar{display:none}.main{padding:28px 20px}.phase-nav{grid-template-columns:1fr}.phase{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="brand">⚡ Feedback Intelligence Platform</div><div class="phase">Phase 1 · EKS/MSK Ingestion · Final</div></div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="side-label">Phase 1</div><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#top">Summary</a>
+  <div class="side-label">Sections</div><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s1">01 · Overview</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s2">02 · Execution Model</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s3">03 · Folder Setup</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s4">04 · Shared Schema</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s5">05 · Generator</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s6">06 · Worker Code</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s7">07 · Dockerfile</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s8">08 · Helm Jobs</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s9">09 · Makefile</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s10">10 · Execution</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s11">11 · Verification</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s12">12 · Troubleshooting</a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase1-data-ingestion-eks-msk-final.html#s13">13 · Next</a>
+</nav>
+<main class="main" id="top">
+<div class="hero"><div class="badge">Phase 1 / 6 · Final corrected build</div><h1>Data Ingestion on <span>FLOCI EKS + FLOCI MSK</span></h1><p>This version removes local Python producer/consumer execution. The data generator runs locally only to create the JSONL seed file. The actual ingestion producer and consumer run as Kubernetes Jobs inside FLOCI EKS and connect to FLOCI MSK internally.</p><div class="meta-grid"><div class="meta"><div class="k">Consumes</div><div class="v">Phase 0 EKS/MSK/S3</div></div><div class="meta"><div class="k">Runtime</div><div class="v">FLOCI EKS</div></div><div class="meta"><div class="k">Kafka</div><div class="v">FLOCI MSK</div></div><div class="meta"><div class="k">Pattern</div><div class="v">Docker + Helm Jobs</div></div></div></div>
+<section class="section" id="s1"><div class="section-header"><div class="num">01</div><div><h2>Overview</h2><p>What Phase 1 adds without recreating infrastructure</p></div></div><div class="grid"><div class="card"><h3>Consumes</h3><p>Phase 0 FLOCI foundation: EKS, MSK, S3, ECR, Secrets, CloudWatch, IAM, and Helm chart.</p></div><div class="card"><h3>Adds</h3><p>Shared event schema, dummy generator, Dockerized ingestion worker, producer Job, consumer Job, and Makefile targets.</p></div><div class="card"><h3>Produces</h3><p>Raw feedback messages published to FLOCI MSK and consumed into the FLOCI S3 raw bucket.</p></div></div><div class="callout good"><strong>Important:</strong> do not run local Kafka. Do not run local producer/consumer against <code class="inline">172.x.x.x:9092</code>. That is an internal FLOCI broker address. The worker must run inside FLOCI EKS.</div></section>
+<section class="section" id="s2"><div class="section-header"><div class="num">02</div><div><h2>Correct Execution Model</h2><p>Why this phase uses EKS Jobs instead of local Python scripts</p></div></div><table><tbody><tr><th>Step</th><th>Action</th><th>Where it runs</th></tr><tr><td>1</td><td>Generate JSONL seed data</td><td>Mac</td></tr><tr><td>2</td><td>Build Docker image</td><td>Mac Docker</td></tr><tr><td>3</td><td>Deploy producer/consumer Jobs</td><td>FLOCI EKS</td></tr><tr><td>4</td><td>Connect to Kafka broker</td><td>FLOCI MSK internal network</td></tr><tr><td>5</td><td>Write raw objects</td><td>FLOCI S3</td></tr></tbody></table></section>
+<section class="section" id="s3"><div class="section-header"><div class="num">03</div><div><h2>Folder Setup</h2><p>Create all required folders and Python package markers</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">bash — folder setup</span><span class="code-file">terminal</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>mkdir -p shared/schemas
+mkdir -p services/data-generator
+mkdir -p services/ingestion-worker
+mkdir -p data/dummy/out
+mkdir -p infra/helm/feedback-platform/templates
+
+touch shared/__init__.py
+touch shared/schemas/__init__.py
+
+echo "✅ Phase 1 folders and Python package markers created"</code></pre></div></section>
+<section class="section" id="s4"><div class="section-header"><div class="num">04</div><div><h2>Shared Schema</h2><p>Fixes the missing shared module issue</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">python — FeedbackEvent schema</span><span class="code-file">shared/schemas/feedback_event.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>from datetime import datetime
+from typing import Any, Dict, Literal, Optional
+from pydantic import BaseModel, Field
+
+FeedbackSource = Literal[
+    "google", "reddit", "doordash", "ubereats",
+    "survey", "qr", "voice", "manager_note",
+]
+
+class FeedbackEvent(BaseModel):
+    event_id: str
+    tenant_id: str
+    location_id: str
+    source: FeedbackSource
+    source_event_id: str
+    review_text: str
+    rating: Optional[float] = Field(default=None, ge=1, le=5)
+    event_ts: datetime
+    raw_payload: Dict[str, Any] = Field(default_factory=dict)</code></pre></div></section>
+<section class="section" id="s5"><div class="section-header"><div class="num">05</div><div><h2>Dummy Data Generator</h2><p>Generate 25K seed events</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">text — requirements</span><span class="code-file">services/data-generator/requirements.txt</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>pydantic==2.7.1
+faker==25.2.0
+python-dateutil==2.9.0</code></pre></div><div class="code-block"><div class="code-header"><span class="code-lang">python — generator</span><span class="code-file">services/data-generator/generator.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>from datetime import datetime, timezone, timedelta
+from faker import Faker
+from pathlib import Path
+import random
+import uuid
+
+from shared.schemas.feedback_event import FeedbackEvent
+
+fake = Faker()
+TENANT = "curry_bowl_express"
+LOCATIONS = ["mission", "castro", "soma", "oakland", "berkeley", "sunnyvale", "fremont", "san_jose", "palo_alto", "mountain_view", "dublin", "pleasanton"]
+SOURCES = ["google", "reddit", "doordash", "ubereats", "survey", "qr", "voice", "manager_note"]
+SCENARIOS = ["cold food", "missing item", "late delivery", "rude staff", "great biryani", "portion size", "price concern", "spicy level mismatch", "packaging leak", "long wait time", "excellent service", "wrong order", "freshness concern"]
+
+def make_event(i: int) -&gt; FeedbackEvent:
+    scenario = random.choice(SCENARIOS)
+    location = random.choice(LOCATIONS)
+    source = random.choice(SOURCES)
+    return FeedbackEvent(
+        event_id=str(uuid.uuid4()),
+        tenant_id=TENANT,
+        location_id=location,
+        source=source,
+        source_event_id=f"{source}-{i}",
+        review_text=f"{fake.sentence()} Main topic: {scenario}. Location: {location}.",
+        rating=round(random.uniform(1, 5), 1),
+        event_ts=datetime.now(timezone.utc) - timedelta(minutes=random.randint(1, 50000)),
+        raw_payload={"scenario": scenario, "source": source, "generated": True},
+    )
+
+def main() -&gt; None:
+    out = Path("data/dummy/out/feedback_events.jsonl")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8") as f:
+        for i in range(25000):
+            f.write(make_event(i).model_dump_json() + "\n")
+    print(f"✅ wrote {out}")
+    print("✅ records=25000")
+
+if __name__ == "__main__":
+    main()</code></pre></div></section>
+<section class="section" id="s6"><div class="section-header"><div class="num">06</div><div><h2>Worker Code</h2><p>Producer and consumer run inside FLOCI EKS</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">text — worker requirements</span><span class="code-file">services/ingestion-worker/requirements.txt</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>pydantic==2.7.1
+confluent-kafka==2.4.0
+boto3==1.34.131</code></pre></div><div class="code-block"><div class="code-header"><span class="code-lang">python — producer</span><span class="code-file">services/ingestion-worker/producer.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>import json
+import os
+from pathlib import Path
+from confluent_kafka import Producer
+from shared.schemas.feedback_event import FeedbackEvent
+
+TOPIC = os.getenv("KAFKA_TOPIC", "feedback.raw.events")
+BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+INPUT_FILE = Path(os.getenv("INPUT_FILE", "data/dummy/out/feedback_events.jsonl"))
+
+def main() -&gt; None:
+    print(f"producer_bootstrap={BOOTSTRAP}")
+    producer = Producer({"bootstrap.servers": BOOTSTRAP, "enable.idempotence": True, "acks": "all"})
+    count = 0
+    with INPUT_FILE.open(encoding="utf-8") as f:
+        for line in f:
+            event = FeedbackEvent(**json.loads(line))
+            producer.produce(TOPIC, key=event.event_id, value=event.model_dump_json())
+            producer.poll(0)
+            count += 1
+    producer.flush()
+    print(f"✅ published={count}")
+
+if __name__ == "__main__":
+    main()</code></pre></div><div class="code-block"><div class="code-header"><span class="code-lang">python — consumer</span><span class="code-file">services/ingestion-worker/consumer.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>import json
+import os
+import boto3
+from confluent_kafka import Consumer
+from shared.schemas.feedback_event import FeedbackEvent
+
+TOPIC = os.getenv("KAFKA_TOPIC", "feedback.raw.events")
+BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+RAW_BUCKET = os.getenv("RAW_BUCKET", "fip-local-raw")
+AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL", "http://localhost:4566")
+MAX_MESSAGES = int(os.getenv("MAX_MESSAGES", "10"))
+
+def s3_client():
+    return boto3.client("s3", endpoint_url=AWS_ENDPOINT_URL, aws_access_key_id="test", aws_secret_access_key="test", region_name="us-west-2")
+
+def main() -&gt; None:
+    print(f"consumer_bootstrap={BOOTSTRAP}")
+    consumer = Consumer({"bootstrap.servers": BOOTSTRAP, "group.id": "fip-ingestion-worker", "auto.offset.reset": "earliest", "enable.auto.commit": False})
+    consumer.subscribe([TOPIC])
+    consumed = 0
+    try:
+        while consumed &lt; MAX_MESSAGES:
+            msg = consumer.poll(10.0)
+            if msg is None:
+                break
+            if msg.error():
+                print(msg.error())
+                continue
+            event = FeedbackEvent(**json.loads(msg.value()))
+            key = f"tenant={event.tenant_id}/source={event.source}/event_id={event.event_id}.json"
+            s3_client().put_object(Bucket=RAW_BUCKET, Key=key, Body=event.model_dump_json().encode("utf-8"))
+            print(f"s3_write_ok s3://{RAW_BUCKET}/{key}")
+            consumer.commit(msg)
+            consumed += 1
+    finally:
+        consumer.close()
+    print(f"✅ consumed={consumed}")
+
+if __name__ == "__main__":
+    main()</code></pre></div></section>
+<section class="section" id="s7"><div class="section-header"><div class="num">07</div><div><h2>Dockerfile</h2><p>This fixes the missing Dockerfile error</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">dockerfile — worker image</span><span class="code-file">services/ingestion-worker/Dockerfile</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+COPY services/ingestion-worker/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY shared /app/shared
+COPY services /app/services
+COPY data/dummy/out /app/data/dummy/out
+CMD ["python", "services/ingestion-worker/producer.py"]</code></pre></div></section>
+<section class="section" id="s8"><div class="section-header"><div class="num">08</div><div><h2>Helm Jobs</h2><p>Deploy producer and consumer into FLOCI EKS</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">yaml — values patch</span><span class="code-file">infra/helm/feedback-platform/values-local.yaml append</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>ingestion:
+  enabled: true
+  image:
+    repository: fip-local/ingestion-worker
+    tag: phase1
+    pullPolicy: IfNotPresent
+  kafka:
+    bootstrapServers: "172.17.0.4:9092"
+    topic: feedback.raw.events
+  aws:
+    endpointUrl: http://localhost:4566
+    region: us-west-2
+  s3:
+    rawBucket: fip-local-raw
+  producer:
+    enabled: true
+  consumer:
+    enabled: true
+    maxMessages: "10"</code></pre></div><div class="code-block"><div class="code-header"><span class="code-lang">yaml — producer job</span><span class="code-file">infra/helm/feedback-platform/templates/phase1-producer-job.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>{{- if and .Values.ingestion.enabled .Values.ingestion.producer.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: feedback-producer
+  namespace: {{ default "feedback" .Values.namespace | quote }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: producer
+          image: "{{ .Values.ingestion.image.repository }}:{{ .Values.ingestion.image.tag }}"
+          imagePullPolicy: {{ .Values.ingestion.image.pullPolicy }}
+          command: ["python", "services/ingestion-worker/producer.py"]
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.ingestion.kafka.bootstrapServers | quote }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.ingestion.kafka.topic | quote }}
+{{- end }}</code></pre></div><div class="code-block"><div class="code-header"><span class="code-lang">yaml — consumer job</span><span class="code-file">infra/helm/feedback-platform/templates/phase1-consumer-job.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>{{- if and .Values.ingestion.enabled .Values.ingestion.consumer.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: feedback-consumer
+  namespace: {{ default "feedback" .Values.namespace | quote }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: consumer
+          image: "{{ .Values.ingestion.image.repository }}:{{ .Values.ingestion.image.tag }}"
+          imagePullPolicy: {{ .Values.ingestion.image.pullPolicy }}
+          command: ["python", "services/ingestion-worker/consumer.py"]
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.ingestion.kafka.bootstrapServers | quote }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.ingestion.kafka.topic | quote }}
+            - name: MAX_MESSAGES
+              value: {{ .Values.ingestion.consumer.maxMessages | quote }}
+            - name: AWS_ENDPOINT_URL
+              value: {{ .Values.ingestion.aws.endpointUrl | quote }}
+            - name: RAW_BUCKET
+              value: {{ .Values.ingestion.s3.rawBucket | quote }}
+{{- end }}</code></pre></div></section>
+<section class="section" id="s9"><div class="section-header"><div class="num">09</div><div><h2>Final Phase 1 Makefile</h2><p>Append this to the Phase 0 Makefile</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">makefile — Phase 1 targets</span><span class="code-file">Makefile append</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>PHASE1_IMAGE ?= fip-local/ingestion-worker:phase1
+PHASE1_IMAGE_TAG ?= phase1
+PHASE1_ECR_REPOSITORY ?= fip-local/workers
+PHASE1_ECR_PUSH_REGISTRY ?= localhost:5100
+PHASE1_ECR_CONTAINER ?= floci-ecr-registry
+PHASE1_EKS_CONTAINER ?= $(shell docker ps --format '{{.Names}}' | grep '^floci-eks-' | head -1)
+PHASE1_MSK_CONTAINER ?= floci-msk-fip-local-msk
+PHASE1_FLOCI_CONTAINER ?= floci
+PHASE1_FLOCI_HOST ?= $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PHASE1_FLOCI_CONTAINER) 2&gt;/dev/null)
+PHASE1_AWS_ENDPOINT_URL ?= http://$(PHASE1_FLOCI_HOST):4566
+PHASE1_ECR_NODE_REGISTRY ?= $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PHASE1_ECR_CONTAINER) 2&gt;/dev/null):5000
+PHASE1_MSK_BOOTSTRAP ?= $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PHASE1_MSK_CONTAINER) 2&gt;/dev/null):9092
+PHASE1_DEPLOY_IMAGE_REPO ?= $(PHASE1_ECR_NODE_REGISTRY)/$(PHASE1_ECR_REPOSITORY)
+PHASE1_ECR_PUSH_IMAGE ?= $(PHASE1_ECR_PUSH_REGISTRY)/$(PHASE1_ECR_REPOSITORY):$(PHASE1_IMAGE_TAG)
+NAMESPACE ?= feedback
+HELM_CHART ?= infra/helm/feedback-platform
+TF_DIR ?= infra/terraform/envs/local-floci
+
+.PHONY: phase1-install phase1-generate phase1-build phase1-push phase1-k8s-ready phase1-ecr-ready phase1-kafka-ready phase1-deploy phase1-status phase1-logs phase1-verify phase1-clean phase1
+
+phase1-install:
+	python3 -m pip install -r services/data-generator/requirements.txt
+
+phase1-generate:
+	PYTHONPATH=. python3 services/data-generator/generator.py
+
+phase1-build:
+	docker build -t $(PHASE1_IMAGE) -f services/ingestion-worker/Dockerfile .
+
+phase1-push: phase1-build
+	@test -n "$(PHASE1_ECR_NODE_REGISTRY)" || (echo "❌ FLOCI ECR container '$(PHASE1_ECR_CONTAINER)' not found. Run 'make floci-start' first."; exit 1)
+	docker tag $(PHASE1_IMAGE) $(PHASE1_ECR_PUSH_IMAGE)
+	aws --endpoint-url $(FLOCI_ENDPOINT) ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(PHASE1_ECR_PUSH_REGISTRY)
+	docker push $(PHASE1_ECR_PUSH_IMAGE)
+
+phase1-k8s-ready:
+	@if ! kubectl get nodes &gt;/dev/null 2&gt;&amp;1; then \
+	  echo "❌ kubectl cannot reach FLOCI EKS (expected https://localhost:6500)."; \
+	  echo "   FLOCI was likely restarted and the cluster is gone."; \
+	  echo "   Run: make tf-apply &amp;&amp; make k8s-config"; \
+	  exit 1; \
+	fi
+
+phase1-ecr-ready:
+	@test -n "$(PHASE1_ECR_NODE_REGISTRY)" || (echo "❌ FLOCI ECR container '$(PHASE1_ECR_CONTAINER)' not found."; exit 1)
+	@test -n "$(PHASE1_EKS_CONTAINER)" || (echo "❌ FLOCI EKS container not found. Run 'make tf-apply &amp;&amp; make k8s-config' first."; exit 1)
+	@if ! docker exec $(PHASE1_EKS_CONTAINER) grep -q "$(PHASE1_ECR_NODE_REGISTRY)" /etc/rancher/k3s/registries.yaml 2&gt;/dev/null; then \
+	  echo "🔧 Configuring FLOCI EKS to pull from insecure registry $(PHASE1_ECR_NODE_REGISTRY)"; \
+	  docker exec $(PHASE1_EKS_CONTAINER) sh -c 'mkdir -p /etc/rancher/k3s &amp;&amp; printf "mirrors:\n  \"%s\":\n    endpoint:\n      - \"http://%s\"\n" "$(PHASE1_ECR_NODE_REGISTRY)" "$(PHASE1_ECR_NODE_REGISTRY)" &gt; /etc/rancher/k3s/registries.yaml'; \
+	  docker restart $(PHASE1_EKS_CONTAINER); \
+	  sleep 15; \
+	  kubectl get nodes &gt;/dev/null || (echo "❌ FLOCI EKS did not come back after registry config. Run 'make k8s-config'."; exit 1); \
+	fi
+
+phase1-kafka-ready:
+	@test -n "$(PHASE1_MSK_BOOTSTRAP)" || (echo "❌ FLOCI MSK container '$(PHASE1_MSK_CONTAINER)' not found. Run 'make tf-apply' first."; exit 1)
+	@MSK_IP=$$(echo "$(PHASE1_MSK_BOOTSTRAP)" | cut -d: -f1); \
+	if docker exec $(PHASE1_MSK_CONTAINER) grep -q 'address: 127.0.0.1' /etc/redpanda/redpanda.yaml 2&gt;/dev/null; then \
+	  echo "🔧 Updating FLOCI MSK advertised_kafka_api to $$MSK_IP"; \
+	  docker exec $(PHASE1_MSK_CONTAINER) sh -c "sed -i 's/address: 127.0.0.1/address: '$$MSK_IP'/g' /etc/redpanda/redpanda.yaml"; \
+	  docker restart $(PHASE1_MSK_CONTAINER); \
+	  sleep 5; \
+	fi
+
+phase1-deploy: phase1-k8s-ready phase1-ecr-ready phase1-kafka-ready
+	kubectl delete job feedback-producer feedback-consumer -n $(NAMESPACE) --ignore-not-found=true
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	helm upgrade --install feedback-platform ./$(HELM_CHART) \
+	  --namespace $(NAMESPACE) \
+	  -f $(HELM_CHART)/values-local.yaml \
+	  --set ingestion.enabled=true \
+	  --set ingestion.image.repository=$(PHASE1_DEPLOY_IMAGE_REPO) \
+	  --set ingestion.image.tag=$(PHASE1_IMAGE_TAG) \
+	  --set ingestion.kafka.bootstrapServers="$(PHASE1_MSK_BOOTSTRAP)" \
+	  --set ingestion.kafka.topic=feedback.raw.events \
+	  --set ingestion.aws.endpointUrl=$(PHASE1_AWS_ENDPOINT_URL) \
+	  --set ingestion.aws.region=us-west-2 \
+	  --set ingestion.s3.rawBucket=fip-local-raw \
+	  --wait --timeout 180s
+
+phase1-status:
+	kubectl get pods -n $(NAMESPACE)
+	kubectl get jobs -n $(NAMESPACE)
+
+phase1-logs:
+	kubectl logs -n $(NAMESPACE) job/feedback-producer --tail=100 || true
+	kubectl logs -n $(NAMESPACE) job/feedback-consumer --tail=100 || true
+
+phase1-verify:
+	@test -f data/dummy/out/feedback_events.jsonl
+	wc -l data/dummy/out/feedback_events.jsonl
+	aws --endpoint-url http://localhost:4566 kafka list-clusters --region us-west-2 --query 'ClusterInfoList[].ClusterName'
+	kubectl get jobs -n $(NAMESPACE)
+	aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-raw --recursive --summarize || true
+
+phase1-clean:
+	kubectl delete job feedback-producer feedback-consumer -n $(NAMESPACE) --ignore-not-found=true
+
+phase1: phase1-install phase1-generate phase1-push phase1-deploy phase1-status phase1-logs phase1-verify
+	@echo "✅ Phase 1 complete: ingestion executed on FLOCI EKS and connected to FLOCI MSK"</code></pre></div></section>
+<section class="section" id="s10"><div class="section-header"><div class="num">10</div><div><h2>Execution</h2><p>Run Phase 1 after creating every file above</p></div></div><div class="code-block"><div class="code-header"><span class="code-lang">bash — execution</span><span class="code-file">terminal</span><button onclick="copyCode(this)">📋 Copy</button></div><pre><code>make verify
+make phase1-install
+make phase1-generate
+make phase1-push
+make phase1-deploy
+make phase1-status
+make phase1-logs
+make phase1-verify</code></pre></div></section>
+<section class="section" id="s11"><div class="section-header"><div class="num">11</div><div><h2>Verification</h2><p>What success looks like</p></div></div><table><tbody><tr><th>Check</th><th>Expected</th></tr><tr><td>make phase1-generate</td><td>Creates 25000 JSONL records.</td></tr><tr><td>make phase1-push</td><td>Builds fip-local/ingestion-worker:phase1 and pushes to FLOCI ECR.</td></tr><tr><td>make phase1-deploy</td><td>Runs k8s/ECR/MSK preflight, then creates feedback-producer and feedback-consumer Jobs.</td></tr><tr><td>make phase1-logs</td><td>Shows producer publish logs and consumer S3 write logs.</td></tr><tr><td>make phase1-verify</td><td>Shows raw bucket objects or job status.</td></tr></tbody></table></section>
+<section class="section" id="s12"><div class="section-header"><div class="num">12</div><div><h2>Troubleshooting</h2><p>Errors handled from the real execution</p></div></div><table><tbody><tr><th>Error</th><th>Cause</th><th>Fix</th></tr><tr><td>Dockerfile no such file</td><td>Dockerfile was missing.</td><td>Create services/ingestion-worker/Dockerfile.</td></tr><tr><td>Kafka timeout from Mac</td><td>FLOCI MSK returned internal Docker IP.</td><td>Run producer/consumer inside FLOCI EKS, not on Mac.</td></tr><tr><td>No module named shared</td><td>Missing schema package or PYTHONPATH.</td><td>Create __init__.py files and copy shared package into Docker image.</td></tr><tr><td>Image pull error</td><td>FLOCI EKS cannot see local Docker image, or image not pushed after cluster recreate.</td><td>Run <code class="inline">make phase1-push</code> before <code class="inline">make phase1-deploy</code>. Deploy auto-configures insecure ECR pull.</td></tr><tr><td>localhost:6500 connection refused</td><td>FLOCI EKS cluster is down after a FLOCI/Docker restart.</td><td>Run <code class="inline">make tf-apply &amp;&amp; make k8s-config</code>, then <code class="inline">make phase1-push &amp;&amp; make phase1-deploy</code>.</td></tr></tbody></table></section>
+<section class="section" id="s13"><div class="section-header"><div class="num">13</div><div><h2>Next Phase</h2><p>What Phase 2 consumes</p></div></div><div class="callout">Phase 2 consumes raw feedback data written to FLOCI S3 and the existing FLOCI MSK/EKS/S3 foundation. It should add Bronze/Silver processing without recreating Phase 0 infrastructure.</div></section>
+<div class="phase-nav"><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase0-foundation-final-validated.html"><span class="k">Previous</span><span class="t">Phase 0</span></a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/00_fip_Project_Guide_V3_Course.html"><span class="k">Guide</span><span class="t">Master Guide</span></a><a href="file:///Users/vijayaramakrishnareddymadduri/Desktop/personal_projects/feedback-intelligence-platform/docs/fip-htmls-interactive-final/fip-course-v3-step-by-step/fip-phase2-data-platform-course.html"><span class="k">Next</span><span class="t">Phase 2</span></a></div>
+</main></div><script>function copyCode(btn){const block=btn.closest('.code-block');const text=block.querySelector('pre').innerText;navigator.clipboard.writeText(text).then(()=>{const old=btn.textContent;btn.textContent='✓ Copied';setTimeout(()=>btn.textContent=old,1400);});}</script>
+</body></html>

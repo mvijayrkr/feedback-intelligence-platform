@@ -1,0 +1,40 @@
+namespace: feedback
+
+api:
+  name: feedback-api
+  image:
+    repository: nginx
+    tag: "1.25"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  containerPort: 80
+  servicePort: 80
+
+env:
+  ENVIRONMENT: local
+  TENANT_ID: curry_bowl_express
+  AWS_ENDPOINT_URL: http://localhost:4566
+  RAW_BUCKET: fip-local-raw
+  PROCESSED_BUCKET: fip-local-processed
+  ARTIFACTS_BUCKET: fip-local-artifacts
+  KAFKA_BOOTSTRAP_SERVERS: "from-terraform-output"
+
+ingestion:
+  enabled: true
+  image:
+    repository: fip-local/ingestion-worker
+    tag: phase1
+    pullPolicy: IfNotPresent
+  kafka:
+    bootstrapServers: "172.17.0.4:9092"
+    topic: feedback.raw.events
+  aws:
+    endpointUrl: http://localhost:4566
+    region: us-west-2
+  s3:
+    rawBucket: fip-local-raw
+  producer:
+    enabled: true
+  consumer:
+    enabled: true
+    maxMessages: "10"

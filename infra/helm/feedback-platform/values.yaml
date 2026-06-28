@@ -1,0 +1,20 @@
+namespace: feedback
+
+api:
+  name: feedback-api
+  image:
+    repository: nginx
+    tag: "1.25"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  containerPort: 80
+  servicePort: 80
+
+env:
+  ENVIRONMENT: local
+  TENANT_ID: curry_bowl_express
+  AWS_ENDPOINT_URL: http://localhost:4566
+  RAW_BUCKET: fip-local-raw
+  PROCESSED_BUCKET: fip-local-processed
+  ARTIFACTS_BUCKET: fip-local-artifacts
+  KAFKA_BOOTSTRAP_SERVERS: "from-terraform-output"

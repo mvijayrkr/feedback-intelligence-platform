@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FIP Phase 2 — Silver NLP Gold dbt Editable Final</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--border:#30363d;--accent:#f78166;--accent2:#79c0ff;--accent3:#56d364;--accent4:#d2a8ff;--accent5:#ffa657;--text:#e6edf3;--muted:#8b949e;--dim:#6e7681;--mono:'JetBrains Mono','Fira Code','Consolas',monospace;--ui:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ui);font-size:15px;line-height:1.65}.topbar{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.96);border-bottom:1px solid var(--border);height:56px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:13px;font-weight:900;color:var(--accent);letter-spacing:.07em;text-transform:uppercase}.phase{font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px}.actions{display:flex;gap:8px}.btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer}.btn:hover{border-color:var(--accent2);color:var(--accent2)}.btn.primary{background:var(--accent);color:#000;border-color:var(--accent)}.btn.good{background:rgba(86,211,100,.13);border-color:rgba(86,211,100,.45);color:var(--accent3)}.layout{display:flex}.sidebar{width:295px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;padding:18px 0}.side-label{font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;padding:12px 18px 5px}.sidebar a{display:block;text-decoration:none;color:var(--muted);font-size:13px;padding:8px 18px;border-left:3px solid transparent}.sidebar a:hover{background:var(--surface2);color:var(--text);border-left-color:var(--accent)}.main{flex:1;max-width:1120px;padding:42px 48px 90px}.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 40px;margin-bottom:34px;position:relative;overflow:hidden}.hero:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent4),var(--accent2))}.badge{display:inline-flex;color:var(--accent);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}h1{font-size:32px;line-height:1.15;margin:0 0 12px}h1 span{color:var(--accent2)}.hero p{max-width:900px;color:var(--muted);margin:0}.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:26px;background:var(--border)}.meta{background:var(--surface2);padding:14px;text-align:center}.meta .k{font-size:10px;color:var(--dim);text-transform:uppercase;font-weight:800}.meta .v{font-size:13px;color:var(--accent2);font-weight:800}.section{margin-bottom:54px;scroll-margin-top:75px}.section-header{display:flex;gap:14px;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:20px}.num{font-size:11px;font-weight:900;color:var(--accent);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.25);border-radius:7px;padding:5px 10px;min-width:42px;text-align:center;height:max-content}.section h2{font-size:21px;margin:0 0 3px}.section-header p{font-size:13px;color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}.card h3{font-size:15px;color:var(--accent2);margin:0 0 8px}.card p,.card li{font-size:13.5px;color:var(--muted)}.callout{border-radius:12px;border:1px solid rgba(121,192,255,.25);background:rgba(121,192,255,.06);padding:15px 18px;color:#a5d6ff;margin:16px 0}.callout.warn{border-color:rgba(255,166,87,.3);background:rgba(255,166,87,.06);color:#ffd1a1}.callout.good{border-color:rgba(86,211,100,.3);background:rgba(86,211,100,.06);color:#a8f0b4}.code-block{background:#0d1117;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}.code-header{display:flex;align-items:center;gap:10px;background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 12px}.code-lang{font-size:11px;font-weight:900;color:var(--accent5);text-transform:uppercase;letter-spacing:.05em}.code-file{font-size:11px;color:var(--dim);font-family:var(--mono);margin-left:auto}.code-header button{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer}pre{margin:0;padding:16px;overflow:auto;color:#c9d1d9;font-family:var(--mono);font-size:12.5px;line-height:1.55}.file-path,code.inline{display:inline-block;font-family:var(--mono);color:var(--accent5);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}th{background:var(--surface2);color:var(--accent2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}td{color:var(--muted)}.edit-mode [contenteditable=true],.edit-mode pre[contenteditable=true]{outline:2px dashed rgba(121,192,255,.45);outline-offset:3px;border-radius:6px}.insert-panel{display:none;position:fixed;right:18px;top:66px;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:14px;z-index:150;padding:14px;box-shadow:0 12px 36px rgba(0,0,0,.45)}.insert-panel.open{display:block}.insert-panel h3{font-size:14px;margin:0 0 10px;color:var(--accent2)}.insert-panel .btn{width:100%;margin:5px 0;text-align:left}.save-toast{position:fixed;right:20px;bottom:20px;background:rgba(86,211,100,.14);border:1px solid rgba(86,211,100,.45);color:var(--accent3);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:800;opacity:0;transition:.2s;z-index:200}.save-toast.show{opacity:1}.editable-new{border:1px dashed rgba(121,192,255,.35);border-radius:12px;padding:14px;margin:16px 0;background:rgba(121,192,255,.04)}.phase-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:40px}.phase-nav a{background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;padding:14px 16px}.phase-nav .k{display:block;font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}.phase-nav .t{display:block;color:var(--text);font-weight:800}@media(max-width:1000px){.layout{display:block}.sidebar{display:none}.main{padding:28px 20px}.phase-nav{grid-template-columns:1fr}.phase{display:none}.topbar{height:auto;padding:10px}.insert-panel{left:16px;right:16px;width:auto}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="brand">⚡ Feedback Intelligence Platform</div><div class="phase">Phase 2 · Silver → NLP Gold → dbt · Editable Final</div><div class="actions"><button class="btn" onclick="toggleEdit()">✏️ Edit</button><button class="btn good" onclick="toggleInsertPanel()">➕ Add Step</button><button class="btn primary" onclick="saveHTML()">💾 Save HTML</button></div></div>
+<div class="insert-panel" id="insertPanel"><h3>Add content</h3><button class="btn" onclick="addInfoBlock()">➕ Info / Highlight</button><button class="btn" onclick="addCodeBlock()">➕ Code Snippet</button><button class="btn" onclick="addTableBlock()">➕ Table</button><button class="btn" onclick="addSectionBlock()">➕ Full Section</button></div><div class="save-toast" id="saveToast">Saved</div>
+<div class="layout"><nav class="sidebar"><div class="side-label">Phase 2</div><a href="#top">Summary</a><div class="side-label">Sections</div><a href="#s1">01 · Overview</a><a href="#s2">02 · Architecture</a><a href="#s3">03 · Folder Setup</a><a href="#s4">04 · Worker Code</a><a href="#s5">05 · dbt Mart</a><a href="#s6">06 · Dockerfile</a><a href="#s7">07 · Helm Jobs</a><a href="#s8">08 · Makefile</a><a href="#s9">09 · Execution</a><a href="#s10">10 · Verification</a><a href="#s11">11 · Troubleshooting</a><a href="#s12">12 · Next</a></nav>
+<main class="main" id="top">
+<div class="hero editable-block"><div class="badge">Phase 2 / 6 · Continuation of Phase 0 + 1</div><h1 contenteditable="false">Data Platform: <span>Silver → NLP Gold → dbt Mart</span></h1><p contenteditable="false">This corrected Phase 2 does not stop at Silver. It consumes Phase 1 raw feedback, validates and cleans it into Silver, enriches it with NLP signals into Gold, then runs dbt to build analytics marts and an embedding-ready mart for Phase 3 Qdrant ingestion.</p><div class="meta-grid"><div class="meta"><div class="k">Consumes</div><div class="v">Phase 1 Raw</div></div><div class="meta"><div class="k">Runtime</div><div class="v">FLOCI EKS</div></div><div class="meta"><div class="k">Output</div><div class="v">Gold + dbt Mart</div></div><div class="meta"><div class="k">Next</div><div class="v">Qdrant Embeddings</div></div></div></div>
+<section class="section editable-block" id="s1"><div class="section-header"><div class="num">01</div><div><h2 contenteditable="false">Overview</h2><p contenteditable="false">Phase 2 extends Phase 0/1 without recreating infrastructure.</p></div></div><div class="grid"><div class="card"><h3>Consumes</h3><p>Phase 0 FLOCI EKS/S3/MSK and Phase 1 raw feedback events.</p></div><div class="card"><h3>Adds</h3><p>Silver worker, NLP enrichment, Gold writer, dbt DuckDB analytics mart, and embedding-ready mart.</p></div><div class="card"><h3>Produces</h3><p><code class="inline">silver/</code>, <code class="inline">gold/</code>, <code class="inline">dbt_input/</code>, and <code class="inline">marts/feedback_analytics.duckdb</code>.</p></div></div><div class="callout good">No Terraform recreation. Everything runs on the existing FLOCI EKS/S3 foundation.</div></section>
+<section class="section editable-block" id="s2"><div class="section-header"><div class="num">02</div><div><h2 contenteditable="false">Correct Phase 2 Architecture</h2><p contenteditable="false">Raw → Silver → NLP Gold → dbt Mart → Phase 3 embeddings</p></div></div><div class="callout">Phase 3 should embed curated Gold/mart records, not raw or lightly cleaned Silver. This page creates <code class="inline">mart_embedding_ready_feedback</code> as the contract for the Phase 3 embedding worker.</div></section>
+<section class="section editable-block" id="s3"><div class="section-header"><div class="num">03</div><div><h2 contenteditable="false">Folder Setup</h2><p contenteditable="false">Create Phase 2 folders</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash — Create Phase 2 folders</span><span class="code-file">terminal</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code># Run from feedback-intelligence-platform/
+mkdir -p services/data-platform-worker
+mkdir -p data/bronze/local data/silver/local data/gold/local data/marts/local data/quarantine/local
+mkdir -p data/dbt/feedback_analytics/models/{staging,gold,marts}
+mkdir -p data/dbt/feedback_analytics/profiles
+mkdir -p infra/helm/feedback-platform/templates
+
+echo "✅ Phase 2 folders created"</code></pre></div></section>
+<section class="section editable-block" id="s4"><div class="section-header"><div class="num">04</div><div><h2 contenteditable="false">Worker Code</h2><p contenteditable="false">Silver validation + NLP Gold enrichment</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">text — requirements</span><span class="code-file">services/data-platform-worker/requirements.txt</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>pydantic==2.7.1
+boto3==1.34.131
+python-dateutil==2.9.0
+orjson==3.10.3
+dbt-core==1.8.4
+dbt-duckdb==1.8.2
+duckdb==1.0.0</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">python — data quality rules</span><span class="code-file">services/data-platform-worker/dq_rules.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>from datetime import datetime
+
+REQUIRED_FIELDS = ["event_id", "tenant_id", "location_id", "source", "source_event_id", "review_text", "event_ts"]
+
+def validate_event(payload):
+    errors = []
+    for field in REQUIRED_FIELDS:
+        if field not in payload or payload[field] in (None, ""):
+            errors.append(f"missing_required_field:{field}")
+    try:
+        r = payload.get("rating")
+        if r is not None and not (1 <= float(r) <= 5):
+            errors.append("rating_out_of_range")
+    except Exception:
+        errors.append("rating_not_numeric")
+    try:
+        datetime.fromisoformat(str(payload.get("event_ts")).replace("Z", "+00:00"))
+    except Exception:
+        errors.append("invalid_event_ts")
+    if len(str(payload.get("review_text", "")).strip()) < 3:
+        errors.append("review_text_too_short")
+    return len(errors) == 0, errors</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">python — cleaner</span><span class="code-file">services/data-platform-worker/cleaner.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>import re
+EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+PHONE_RE = re.compile(r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b")
+
+def normalize_text(text):
+    text = EMAIL_RE.sub("[EMAIL_MASKED]", text or "")
+    text = PHONE_RE.sub("[PHONE_MASKED]", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+def clean_event(payload, quality_errors):
+    return {**payload, "clean_review_text": normalize_text(str(payload.get("review_text", ""))), "quality_errors": quality_errors, "processing_stage": "silver"}</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">python — NLP enricher</span><span class="code-file">services/data-platform-worker/nlp_enricher.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>import re
+CATEGORY_RULES = {"delivery":["late","delivery","driver","cold"],"order_accuracy":["missing","wrong","item","order"],"service":["rude","staff","service","wait"],"food_quality":["fresh","taste","spicy","biryani","portion"],"pricing":["price","expensive","cost"]}
+
+def keywords(text):
+    words = re.findall(r"[a-zA-Z]{4,}", text.lower())
+    stop = {"this","that","with","main","topic","location","food","very"}
+    out=[]
+    for w in words:
+        if w not in stop and w not in out: out.append(w)
+        if len(out)>=8: break
+    return out
+
+def categorize(text):
+    t = text.lower(); scores = {c:sum(1 for term in terms if term in t) for c,terms in CATEGORY_RULES.items()}
+    best=max(scores,key=scores.get); return best if scores[best]>0 else "general"
+
+def sentiment_from_rating(rating):
+    try:
+        r=float(rating)
+        return "negative" if r<=2 else "neutral" if r<=3.5 else "positive"
+    except Exception: return "unknown"
+
+def enrich_nlp(silver):
+    text=silver.get("clean_review_text") or silver.get("review_text","")
+    category=categorize(text); sentiment=sentiment_from_rating(silver.get("rating"))
+    severity="high" if sentiment=="negative" and category in {"delivery","order_accuracy","service"} else "medium" if sentiment=="negative" else "low"
+    return {**silver,"category":category,"sentiment":sentiment,"severity":severity,"intent":"complaint" if sentiment=="negative" else "praise" if sentiment=="positive" else "feedback","keywords":keywords(text),"embedding_text":f"{category} | {sentiment} | {text}","processing_stage":"gold"}</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">python — main worker</span><span class="code-file">services/data-platform-worker/worker.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>import json, os, csv
+from pathlib import Path
+import boto3
+from services.data_platform_worker.cleaner import clean_event
+from services.data_platform_worker.dq_rules import validate_event
+from services.data_platform_worker.nlp_enricher import enrich_nlp
+
+AWS_ENDPOINT_URL=os.getenv("AWS_ENDPOINT_URL","http://localhost:4566"); AWS_REGION=os.getenv("AWS_REGION","us-west-2")
+RAW_BUCKET=os.getenv("RAW_BUCKET","fip-local-raw"); PROCESSED_BUCKET=os.getenv("PROCESSED_BUCKET","fip-local-processed")
+LOCAL_INPUT=os.getenv("LOCAL_INPUT","data/dummy/out/feedback_events.jsonl"); MAX_RECORDS=int(os.getenv("MAX_RECORDS","25000")); WORK_DIR=Path(os.getenv("WORK_DIR","/app/work"))
+
+def s3_client(): return boto3.client("s3",endpoint_url=AWS_ENDPOINT_URL,aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID","test"),aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY","test"),region_name=AWS_REGION)
+def write_s3(key,payload): s3_client().put_object(Bucket=PROCESSED_BUCKET,Key=key,Body=json.dumps(payload,default=str).encode("utf-8"))
+def read_local_jsonl(path):
+    p=Path(path)
+    if p.exists():
+        for line in p.open(encoding="utf-8"):
+            if line.strip(): yield json.loads(line)
+def read_raw_s3():
+    c=s3_client(); resp=c.list_objects_v2(Bucket=RAW_BUCKET)
+    for obj in resp.get("Contents",[]):
+        if obj["Key"].endswith(".json"): yield json.loads(c.get_object(Bucket=RAW_BUCKET,Key=obj["Key"])["Body"].read())
+def write_gold_csv(path, rows):
+    path.parent.mkdir(parents=True,exist_ok=True); fields=["event_id","tenant_id","location_id","source","rating","event_ts","sentiment","category","severity","intent","clean_review_text","embedding_text"]
+    with path.open("w",newline="",encoding="utf-8") as f:
+        w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); [w.writerow({k:r.get(k,"") for k in fields}) for r in rows]
+def main():
+    events=list(read_local_jsonl(LOCAL_INPUT)) or list(read_raw_s3()); silver=[]; gold=[]; invalid=[]
+    for event in events[:MAX_RECORDS]:
+        ok,errors=validate_event(event)
+        if not ok: invalid.append({**event,"quality_errors":errors}); continue
+        s=clean_event(event,errors); g=enrich_nlp(s); silver.append(s); gold.append(g)
+        tenant=g.get("tenant_id","unknown"); source=g.get("source","unknown"); eid=g.get("event_id")
+        write_s3(f"silver/tenant={tenant}/source={source}/event_id={eid}.json",s); write_s3(f"gold/tenant={tenant}/source={source}/event_id={eid}.json",g)
+    for q in invalid: write_s3(f"quarantine/tenant={q.get('tenant_id','unknown')}/event_id={q.get('event_id','missing')}.json",q)
+    csv_path=WORK_DIR/"gold_feedback.csv"; write_gold_csv(csv_path,gold)
+    s3_client().put_object(Bucket=PROCESSED_BUCKET,Key="dbt_input/gold_feedback.csv",Body=csv_path.read_bytes())
+    print(f"✅ phase2_worker_complete silver={len(silver)} gold={len(gold)} quarantine={len(invalid)}")
+if __name__=="__main__": main()</code></pre></div></section>
+<section class="section editable-block" id="s5"><div class="section-header"><div class="num">05</div><div><h2 contenteditable="false">dbt Analytics Mart</h2><p contenteditable="false">DuckDB dbt project that builds marts from Gold</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">python — dbt runner</span><span class="code-file">services/data-platform-worker/run_dbt.py</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>import os, subprocess
+from pathlib import Path
+import boto3
+AWS_ENDPOINT_URL=os.getenv("AWS_ENDPOINT_URL","http://localhost:4566"); PROCESSED_BUCKET=os.getenv("PROCESSED_BUCKET","fip-local-processed")
+WORK_DIR=Path(os.getenv("WORK_DIR","/app/work")); PROJECT_DIR=Path("data/dbt/feedback_analytics")
+def s3_client(): return boto3.client("s3",endpoint_url=AWS_ENDPOINT_URL,aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID","test"),aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY","test"),region_name=os.getenv("AWS_REGION","us-west-2"))
+def main():
+    WORK_DIR.mkdir(parents=True,exist_ok=True)
+    obj=s3_client().get_object(Bucket=PROCESSED_BUCKET,Key="dbt_input/gold_feedback.csv")
+    (WORK_DIR/"gold_feedback.csv").write_bytes(obj["Body"].read())
+    subprocess.check_call(["dbt","run","--project-dir",str(PROJECT_DIR),"--profiles-dir",str(PROJECT_DIR/"profiles")])
+    mart=PROJECT_DIR/"target"/"feedback_analytics.duckdb"
+    if mart.exists(): s3_client().put_object(Bucket=PROCESSED_BUCKET,Key="marts/feedback_analytics.duckdb",Body=mart.read_bytes())
+    print("✅ dbt_marts_complete")
+if __name__=="__main__": main()</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">yaml — dbt project</span><span class="code-file">data/dbt/feedback_analytics/dbt_project.yml</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>name: feedback_analytics
+version: '1.0'
+config-version: 2
+profile: feedback_analytics
+model-paths: ["models"]
+models:
+  feedback_analytics:
+    +materialized: table</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">yaml — dbt profile</span><span class="code-file">data/dbt/feedback_analytics/profiles/profiles.yml</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>feedback_analytics:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: target/feedback_analytics.duckdb
+      threads: 4</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">sql — dbt models</span><span class="code-file">staging/gold/marts SQL files</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>-- data/dbt/feedback_analytics/models/staging/stg_gold_feedback.sql
+with src as (select * from read_csv_auto('/app/work/gold_feedback.csv', header=true))
+select event_id, tenant_id, location_id, source, cast(rating as double) as rating, event_ts, sentiment, category, severity, intent, clean_review_text, embedding_text from src;
+
+-- data/dbt/feedback_analytics/models/gold/fact_feedback.sql
+select *, case when sentiment = 'negative' then 1 else 0 end as is_complaint from {{ ref('stg_gold_feedback') }};
+
+-- data/dbt/feedback_analytics/models/marts/mart_location_feedback_summary.sql
+select tenant_id, location_id, category, sentiment, count(*) as feedback_count, avg(rating) as avg_rating, sum(is_complaint) as complaint_count from {{ ref('fact_feedback') }} group by 1,2,3,4;
+
+-- data/dbt/feedback_analytics/models/marts/mart_complaint_trends.sql
+select tenant_id, location_id, category, date_trunc('day', cast(event_ts as timestamp)) as feedback_day, count(*) as feedback_count, sum(is_complaint) as complaint_count from {{ ref('fact_feedback') }} group by 1,2,3,4;
+
+-- data/dbt/feedback_analytics/models/marts/mart_embedding_ready_feedback.sql
+select event_id, tenant_id, location_id, source, category, sentiment, severity, intent, embedding_text from {{ ref('fact_feedback') }} where embedding_text is not null and length(embedding_text) > 10;</code></pre></div></section>
+<section class="section editable-block" id="s6"><div class="section-header"><div class="num">06</div><div><h2 contenteditable="false">Dockerfile</h2><p contenteditable="false">Packages worker + dbt project</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">dockerfile — Data platform image</span><span class="code-file">services/data-platform-worker/Dockerfile</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+COPY services/data-platform-worker/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY shared /app/shared
+COPY services /app/services
+COPY data/dummy/out /app/data/dummy/out
+COPY data/dbt /app/data/dbt
+CMD ["python", "services/data-platform-worker/worker.py"]</code></pre></div></section>
+<section class="section editable-block" id="s7"><div class="section-header"><div class="num">07</div><div><h2 contenteditable="false">Helm Jobs</h2><p contenteditable="false">One job for Silver/Gold worker, one job for dbt marts</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">yaml — values patch</span><span class="code-file">infra/helm/feedback-platform/values-local.yaml append</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>dataPlatform:
+  enabled: true
+  image:
+    repository: fip-local/data-platform-worker
+    tag: phase2
+    pullPolicy: IfNotPresent
+  aws:
+    endpointUrl: http://localhost:4566
+    region: us-west-2
+  s3:
+    rawBucket: fip-local-raw
+    processedBucket: fip-local-processed
+  processing:
+    maxRecords: "25000"
+    runDbt: true</code></pre></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">yaml — Helm Jobs</span><span class="code-file">phase2-data-platform-job.yaml + phase2-dbt-job.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code># Create infra/helm/feedback-platform/templates/phase2-data-platform-job.yaml
+{{- if .Values.dataPlatform.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: data-platform-worker
+  namespace: {{ default "feedback" .Values.namespace | quote }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: data-platform-worker
+          image: "{{ .Values.dataPlatform.image.repository }}:{{ .Values.dataPlatform.image.tag }}"
+          imagePullPolicy: {{ .Values.dataPlatform.image.pullPolicy }}
+          command: ["python", "services/data-platform-worker/worker.py"]
+          env:
+            - { name: AWS_ENDPOINT_URL, value: {{ .Values.dataPlatform.aws.endpointUrl | quote }} }
+            - { name: AWS_REGION, value: {{ .Values.dataPlatform.aws.region | quote }} }
+            - { name: AWS_ACCESS_KEY_ID, value: "test" }
+            - { name: AWS_SECRET_ACCESS_KEY, value: "test" }
+            - { name: RAW_BUCKET, value: {{ .Values.dataPlatform.s3.rawBucket | quote }} }
+            - { name: PROCESSED_BUCKET, value: {{ .Values.dataPlatform.s3.processedBucket | quote }} }
+            - { name: MAX_RECORDS, value: {{ .Values.dataPlatform.processing.maxRecords | quote }} }
+{{- end }}
+
+# Create infra/helm/feedback-platform/templates/phase2-dbt-job.yaml
+{{- if and .Values.dataPlatform.enabled .Values.dataPlatform.processing.runDbt }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dbt-analytics-mart
+  namespace: {{ default "feedback" .Values.namespace | quote }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: dbt-analytics-mart
+          image: "{{ .Values.dataPlatform.image.repository }}:{{ .Values.dataPlatform.image.tag }}"
+          imagePullPolicy: {{ .Values.dataPlatform.image.pullPolicy }}
+          command: ["python", "services/data-platform-worker/run_dbt.py"]
+          env:
+            - { name: AWS_ENDPOINT_URL, value: {{ .Values.dataPlatform.aws.endpointUrl | quote }} }
+            - { name: AWS_REGION, value: {{ .Values.dataPlatform.aws.region | quote }} }
+            - { name: AWS_ACCESS_KEY_ID, value: "test" }
+            - { name: AWS_SECRET_ACCESS_KEY, value: "test" }
+            - { name: PROCESSED_BUCKET, value: {{ .Values.dataPlatform.s3.processedBucket | quote }} }
+{{- end }}</code></pre></div></section>
+<section class="section editable-block" id="s8"><div class="section-header"><div class="num">08</div><div><h2 contenteditable="false">Makefile</h2><p contenteditable="false">Append these targets to existing Makefile</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">makefile — Phase 2 targets</span><span class="code-file">Makefile append</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code># -------------------------------------------------------------------
+# Phase 2 — Silver → NLP Gold → dbt Analytics Mart on FLOCI EKS/S3
+# -------------------------------------------------------------------
+PHASE2_IMAGE ?= fip-local/data-platform-worker:phase2
+PHASE2_IMAGE_REPO ?= fip-local/data-platform-worker
+PHASE2_IMAGE_TAG ?= phase2
+NAMESPACE ?= feedback
+HELM_CHART ?= infra/helm/feedback-platform
+.PHONY: phase2-install phase2-build phase2-deploy phase2-status phase2-logs phase2-verify phase2-clean phase2
+phase2-install:
+	python3 -m pip install -r services/data-platform-worker/requirements.txt
+phase2-build:
+	docker build -t $(PHASE2_IMAGE) -f services/data-platform-worker/Dockerfile .
+phase2-deploy:
+	kubectl delete job data-platform-worker dbt-analytics-mart -n $(NAMESPACE) --ignore-not-found=true
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	helm upgrade --install feedback-platform ./$(HELM_CHART) \
+	  --namespace $(NAMESPACE) \
+	  -f $(HELM_CHART)/values-local.yaml \
+	  --set dataPlatform.enabled=true \
+	  --set dataPlatform.image.repository=$(PHASE2_IMAGE_REPO) \
+	  --set dataPlatform.image.tag=$(PHASE2_IMAGE_TAG) \
+	  --set dataPlatform.aws.endpointUrl=http://localhost:4566 \
+	  --set dataPlatform.s3.rawBucket=fip-local-raw \
+	  --set dataPlatform.s3.processedBucket=fip-local-processed \
+	  --wait --timeout 240s
+phase2-status:
+	kubectl get pods -n $(NAMESPACE)
+	kubectl get jobs -n $(NAMESPACE)
+phase2-logs:
+	kubectl logs -n $(NAMESPACE) job/data-platform-worker --tail=120 || true
+	kubectl logs -n $(NAMESPACE) job/dbt-analytics-mart --tail=120 || true
+phase2-verify:
+	@echo "🔎 Silver objects"; aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-processed/silver --recursive | head || true
+	@echo "🔎 Gold objects"; aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-processed/gold --recursive | head || true
+	@echo "🔎 dbt input"; aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-processed/dbt_input --recursive || true
+	@echo "🔎 dbt marts"; aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-processed/marts --recursive || true
+	@echo "✅ Phase 2 verified: Silver + Gold + dbt mart ready for Phase 3 embeddings"
+phase2-clean:
+	kubectl delete job data-platform-worker dbt-analytics-mart -n $(NAMESPACE) --ignore-not-found=true
+phase2: phase2-install phase2-build phase2-deploy phase2-status phase2-logs phase2-verify
+	@echo "✅ Phase 2 complete: Silver → NLP Gold → dbt marts"</code></pre></div></section>
+<section class="section editable-block" id="s9"><div class="section-header"><div class="num">09</div><div><h2 contenteditable="false">Execution</h2><p contenteditable="false">Run after every file above exists</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash — Execution steps</span><span class="code-file">terminal</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code># Run from feedback-intelligence-platform/
+make verify
+make phase1-verify
+make phase2-install
+make phase2-build
+make phase2-deploy
+make phase2-status
+make phase2-logs
+make phase2-verify</code></pre></div></section>
+<section class="section editable-block" id="s10"><div class="section-header"><div class="num">10</div><div><h2 contenteditable="false">Verification</h2><p contenteditable="false">Expected outputs</p></div></div><table><tr><th>Layer</th><th>Expected Output</th></tr><tr><td>Silver</td><td><code class="inline">s3://fip-local-processed/silver/</code></td></tr><tr><td>Gold</td><td><code class="inline">s3://fip-local-processed/gold/</code></td></tr><tr><td>dbt Input</td><td><code class="inline">s3://fip-local-processed/dbt_input/gold_feedback.csv</code></td></tr><tr><td>dbt Mart</td><td><code class="inline">s3://fip-local-processed/marts/feedback_analytics.duckdb</code></td></tr><tr><td>Phase 3 Contract</td><td><code class="inline">mart_embedding_ready_feedback</code></td></tr></table></section>
+<section class="section editable-block" id="s11"><div class="section-header"><div class="num">11</div><div><h2 contenteditable="false">Troubleshooting</h2><p contenteditable="false">Common checks</p></div></div>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash — Troubleshooting commands</span><span class="code-file">terminal</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="false"><code>kubectl describe job data-platform-worker -n feedback
+kubectl describe job dbt-analytics-mart -n feedback
+kubectl logs -n feedback job/data-platform-worker --tail=200
+kubectl logs -n feedback job/dbt-analytics-mart --tail=200
+aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-processed --recursive --summarize
+make phase2-clean && make phase2-deploy</code></pre></div></section>
+<section class="section editable-block" id="s12"><div class="section-header"><div class="num">12</div><div><h2 contenteditable="false">Next Phase</h2><p contenteditable="false">Phase 3 consumes Gold + dbt mart</p></div></div><div class="callout">Phase 3 embedding worker should read <code class="inline">mart_embedding_ready_feedback</code> / Gold records, generate embeddings, and store them in Qdrant. It should not embed Raw or Silver directly.</div></section>
+<div id="dynamicContent"></div><div class="phase-nav"><a href="fip-phase1-data-ingestion-eks-msk-final.html"><span class="k">Previous</span><span class="t">Phase 1</span></a><a href="00_fip_Project_Guide_V3_Course.html"><span class="k">Guide</span><span class="t">Master Guide</span></a><a href="fip-phase3-rag-layer-course.html"><span class="k">Next</span><span class="t">Phase 3</span></a></div></main></div>
+<script>
+let editMode=false;function copyCode(btn){const block=btn.closest('.code-block');const text=block.querySelector('pre').innerText;navigator.clipboard.writeText(text).then(()=>{const old=btn.textContent;btn.textContent='✓ Copied';setTimeout(()=>btn.textContent=old,1400);});}function toggleEdit(){editMode=!editMode;document.body.classList.toggle('edit-mode',editMode);document.querySelectorAll('[contenteditable]').forEach(el=>el.setAttribute('contenteditable',editMode?'true':'false'));document.querySelectorAll('.code-block pre').forEach(el=>el.setAttribute('contenteditable',editMode?'true':'false'));}function toggleInsertPanel(){document.getElementById('insertPanel').classList.toggle('open');}function target(){return document.getElementById('dynamicContent');}function addInfoBlock(){target().insertAdjacentHTML('beforeend','<div class="editable-new callout" contenteditable="true"><strong>New highlight:</strong> Add your note here.</div>');}function addCodeBlock(){target().insertAdjacentHTML('beforeend','<div class="code-block editable-new"><div class="code-header"><span class="code-lang">bash — new snippet</span><span class="code-file">custom</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="true"><code># Add command here</code></pre></div>');}function addTableBlock(){target().insertAdjacentHTML('beforeend','<div class="editable-new"><table contenteditable="true"><tr><th>Column A</th><th>Column B</th></tr><tr><td>Add value</td><td>Add value</td></tr></table></div>');}function addSectionBlock(){target().insertAdjacentHTML('beforeend','<section class="section editable-new"><div class="section-header"><div class="num">NEW</div><div><h2 contenteditable="true">New Section</h2><p contenteditable="true">Add section description here.</p></div></div><p contenteditable="true">Add your content here.</p></section>');}function saveHTML(){const clone=document.documentElement.cloneNode(true);clone.querySelectorAll('.insert-panel,.save-toast').forEach(e=>e.remove());const blob=new Blob(['<!doctype html>\n'+clone.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fip-phase2-data-platform-gold-dbt-edited.html';a.click();URL.revokeObjectURL(a.href);const t=document.getElementById('saveToast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400);}
+</script>
+</body></html>
