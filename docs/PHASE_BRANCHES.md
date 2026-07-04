@@ -73,9 +73,24 @@ phase-2: deploy data-platform-worker with RDS port from terraform output
 
 | Remote branch | Notes |
 |---------------|-------|
-| `origin/phase0_1` | Legacy naming; prefer `phase-0` / `phase-1` kebab-case going forward |
-| `origin/dev` | Integration branch |
+| `origin/phase0_1` | Legacy naming; superseded by `phase-0` / `phase-1` |
+| `origin/dev` | Integration branch — sync with `phase-2` after phase releases |
 | `origin/main` | Default branch |
+
+## Local phase branches (created)
+
+| Branch | Latest commit topic |
+|--------|---------------------|
+| `phase-0` | FLOCI foundation + Terraform + Helm base |
+| `phase-1` | Phase 0 + ingestion workers |
+| `phase-2` | Phase 1 + data platform + dbt |
+| `dev` | Tracks latest `phase-2` for active development |
+
+Push to share with learners:
+
+```bash
+git push -u origin phase-0 phase-1 phase-2 dev
+```
 
 ## Claude Code
 
