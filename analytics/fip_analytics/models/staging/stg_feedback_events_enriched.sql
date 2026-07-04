@@ -1,0 +1,1 @@
+select * from gold.feedback_events_enriched

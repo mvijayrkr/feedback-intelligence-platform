@@ -40,7 +40,14 @@ ingestion:
     maxMessages: "10"
 
 dataPlatform:
-  enabled: false
+  enabled: true
+  image: { repository: fip-local/data-platform-worker, tag: phase2, pullPolicy: IfNotPresent }
+  aws: { endpointUrl: http://localhost:4566, region: us-west-2 }
+  s3: { rawBucket: fip-local-raw, processedBucket: fip-local-processed }
+  rds: { host: fip-local-postgres.local, port: "5432", dbName: fip, username: fip_user, password: fip_password }
+  processing: { maxRecords: "25000" }
 
 dbt:
-  enabled: false
+  enabled: true
+  image: { repository: fip-local/dbt-runner, tag: phase2, pullPolicy: IfNotPresent }
+  rds: { host: fip-local-postgres.local, port: "5432", dbName: fip, username: fip_user, password: fip_password }

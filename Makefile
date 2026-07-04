@@ -236,3 +236,85 @@ phase1-clean:
 
 phase1: phase1-install phase1-generate phase1-push phase1-deploy phase1-status phase1-logs phase1-verify
 	@echo "✅ Phase 1 complete: ingestion executed on FLOCI EKS and connected to FLOCI MSK"
+PHASE2_WORKER_IMAGE ?= fip-local/data-platform-worker:phase2
+PHASE2_DBT_IMAGE ?= fip-local/dbt-runner:phase2
+PHASE2_WORKER_ECR_TAG ?= phase2-worker
+PHASE2_DBT_ECR_TAG ?= phase2-dbt
+PHASE2_WORKER_ECR_PUSH_IMAGE ?= $(PHASE1_ECR_PUSH_REGISTRY)/$(PHASE1_ECR_REPOSITORY):$(PHASE2_WORKER_ECR_TAG)
+PHASE2_DBT_ECR_PUSH_IMAGE ?= $(PHASE1_ECR_PUSH_REGISTRY)/$(PHASE1_ECR_REPOSITORY):$(PHASE2_DBT_ECR_TAG)
+PHASE2_DEPLOY_IMAGE_REPO ?= $(PHASE1_ECR_NODE_REGISTRY)/$(PHASE1_ECR_REPOSITORY)
+NAMESPACE ?= feedback
+HELM_CHART ?= infra/helm/feedback-platform
+TF_DIR ?= infra/terraform/envs/local-floci
+
+RDS_HOST ?= $(shell terraform -chdir=$(TF_DIR) output -raw rds_endpoint 2>/dev/null | cut -d: -f1)
+RDS_PORT ?= $(shell terraform -chdir=$(TF_DIR) output -raw rds_endpoint 2>/dev/null | cut -d: -f2)
+RDS_DB_NAME ?= fip
+RDS_USERNAME ?= fip_user
+RDS_PASSWORD ?= fip_password
+
+.PHONY: phase2-install phase2-build phase2-push phase2-deploy-worker phase2-deploy-dbt phase2-status phase2-logs phase2-verify phase2-clean phase2
+
+phase2-install:
+	python3 -m pip install -r services/data-platform-worker/requirements.txt
+	python3 -m pip install -r analytics/dbt/fip_analytics/requirements.txt
+
+phase2-build:
+	docker build -t $(PHASE2_WORKER_IMAGE) -f services/data-platform-worker/Dockerfile .
+	docker build -t $(PHASE2_DBT_IMAGE) -f analytics/dbt/fip_analytics/Dockerfile .
+
+phase2-push: phase2-build phase1-ecr-ready
+	@test -n "$(PHASE1_ECR_NODE_REGISTRY)" || (echo "❌ FLOCI ECR container '$(PHASE1_ECR_CONTAINER)' not found. Run 'make floci-start' first."; exit 1)
+	docker tag $(PHASE2_WORKER_IMAGE) $(PHASE2_WORKER_ECR_PUSH_IMAGE)
+	docker tag $(PHASE2_DBT_IMAGE) $(PHASE2_DBT_ECR_PUSH_IMAGE)
+	aws --endpoint-url $(FLOCI_ENDPOINT) ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(PHASE1_ECR_PUSH_REGISTRY)
+	docker push $(PHASE2_WORKER_ECR_PUSH_IMAGE)
+	docker push $(PHASE2_DBT_ECR_PUSH_IMAGE)
+
+phase2-deploy-worker: phase1-k8s-ready phase1-ecr-ready
+	kubectl delete job data-platform-worker feedback-producer feedback-consumer -n $(NAMESPACE) --ignore-not-found=true
+	helm upgrade --install feedback-platform ./$(HELM_CHART) \
+	  --namespace $(NAMESPACE) \
+	  -f $(HELM_CHART)/values-local.yaml \
+	  --set dataPlatform.enabled=true \
+	  --set dataPlatform.image.repository=$(PHASE2_DEPLOY_IMAGE_REPO) \
+	  --set dataPlatform.image.tag=$(PHASE2_WORKER_ECR_TAG) \
+	  --set dataPlatform.aws.endpointUrl=$(PHASE1_AWS_ENDPOINT_URL) \
+	  --set dataPlatform.rds.host="$(RDS_HOST)" \
+	  --set dataPlatform.rds.port="$(RDS_PORT)" \
+	  --set ingestion.producer.enabled=false \
+	  --set ingestion.consumer.enabled=false \
+	  --wait --timeout 240s
+
+phase2-deploy-dbt: phase1-k8s-ready phase1-ecr-ready
+	kubectl delete job dbt-runner feedback-producer feedback-consumer -n $(NAMESPACE) --ignore-not-found=true
+	helm upgrade --install feedback-platform ./$(HELM_CHART) \
+	  --namespace $(NAMESPACE) \
+	  -f $(HELM_CHART)/values-local.yaml \
+	  --set dbt.enabled=true \
+	  --set dbt.image.repository=$(PHASE2_DEPLOY_IMAGE_REPO) \
+	  --set dbt.image.tag=$(PHASE2_DBT_ECR_TAG) \
+	  --set dbt.rds.host="$(RDS_HOST)" \
+	  --set dbt.rds.port="$(RDS_PORT)" \
+	  --set ingestion.producer.enabled=false \
+	  --set ingestion.consumer.enabled=false \
+	  --wait --timeout 240s
+
+phase2-status:
+	kubectl get pods -n $(NAMESPACE)
+	kubectl get jobs -n $(NAMESPACE)
+
+phase2-logs:
+	kubectl logs -n $(NAMESPACE) job/data-platform-worker --tail=160 || true
+	kubectl logs -n $(NAMESPACE) job/dbt-runner --tail=160 || true
+
+phase2-verify:
+	terraform -chdir=$(TF_DIR) output -raw rds_endpoint || true
+	aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-processed --recursive --summarize || true
+	kubectl get job dbt-runner -n $(NAMESPACE) || true
+
+phase2-clean:
+	kubectl delete job data-platform-worker dbt-runner -n $(NAMESPACE) --ignore-not-found=true
+
+phase2: phase2-install phase2-push phase2-deploy-worker phase2-deploy-dbt phase2-status phase2-logs phase2-verify
+	@echo "✅ Phase 2 complete: Silver/Gold loaded to RDS and dbt marts built"
