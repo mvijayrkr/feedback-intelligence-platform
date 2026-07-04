@@ -20,21 +20,14 @@ env:
   KAFKA_BOOTSTRAP_SERVERS: "from-terraform-output"
 
 ingestion:
-  enabled: true
-  image:
-    repository: fip-local/ingestion-worker
-    tag: phase1
-    pullPolicy: IfNotPresent
-  kafka:
-    bootstrapServers: "172.17.0.4:9092"
-    topic: feedback.raw.events
-  aws:
-    endpointUrl: http://localhost:4566
-    region: us-west-2
-  s3:
-    rawBucket: fip-local-raw
+  enabled: false
   producer:
-    enabled: true
+    enabled: false
   consumer:
-    enabled: true
-    maxMessages: "10"
+    enabled: false
+
+dataPlatform:
+  enabled: false
+
+dbt:
+  enabled: false

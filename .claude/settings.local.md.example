@@ -1,0 +1,23 @@
+---
+enabled: true
+current_phase: "2"
+notes: "Copy to .claude/settings.local.md and customize per session"
+---
+
+# Local Claude Code overrides
+
+Use this file for session-specific context Claude should remember:
+
+- Current phase focus (0, 1, 2, …)
+- FLOCI bridge IPs if different from defaults
+- Any blockers from last deploy
+
+Example:
+
+```markdown
+---
+current_phase: "2"
+rds_host: "172.17.0.2"
+rds_port: "7001"
+---
+```

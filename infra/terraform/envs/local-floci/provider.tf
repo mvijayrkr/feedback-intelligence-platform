@@ -11,6 +11,7 @@ provider "aws" {
     apigateway     = var.floci_endpoint
     cloudwatch     = var.floci_endpoint
     cloudwatchlogs = var.floci_endpoint
+    ec2            = var.floci_endpoint
     ecr            = var.floci_endpoint
     eks            = var.floci_endpoint
     iam            = var.floci_endpoint
