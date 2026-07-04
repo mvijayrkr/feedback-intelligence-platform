@@ -28,6 +28,11 @@ help:
 	@echo "  make verify      # verify Phase 0 foundation"
 	@echo "  make tf-destroy  # destroy local Terraform resources"
 	@echo "  make clean       # stop FLOCI"
+	@echo ""
+	@echo "Phase 1 commands:"
+	@echo "  make phase1-push   # build and push ingestion worker to FLOCI ECR (required after cluster recreate)"
+	@echo "  make phase1-deploy # deploy producer/consumer jobs into FLOCI EKS"
+	@echo "  make phase1        # full Phase 1 pipeline"
 
 doctor:
 	@command -v floci >/dev/null || (echo "❌ floci not installed"; exit 1)
@@ -130,3 +135,104 @@ tf-destroy:
 
 clean:
 	floci stop
+
+PHASE1_IMAGE ?= fip-local/ingestion-worker:phase1
+PHASE1_IMAGE_TAG ?= phase1
+PHASE1_ECR_REPOSITORY ?= fip-local/workers
+PHASE1_ECR_PUSH_REGISTRY ?= localhost:5100
+PHASE1_ECR_CONTAINER ?= floci-ecr-registry
+PHASE1_EKS_CONTAINER ?= $(shell docker ps --format '{{.Names}}' | grep '^floci-eks-' | head -1)
+PHASE1_MSK_CONTAINER ?= floci-msk-fip-local-msk
+PHASE1_FLOCI_CONTAINER ?= floci
+PHASE1_FLOCI_HOST ?= $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PHASE1_FLOCI_CONTAINER) 2>/dev/null)
+PHASE1_AWS_ENDPOINT_URL ?= http://$(PHASE1_FLOCI_HOST):4566
+PHASE1_ECR_NODE_REGISTRY ?= $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PHASE1_ECR_CONTAINER) 2>/dev/null):5000
+PHASE1_MSK_BOOTSTRAP ?= $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PHASE1_MSK_CONTAINER) 2>/dev/null):9092
+PHASE1_DEPLOY_IMAGE_REPO ?= $(PHASE1_ECR_NODE_REGISTRY)/$(PHASE1_ECR_REPOSITORY)
+PHASE1_ECR_PUSH_IMAGE ?= $(PHASE1_ECR_PUSH_REGISTRY)/$(PHASE1_ECR_REPOSITORY):$(PHASE1_IMAGE_TAG)
+NAMESPACE ?= feedback
+HELM_CHART ?= infra/helm/feedback-platform
+TF_DIR ?= infra/terraform/envs/local-floci
+
+.PHONY: phase1-install phase1-generate phase1-build phase1-push phase1-k8s-ready phase1-ecr-ready phase1-kafka-ready phase1-deploy phase1-status phase1-logs phase1-verify phase1-clean phase1
+
+phase1-install:
+	python3 -m pip install -r services/data-generator/requirements.txt
+
+phase1-generate:
+	PYTHONPATH=. python3 services/data-generator/generator.py
+
+phase1-build:
+	docker build -t $(PHASE1_IMAGE) -f services/ingestion-worker/Dockerfile .
+
+phase1-push: phase1-build
+	@test -n "$(PHASE1_ECR_NODE_REGISTRY)" || (echo "❌ FLOCI ECR container '$(PHASE1_ECR_CONTAINER)' not found. Run 'make floci-start' first."; exit 1)
+	docker tag $(PHASE1_IMAGE) $(PHASE1_ECR_PUSH_IMAGE)
+	aws --endpoint-url $(FLOCI_ENDPOINT) ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(PHASE1_ECR_PUSH_REGISTRY)
+	docker push $(PHASE1_ECR_PUSH_IMAGE)
+
+phase1-k8s-ready:
+	@if ! kubectl get nodes >/dev/null 2>&1; then \
+	  echo "❌ kubectl cannot reach FLOCI EKS (expected https://localhost:6500)."; \
+	  echo "   FLOCI was likely restarted and the cluster is gone."; \
+	  echo "   Run: make tf-apply && make k8s-config"; \
+	  exit 1; \
+	fi
+
+phase1-ecr-ready:
+	@test -n "$(PHASE1_ECR_NODE_REGISTRY)" || (echo "❌ FLOCI ECR container '$(PHASE1_ECR_CONTAINER)' not found."; exit 1)
+	@test -n "$(PHASE1_EKS_CONTAINER)" || (echo "❌ FLOCI EKS container not found. Run 'make tf-apply && make k8s-config' first."; exit 1)
+	@if ! docker exec $(PHASE1_EKS_CONTAINER) grep -q "$(PHASE1_ECR_NODE_REGISTRY)" /etc/rancher/k3s/registries.yaml 2>/dev/null; then \
+	  echo "🔧 Configuring FLOCI EKS to pull from insecure registry $(PHASE1_ECR_NODE_REGISTRY)"; \
+	  docker exec $(PHASE1_EKS_CONTAINER) sh -c 'mkdir -p /etc/rancher/k3s && printf "mirrors:\n  \"%s\":\n    endpoint:\n      - \"http://%s\"\n" "$(PHASE1_ECR_NODE_REGISTRY)" "$(PHASE1_ECR_NODE_REGISTRY)" > /etc/rancher/k3s/registries.yaml'; \
+	  docker restart $(PHASE1_EKS_CONTAINER); \
+	  sleep 15; \
+	  kubectl get nodes >/dev/null || (echo "❌ FLOCI EKS did not come back after registry config. Run 'make k8s-config'."; exit 1); \
+	fi
+
+phase1-kafka-ready:
+	@test -n "$(PHASE1_MSK_BOOTSTRAP)" || (echo "❌ FLOCI MSK container '$(PHASE1_MSK_CONTAINER)' not found. Run 'make tf-apply' first."; exit 1)
+	@MSK_IP=$$(echo "$(PHASE1_MSK_BOOTSTRAP)" | cut -d: -f1); \
+	if docker exec $(PHASE1_MSK_CONTAINER) grep -q 'address: 127.0.0.1' /etc/redpanda/redpanda.yaml 2>/dev/null; then \
+	  echo "🔧 Updating FLOCI MSK advertised_kafka_api to $$MSK_IP"; \
+	  docker exec $(PHASE1_MSK_CONTAINER) sh -c "sed -i 's/address: 127.0.0.1/address: '$$MSK_IP'/g' /etc/redpanda/redpanda.yaml"; \
+	  docker restart $(PHASE1_MSK_CONTAINER); \
+	  sleep 5; \
+	fi
+
+phase1-deploy: phase1-k8s-ready phase1-ecr-ready phase1-kafka-ready
+	kubectl delete job feedback-producer feedback-consumer -n $(NAMESPACE) --ignore-not-found=true
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	helm upgrade --install feedback-platform ./$(HELM_CHART) \
+	  --namespace $(NAMESPACE) \
+	  -f $(HELM_CHART)/values-local.yaml \
+	  --set ingestion.enabled=true \
+	  --set ingestion.image.repository=$(PHASE1_DEPLOY_IMAGE_REPO) \
+	  --set ingestion.image.tag=$(PHASE1_IMAGE_TAG) \
+	  --set ingestion.kafka.bootstrapServers="$(PHASE1_MSK_BOOTSTRAP)" \
+	  --set ingestion.kafka.topic=feedback.raw.events \
+	  --set ingestion.aws.endpointUrl=$(PHASE1_AWS_ENDPOINT_URL) \
+	  --set ingestion.aws.region=us-west-2 \
+	  --set ingestion.s3.rawBucket=fip-local-raw \
+	  --wait --timeout 180s
+
+phase1-status:
+	kubectl get pods -n $(NAMESPACE)
+	kubectl get jobs -n $(NAMESPACE)
+
+phase1-logs:
+	kubectl logs -n $(NAMESPACE) job/feedback-producer --tail=100 || true
+	kubectl logs -n $(NAMESPACE) job/feedback-consumer --tail=100 || true
+
+phase1-verify:
+	@test -f data/dummy/out/feedback_events.jsonl
+	wc -l data/dummy/out/feedback_events.jsonl
+	aws --endpoint-url http://localhost:4566 kafka list-clusters --region us-west-2 --query 'ClusterInfoList[].ClusterName'
+	kubectl get jobs -n $(NAMESPACE)
+	aws --endpoint-url http://localhost:4566 s3 ls s3://fip-local-raw --recursive --summarize || true
+
+phase1-clean:
+	kubectl delete job feedback-producer feedback-consumer -n $(NAMESPACE) --ignore-not-found=true
+
+phase1: phase1-install phase1-generate phase1-push phase1-deploy phase1-status phase1-logs phase1-verify
+	@echo "✅ Phase 1 complete: ingestion executed on FLOCI EKS and connected to FLOCI MSK"
