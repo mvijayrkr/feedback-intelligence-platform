@@ -1,4 +1,4 @@
-Feedback Intelligence Platform for Restaurants
+Feedback Intelligence Platform for Restaurants (In-Progress)
 
 AI-powered, production-grade feedback intelligence platform for restaurants and SMBs
 
