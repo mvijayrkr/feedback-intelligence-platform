@@ -1,0 +1,53 @@
+namespace: feedback
+
+api:
+  name: feedback-api
+  image:
+    repository: nginx
+    tag: "1.25"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  containerPort: 80
+  servicePort: 80
+
+env:
+  ENVIRONMENT: local
+  TENANT_ID: curry_bowl_express
+  AWS_ENDPOINT_URL: http://localhost:4566
+  RAW_BUCKET: fip-local-raw
+  PROCESSED_BUCKET: fip-local-processed
+  ARTIFACTS_BUCKET: fip-local-artifacts
+  KAFKA_BOOTSTRAP_SERVERS: "from-terraform-output"
+
+ingestion:
+  enabled: true
+  image:
+    repository: fip-local/ingestion-worker
+    tag: phase1
+    pullPolicy: IfNotPresent
+  kafka:
+    bootstrapServers: "172.17.0.4:9092"
+    topic: feedback.raw.events
+  aws:
+    endpointUrl: http://localhost:4566
+    region: us-west-2
+  s3:
+    rawBucket: fip-local-raw
+  producer:
+    enabled: true
+  consumer:
+    enabled: true
+    maxMessages: "10"
+
+dataPlatform:
+  enabled: true
+  image: { repository: fip-local/data-platform-worker, tag: phase2, pullPolicy: IfNotPresent }
+  aws: { endpointUrl: http://localhost:4566, region: us-west-2 }
+  s3: { rawBucket: fip-local-raw, processedBucket: fip-local-processed }
+  rds: { host: fip-local-postgres.local, port: "5432", dbName: fip, username: fip_user, password: fip_password }
+  processing: { maxRecords: "25000" }
+
+dbt:
+  enabled: true
+  image: { repository: fip-local/dbt-runner, tag: phase2, pullPolicy: IfNotPresent }
+  rds: { host: fip-local-postgres.local, port: "5432", dbName: fip, username: fip_user, password: fip_password }

@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Phase 0 — FLOCI Foundation Final Validated | Feedback Intelligence Platform</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --surface2: #1c2333; --border: #30363d;
+  --accent: #f78166; --accent2: #79c0ff; --accent3: #56d364; --accent4: #d2a8ff; --accent5: #ffa657;
+  --text: #e6edf3; --text-muted: #8b949e; --text-dim: #6e7681; --code-bg: #0d1117;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 15px; }
+.topbar { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.topbar-brand { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .05em; text-transform: uppercase; }
+.topbar-phase { font-size: 12px; color: var(--text-muted); background: var(--surface2); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); }
+.topbar-actions { display:flex; gap:8px; align-items:center; }
+.btn-save,.btn-edit,.btn-history { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.btn-save { background: var(--accent); color:#000; border:none; }
+.layout { display: flex; min-height: calc(100vh - 52px); }
+.sidebar { width: 260px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; }
+.sidebar-section-label { font-size: 10px; font-weight: 700; color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; padding: 12px 16px 4px; }
+.sidebar a { display: flex; align-items: center; gap: 8px; padding: 7px 16px; font-size: 13px; color: var(--text-muted); text-decoration: none; border-left: 2px solid transparent; transition: all .15s; }
+.sidebar a:hover,.sidebar a.active { color: var(--text); background: var(--surface2); border-left-color: var(--accent); }
+.sidebar .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink:0; }
+.main { flex:1; padding: 40px 48px; max-width: 1060px; }
+.hero { border:1px solid var(--border); border-radius: 12px; background: var(--surface); padding:36px 40px; margin-bottom:40px; position:relative; overflow:hidden; }
+.hero:before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg,var(--accent),var(--accent4),var(--accent2)); }
+.hero-badge { display:inline-flex; background:rgba(247,129,102,.1); border:1px solid rgba(247,129,102,.3); color:var(--accent); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:16px; }
+.hero h1 { font-size:30px; font-weight:800; line-height:1.2; margin-bottom:12px; }
+.hero h1 span { color:var(--accent); }
+.hero p { color:var(--text-muted); max-width:760px; margin-bottom:22px; }
+.hero-meta { display:flex; gap:18px; flex-wrap:wrap; }
+.hero-meta-item { display:flex; flex-direction:column; gap:2px; }
+.hero-meta-item .label { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; }
+.hero-meta-item .value { font-size:13px; font-weight:600; color:var(--accent2); }
+.section { margin-bottom:56px; scroll-margin-top:72px; }
+.section-header { display:flex; align-items:flex-start; gap:16px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+.section-number { font-size:11px; font-weight:800; color:var(--accent); background:rgba(247,129,102,.1); border:1px solid rgba(247,129,102,.2); padding:4px 10px; border-radius:6px; letter-spacing:.05em; flex-shrink:0; margin-top:2px; }
+.section-header h2 { font-size:21px; font-weight:700; margin-bottom:4px; }
+.section-header p { font-size:13px; color:var(--text-muted); }
+.card { background: var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 22px; margin-bottom:16px; }
+.card-title { font-size:13px; font-weight:700; color:var(--accent2); margin-bottom:10px; }
+.card p,.card li { font-size:14px; color:var(--text-muted); }
+.card ul { padding-left: 20px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.code-block { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; margin:14px 0 22px; overflow:hidden; }
+.code-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; background:var(--surface2); border-bottom:1px solid var(--border); }
+.code-header span { font-size:11px; font-weight:700; color:var(--accent5); text-transform:uppercase; letter-spacing:.06em; }
+.code-header button { font-size:11px; cursor:pointer; background:transparent; border:1px solid var(--border); color:var(--text-muted); padding:3px 10px; border-radius:6px; }
+.code-header button:hover { border-color:var(--accent2); color:var(--accent2); }
+pre { padding:16px; overflow-x:auto; font-family:'JetBrains Mono','Fira Code','Consolas',monospace; font-size:12.5px; line-height:1.6; color:var(--text); }
+.alert { border-radius:8px; padding:14px 18px; margin:16px 0; font-size:13px; display:flex; gap:10px; align-items:flex-start; }
+.alert-info { background:rgba(121,192,255,.05); border:1px solid rgba(121,192,255,.2); color:var(--accent2); }
+.alert-warn { background:rgba(255,166,87,.05); border:1px solid rgba(255,166,87,.2); color:var(--accent5); }
+.alert-success { background:rgba(86,211,100,.05); border:1px solid rgba(86,211,100,.2); color:var(--accent3); }
+table { width:100%; border-collapse:collapse; font-size:13px; margin:12px 0 18px; }
+th,td { padding:10px 14px; border:1px solid var(--border); text-align:left; vertical-align:top; }
+th { background:var(--surface2); color:var(--accent2); text-transform:uppercase; font-size:12px; }
+td { color:var(--text-muted); }
+code.inline { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--accent5); font-family: monospace; }
+.checklist { list-style:none; padding:0; }
+.checklist li { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); color:var(--text-muted); }
+.checklist li:before { content:'✓'; color:var(--accent3); font-weight:800; }
+.edit-mode-badge,.save-indicator { display:none; }
+@media(max-width:900px) { .sidebar{display:none} .main{padding:28px 22px} .grid-2{grid-template-columns:1fr} }
+
+/* --- Editable / Savable Extension --- */
+.edit-mode [contenteditable="true"]{outline:2px dashed rgba(121,192,255,.55);outline-offset:3px;border-radius:6px;}
+.edit-mode pre[contenteditable="true"]{outline:2px dashed rgba(121,192,255,.55);outline-offset:-6px;}
+.btn-add,.btn-insert{background:var(--surface2,#1c2333);color:var(--text-muted,#8b949e);border:1px solid var(--border,#30363d);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-add:hover,.btn-insert:hover{border-color:var(--accent2,#79c0ff);color:var(--accent2,#79c0ff);}
+.insert-panel{display:none;position:fixed;right:18px;top:64px;width:330px;background:var(--surface,#161b22);border:1px solid var(--border,#30363d);border-radius:14px;z-index:250;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.45);}
+.insert-panel.open{display:block;}
+.insert-panel h3{font-size:14px;margin:0 0 10px;color:var(--accent2,#79c0ff);}
+.insert-panel p{font-size:12px;color:var(--text-muted,#8b949e);margin:0 0 10px;}
+.insert-panel .btn-insert{width:100%;text-align:left;margin:5px 0;}
+.dynamic-insert,.editable-new{border:1px dashed rgba(121,192,255,.35);border-radius:12px;padding:14px;margin:16px 0;background:rgba(121,192,255,.04);}
+.save-toast{position:fixed;right:20px;bottom:20px;background:rgba(86,211,100,.14);border:1px solid rgba(86,211,100,.45);color:var(--accent3,#56d364);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:800;opacity:0;transition:.2s;z-index:300;}
+.save-toast.show{opacity:1;}
+@media(max-width:900px){.insert-panel{left:16px;right:16px;width:auto;}.topbar-actions,.actions{flex-wrap:wrap}}
+
+</style>
+</head>
+<body>
+
+<div class="insert-panel" id="insertPanel">
+  <h3>Add editable content</h3>
+  <p>Add extra steps anywhere near the end of the document, then drag/copy it where needed if you want to reorganize.</p>
+  <button class="btn-insert" onclick="addInfoBlock()">➕ Info / Highlight block</button>
+  <button class="btn-insert" onclick="addCodeBlock()">➕ Code snippet</button>
+  <button class="btn-insert" onclick="addTableBlock()">➕ Table</button>
+  <button class="btn-insert" onclick="addSectionBlock()">➕ Full section</button>
+</div>
+<div class="save-toast" id="saveToast">Saved HTML</div>
+
+<div class="topbar">
+  <div class="topbar-brand">⚡ Feedback Intelligence Platform</div>
+  <div class="topbar-phase">Phase 0 · Final Validated · FLOCI EKS + MSK</div>
+  <div class="topbar-actions">
+    <button class="btn-edit" onclick="toggleEditMode()">✏️ Edit</button>
+    <button class="btn-save" onclick="saveHTML()">💾 Save HTML</button>
+  <button class="btn-add" onclick="toggleInsertPanel()">➕ Add</button>
+  </div>
+</div>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-section-label">Overview</div>
+  <a href="#hero"><span class="dot" style="background:#f78166"></span>Phase Summary</a>
+  <a href="#roadmap"><span class="dot" style="background:#79c0ff"></span>Execution Model</a>
+  <div class="sidebar-section-label">Final Phase 0 Order</div>
+  <a href="#s1"><span class="dot" style="background:#ffa657"></span>01 · Business Req</a>
+  <a href="#s2"><span class="dot" style="background:#56d364"></span>02 · Technical Req</a>
+  <a href="#s3"><span class="dot" style="background:#79c0ff"></span>03 · Architecture</a>
+  <a href="#s4"><span class="dot" style="background:#d2a8ff"></span>04 · Repo Structure</a>
+  <a href="#s5"><span class="dot" style="background:#f78166"></span>05 · Toolchain</a>
+  <a href="#s6"><span class="dot" style="background:#ffa657"></span>06 · Makefile</a>
+  <a href="#s7"><span class="dot" style="background:#56d364"></span>07 · Terraform</a>
+  <a href="#s8"><span class="dot" style="background:#79c0ff"></span>08 · Helm</a>
+  <a href="#s9"><span class="dot" style="background:#d2a8ff"></span>09 · Kafka Topics</a>
+  <a href="#s10"><span class="dot" style="background:#f78166"></span>10 · Execution</a>
+  <a href="#s11"><span class="dot" style="background:#ffa657"></span>11 · Verification</a>
+  <a href="#s12"><span class="dot" style="background:#56d364"></span>12 · Troubleshooting</a>
+  <a href="#s13"><span class="dot" style="background:#79c0ff"></span>13 · Checklist</a>
+</nav>
+<main class="main">
+<section class="hero" id="hero">
+  <div class="hero-badge">📅 Day 1 of 7 · Phase 0 · Final Validated</div>
+  <h1>FLOCI-First <span>Local Foundation</span><br/>with EKS + MSK</h1>
+  <p data-editable="hero-subtitle" contenteditable="false">This is the final corrected Phase 0 guide based on actual execution errors and fixes. It creates FLOCI EKS, FLOCI MSK, S3, IAM, Secrets Manager, ECR, SQS DLQ, CloudWatch, a base Helm deployment, and safe verification logic.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span class="label">Runtime</span><span class="value">FLOCI EKS + FLOCI MSK</span></div>
+    <div class="hero-meta-item"><span class="label">IaC</span><span class="value">Terraform -chdir</span></div>
+    <div class="hero-meta-item"><span class="label">Deploy</span><span class="value">Helm into EKS</span></div>
+    <div class="hero-meta-item"><span class="label">Kafka</span><span class="value">FLOCI MSK, CLI optional</span></div>
+  </div>
+</section>
+
+<section class="section" id="roadmap">
+  <div class="section-header"><div class="section-number">00</div><div><h2>Validated Execution Model</h2><p>Create every file first. Then run bootstrap. No empty Terraform files. No hidden generator script. No local Kafka broker.</p></div></div>
+  <div class="alert alert-success"><strong>Validated outcome:</strong>&nbsp; Terraform creates EKS/MSK, kubectl can see nodes, Helm deploys a running pod, and Kafka verification no longer blocks on internal Docker broker IPs.</div>
+  <table><thead><tr><th>Order</th><th>Step</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td>1</td><td>Scaffold repo</td><td>Create folders only</td></tr>
+    <tr><td>2</td><td>Create .env.example</td><td>Document local variables</td></tr>
+    <tr><td>3</td><td>Install developer toolchain</td><td>Install CLI tools only</td></tr>
+    <tr><td>4</td><td>Create Makefile</td><td>Use safe Terraform, Helm, Kafka logic</td></tr>
+    <tr><td>5</td><td>Create Terraform files</td><td>Provision FLOCI EKS/MSK and core AWS services</td></tr>
+    <tr><td>6</td><td>Create Helm chart</td><td>Deploy base app into FLOCI EKS</td></tr>
+    <tr><td>7</td><td>Create topic script</td><td>Supports Kafka CLI when broker is reachable</td></tr>
+    <tr><td>8</td><td>Run bootstrap</td><td>Start FLOCI → apply infra → deploy app → verify</td></tr>
+  </tbody></table>
+</section>
+
+<section class="section" id="s1">
+  <div class="section-header"><div class="section-number">01</div><div><h2>Business Requirement</h2><p>Why Phase 0 exists.</p></div></div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title">🎯 Business Problem</div><ul><li>Feedback arrives from Google, delivery apps, surveys, QR codes, voice, and manager notes.</li><li>Restaurant operators need a unified foundation before ingestion, AI, RAG, and dashboard phases.</li><li>Engineering needs AWS-parity locally so Phase 6 promotion to AWS is not a rewrite.</li></ul></div>
+    <div class="card"><div class="card-title">✅ Phase 0 Delivers</div><ul><li>FLOCI EKS for service runtime.</li><li>FLOCI MSK for Kafka runtime.</li><li>S3, Secrets Manager, IAM, ECR, SQS DLQ, CloudWatch.</li><li>Helm base deployment with a running pod.</li><li>Safe checks for Kafka internal broker addresses.</li></ul></div>
+  </div>
+</section>
+
+<section class="section" id="s2">
+  <div class="section-header"><div class="section-number">02</div><div><h2>Technical Requirement</h2><p>FLOCI-first foundation.</p></div></div>
+  <div class="alert alert-info"><strong>Separation:</strong>&nbsp; Your laptop installs CLI tools. Runtime services run inside FLOCI. Kafka runtime is FLOCI MSK. Kubernetes runtime is FLOCI EKS.</div>
+  <table><thead><tr><th>Capability</th><th>Local Phase 0</th><th>Production Phase 6</th></tr></thead><tbody>
+    <tr><td>Kubernetes</td><td>FLOCI EKS</td><td>AWS EKS</td></tr>
+    <tr><td>Kafka</td><td>FLOCI MSK</td><td>AWS MSK</td></tr>
+    <tr><td>Storage</td><td>FLOCI S3</td><td>AWS S3</td></tr>
+    <tr><td>Secrets</td><td>FLOCI Secrets Manager</td><td>AWS Secrets Manager</td></tr>
+    <tr><td>Deployment</td><td>Helm</td><td>Helm</td></tr>
+  </tbody></table>
+</section>
+
+<section class="section" id="s3">
+  <div class="section-header"><div class="section-number">03</div><div><h2>Architecture</h2><p>What Phase 0 creates for later phases.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>architecture — Phase 0 runtime</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>Developer Laptop
+  ├── floci CLI
+  ├── terraform
+  ├── aws cli
+  ├── kubectl
+  ├── helm
+  └── kafka CLI optional
+
+FLOCI Runtime
+  ├── EKS: fip-local-eks
+  │   └── Helm release: feedback-platform
+  │       └── Pod: feedback-api
+  ├── MSK: fip-local-msk
+  │   └── Bootstrap brokers from Terraform output
+  ├── S3
+  │   ├── fip-local-raw
+  │   ├── fip-local-processed
+  │   └── fip-local-artifacts
+  ├── Secrets Manager
+  ├── IAM
+  ├── ECR
+  ├── SQS DLQ
+  └── CloudWatch Logs
+
+Later Phases
+  ├── Phase 1 uses MSK + S3 + EKS
+  ├── Phase 2 uses Bronze/Silver/Gold on S3/RDS
+  ├── Phase 3 deploys Qdrant into EKS
+  ├── Phase 4 deploys agents into EKS
+  └── Phase 5 deploys UI/API into EKS</code></pre>
+</div>
+</section>
+
+<section class="section" id="s4">
+  <div class="section-header"><div class="section-number">04</div><div><h2>Repository Structure</h2><p>Create folders first, then create each file shown below.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>bash — scaffold commands</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code># 1) Create the course repo from scratch
+mkdir -p feedback-intelligence-platform
+cd feedback-intelligence-platform
+
+# Application surfaces
+mkdir -p apps/{api,web,agent-service,voice-service}
+
+# Incremental services used by later phases
+mkdir -p services/{data-generator,ingestion-worker,cleaning-worker,nlp-worker,embedding-worker,action-worker}
+
+# Shared libraries
+mkdir -p shared/{schemas,config,logging,auth}
+
+# Data assets
+mkdir -p data/dummy/{google_reviews,reddit_mentions,delivery_reviews,surveys,voice_transcripts,manager_notes,qr_feedback}
+mkdir -p data/dbt/models/{bronze,silver,gold}
+mkdir -p data/sql/{postgres,snowflake}
+
+# Infrastructure
+mkdir -p infra/terraform/envs/local-floci
+mkdir -p infra/terraform/envs/prod-aws
+mkdir -p infra/helm/feedback-platform/templates
+mkdir -p infra/k8s/{namespaces,secrets,ingress}
+mkdir -p scripts
+
+# Root files
+touch README.md .gitignore .env.example Makefile
+
+echo &quot;✅ Phase 0 repository scaffold created&quot;</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>tree — full structure</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>feedback-intelligence-platform/
+├── README.md
+├── Makefile
+├── .env.example
+├── .gitignore
+├── apps/
+│   ├── api/
+│   ├── web/
+│   ├── agent-service/
+│   └── voice-service/
+├── services/
+│   ├── data-generator/
+│   ├── ingestion-worker/
+│   ├── cleaning-worker/
+│   ├── nlp-worker/
+│   ├── embedding-worker/
+│   └── action-worker/
+├── shared/
+│   ├── schemas/
+│   ├── config/
+│   ├── logging/
+│   └── auth/
+├── data/
+│   ├── dummy/
+│   ├── dbt/models/{bronze,silver,gold}/
+│   └── sql/{postgres,snowflake}/
+├── scripts/
+│   └── create_topics.sh
+└── infra/
+    ├── terraform/
+    │   └── envs/
+    │       ├── local-floci/
+    │       │   ├── versions.tf
+    │       │   ├── provider.tf
+    │       │   ├── variables.tf
+    │       │   ├── main.tf
+    │       │   ├── outputs.tf
+    │       │   └── terraform.tfvars
+    │       └── prod-aws/
+    ├── helm/
+    │   └── feedback-platform/
+    │       ├── Chart.yaml
+    │       ├── values.yaml
+    │       ├── values-local.yaml
+    │       └── templates/
+    │           ├── _helpers.tpl
+    │           ├── deployment.yaml
+    │           └── service.yaml
+    └── k8s/</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>bash — .env.example</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code># .env.example
+# Copy to .env for local development
+
+ENVIRONMENT=local
+TENANT_ID=curry_bowl_express
+
+AWS_REGION=us-west-2
+AWS_ENDPOINT_URL=http://localhost:4566
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+
+# FLOCI Runtime
+FLOCI_ENDPOINT=http://localhost:4566
+EKS_CLUSTER_NAME=fip-local-eks
+MSK_CLUSTER_NAME=fip-local-msk
+
+# This value is overwritten by Terraform output after MSK is created.
+# FLOCI may return an internal Docker broker IP such as 172.17.0.4:9092.
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+
+# Buckets
+RAW_BUCKET=fip-local-raw
+PROCESSED_BUCKET=fip-local-processed
+ARTIFACTS_BUCKET=fip-local-artifacts
+
+# Secrets Manager paths
+OPENAI_SECRET_ID=/feedback/local/openai_api_key
+JWT_SECRET_ID=/feedback/local/jwt_secret
+DB_PASSWORD_SECRET_ID=/feedback/local/db_password</code></pre>
+</div>
+</section>
+
+<section class="section" id="s5">
+  <div class="section-header"><div class="section-number">05</div><div><h2>Install Developer Toolchain</h2><p>Install laptop-side tools only.</p></div></div>
+  <div class="alert alert-warn"><strong>Do not start local Kafka:</strong>&nbsp; Do not run <code class="inline">brew services start kafka</code>, Docker Compose Kafka, ZooKeeper, or Redpanda. Kafka runs in FLOCI MSK.</div>
+<div class="code-block">
+  <div class="code-header"><span>bash — developer tools only</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code># macOS developer prerequisites.
+# These are laptop-side CLI tools only.
+# They do NOT start Kubernetes or Kafka locally.
+brew install \
+  awscli \
+  terraform \
+  helm \
+  kubectl \
+  jq \
+  yq \
+  make \
+  uv
+
+# Optional: Kafka CLI tools only.
+# This is NOT the Kafka runtime for the project.
+# Runtime Kafka is FLOCI MSK created by Terraform.
+# Homebrew may expose the command as kafka-topics, not kafka-topics.sh.
+brew install kafka
+
+# FLOCI install
+brew tap floci/tap
+brew install floci
+
+# Alternative FLOCI install
+# curl -fsSL https://install.floci.io | bash
+
+# Confirm versions
+floci --version
+aws --version
+terraform version
+helm version
+kubectl version --client
+jq --version
+yq --version
+uv --version
+
+# Optional Kafka CLI verification
+kafka-topics --version || kafka-topics.sh --version || true</code></pre>
+</div>
+</section>
+
+<section class="section" id="s6">
+  <div class="section-header"><div class="section-number">06</div><div><h2>Makefile</h2><p>Final validated execution controller.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>makefile — Makefile</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code># Makefile — Phase 0 FLOCI Foundation with EKS + MSK
+# Final validated behavior:
+# - Terraform creates FLOCI EKS, FLOCI MSK, S3, IAM, Secrets, ECR, SQS, and CloudWatch.
+# - Helm deploys a base app into FLOCI EKS.
+# - Kafka CLI is optional and is used only for admin commands.
+# - Kafka runtime is FLOCI MSK, not a local Kafka broker.
+# - If FLOCI returns an internal Docker broker IP such as 172.17.0.4:9092, verification does not fail.
+
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
+AWS_REGION ?= us-west-2
+FLOCI_ENDPOINT ?= http://localhost:4566
+TF_DIR := infra/terraform/envs/local-floci
+HELM_CHART := infra/helm/feedback-platform
+NAMESPACE := feedback
+CLUSTER_NAME := fip-local-eks
+MSK_CLUSTER_NAME := fip-local-msk
+
+.PHONY: help doctor bootstrap floci-start tf-check tf-init tf-plan tf-apply k8s-config topics helm-install verify tf-destroy clean
+
+help:
+	@echo &quot;Phase 0 commands:&quot;
+	@echo &quot;  make doctor      # verify required local developer tools&quot;
+	@echo &quot;  make bootstrap   # FLOCI -&gt; Terraform(EKS/MSK/S3/Secrets/IAM/etc) -&gt; kubectl -&gt; topics -&gt; Helm -&gt; verify&quot;
+	@echo &quot;  make tf-plan     # preview Terraform resources&quot;
+	@echo &quot;  make helm-install# deploy base Helm chart only&quot;
+	@echo &quot;  make verify      # verify Phase 0 foundation&quot;
+	@echo &quot;  make tf-destroy  # destroy local Terraform resources&quot;
+	@echo &quot;  make clean       # stop FLOCI&quot;
+
+doctor:
+	@command -v floci &gt;/dev/null || (echo &quot;❌ floci not installed&quot;; exit 1)
+	@command -v aws &gt;/dev/null || (echo &quot;❌ aws cli not installed&quot;; exit 1)
+	@command -v terraform &gt;/dev/null || (echo &quot;❌ terraform not installed&quot;; exit 1)
+	@command -v kubectl &gt;/dev/null || (echo &quot;❌ kubectl not installed&quot;; exit 1)
+	@command -v helm &gt;/dev/null || (echo &quot;❌ helm not installed&quot;; exit 1)
+	@if command -v kafka-topics &gt;/dev/null || command -v kafka-topics.sh &gt;/dev/null; then \
+	  echo &quot;✅ Kafka CLI available for optional MSK admin commands&quot;; \
+	else \
+	  echo &quot;⚠️ Kafka CLI not found. Kafka runtime is FLOCI MSK. Install CLI only if needed: brew install kafka&quot;; \
+	fi
+	@echo &quot;✅ Required developer tools are installed&quot;
+
+bootstrap: doctor floci-start tf-check tf-init tf-apply k8s-config topics helm-install verify
+	@echo &quot;✅ Phase 0 FLOCI foundation completed: EKS + MSK + S3 + IAM + Secrets + Helm&quot;
+
+floci-start:
+	floci start
+	aws --endpoint-url $(FLOCI_ENDPOINT) sts get-caller-identity
+	aws --endpoint-url $(FLOCI_ENDPOINT) s3 ls || true
+
+tf-check:
+	@test -s $(TF_DIR)/versions.tf || (echo &quot;❌ Missing or empty $(TF_DIR)/versions.tf&quot;; exit 1)
+	@test -s $(TF_DIR)/provider.tf || (echo &quot;❌ Missing or empty $(TF_DIR)/provider.tf&quot;; exit 1)
+	@test -s $(TF_DIR)/main.tf || (echo &quot;❌ Missing or empty $(TF_DIR)/main.tf&quot;; exit 1)
+	@test -s $(TF_DIR)/outputs.tf || (echo &quot;❌ Missing or empty $(TF_DIR)/outputs.tf&quot;; exit 1)
+	@echo &quot;✅ Terraform files found and are not empty&quot;
+	@ls -la $(TF_DIR)
+
+tf-init:
+	terraform -chdir=$(TF_DIR) init -upgrade
+
+tf-plan:
+	terraform -chdir=$(TF_DIR) plan
+
+tf-apply:
+	terraform -chdir=$(TF_DIR) apply -auto-approve
+	terraform -chdir=$(TF_DIR) output || true
+
+k8s-config:
+	aws --endpoint-url $(FLOCI_ENDPOINT) eks update-kubeconfig --region $(AWS_REGION) --name $(CLUSTER_NAME)
+	kubectl get nodes
+
+topics:
+	@KAFKA_BIN=$$(command -v kafka-topics || command -v kafka-topics.sh || true); \
+	BOOTSTRAP=$$(terraform -chdir=$(TF_DIR) output -raw kafka_bootstrap_brokers 2&gt;/dev/null || echo &quot;&quot;); \
+	if [ -z &quot;$$KAFKA_BIN&quot; ]; then \
+	  echo &quot;⚠️ Skipping topic creation because Kafka CLI is not installed.&quot;; \
+	  echo &quot;   Runtime Kafka is FLOCI MSK. Install CLI only if needed: brew install kafka&quot;; \
+	elif [ -z &quot;$$BOOTSTRAP&quot; ]; then \
+	  echo &quot;⚠️ Skipping topic creation because Terraform did not return kafka_bootstrap_brokers.&quot;; \
+	elif echo &quot;$$BOOTSTRAP&quot; | grep -E &#x27;^172\.|^10\.|^192\.168\.&#x27; &gt;/dev/null; then \
+	  echo &quot;⚠️ FLOCI returned internal Docker/MSK broker address: $$BOOTSTRAP&quot;; \
+	  echo &quot;   MSK is created. Topic admin from macOS may timeout against this internal broker.&quot;; \
+	  echo &quot;   Topic creation is deferred to Phase 1 service/runtime path.&quot;; \
+	else \
+	  chmod +x scripts/create_topics.sh; \
+	  KAFKA_TOPICS_BIN=$$KAFKA_BIN KAFKA_BOOTSTRAP_SERVERS=$$BOOTSTRAP ./scripts/create_topics.sh; \
+	fi
+
+helm-install:
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	helm lint ./$(HELM_CHART) -f $(HELM_CHART)/values-local.yaml
+	helm upgrade --install feedback-platform ./$(HELM_CHART) \
+	  --namespace $(NAMESPACE) --create-namespace \
+	  -f $(HELM_CHART)/values-local.yaml \
+	  --wait --timeout 180s
+
+verify:
+	@echo &quot;🔎 S3 buckets&quot;
+	aws --endpoint-url $(FLOCI_ENDPOINT) s3 ls
+	@echo &quot;🔎 Secrets&quot;
+	aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager list-secrets --query &#x27;SecretList[].Name&#x27;
+	@echo &quot;🔎 EKS cluster&quot;
+	aws --endpoint-url $(FLOCI_ENDPOINT) eks describe-cluster --region $(AWS_REGION) --name $(CLUSTER_NAME) --query &#x27;cluster.name&#x27;
+	@echo &quot;🔎 MSK cluster&quot;
+	aws --endpoint-url $(FLOCI_ENDPOINT) kafka list-clusters --region $(AWS_REGION) --query &#x27;ClusterInfoList[].ClusterName&#x27;
+	@echo &quot;🔎 Kubernetes pods&quot;
+	kubectl get pods -n $(NAMESPACE)
+	@echo &quot;🔎 Kafka bootstrap returned by Terraform&quot;
+	@BOOTSTRAP=$$(terraform -chdir=$(TF_DIR) output -raw kafka_bootstrap_brokers 2&gt;/dev/null || echo &quot;&quot;); \
+	echo &quot;$$BOOTSTRAP&quot;; \
+	KAFKA_BIN=$$(command -v kafka-topics || command -v kafka-topics.sh || true); \
+	if [ -z &quot;$$BOOTSTRAP&quot; ]; then \
+	  echo &quot;⚠️ No Kafka bootstrap output found&quot;; \
+	elif echo &quot;$$BOOTSTRAP&quot; | grep -E &#x27;^172\.|^10\.|^192\.168\.&#x27; &gt;/dev/null; then \
+	  echo &quot;⚠️ Kafka broker address is internal to FLOCI/Docker: $$BOOTSTRAP&quot;; \
+	  echo &quot;   MSK exists, but laptop-side Kafka admin may not reach this address from macOS.&quot;; \
+	  echo &quot;   This is acceptable for Phase 0 foundation verification.&quot;; \
+	elif [ -n &quot;$$KAFKA_BIN&quot; ]; then \
+	  $$KAFKA_BIN --list --bootstrap-server &quot;$$BOOTSTRAP&quot; || true; \
+	else \
+	  echo &quot;⚠️ Kafka CLI not found; topic list skipped&quot;; \
+	fi
+	@echo &quot;✅ Phase 0 verification completed&quot;
+
+tf-destroy:
+	terraform -chdir=$(TF_DIR) destroy -auto-approve
+
+clean:
+	floci stop</code></pre>
+</div>
+</section>
+
+<section class="section" id="s7">
+  <div class="section-header"><div class="section-number">07</div><div><h2>Terraform Files</h2><p>Create these under <code class="inline">infra/terraform/envs/local-floci/</code>.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>terraform — versions.tf</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>terraform {
+  required_version = &quot;&gt;= 1.6.0&quot;
+
+  required_providers {
+    aws = {
+      source  = &quot;hashicorp/aws&quot;
+      version = &quot;~&gt; 5.0&quot;
+    }
+  }
+}</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>terraform — provider.tf</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>provider &quot;aws&quot; {
+  region                      = var.aws_region
+  access_key                  = &quot;test&quot;
+  secret_key                  = &quot;test&quot;
+  s3_use_path_style           = true
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+
+  endpoints {
+    apigateway     = var.floci_endpoint
+    cloudwatch     = var.floci_endpoint
+    cloudwatchlogs = var.floci_endpoint
+    ecr            = var.floci_endpoint
+    eks            = var.floci_endpoint
+    iam            = var.floci_endpoint
+    kafka          = var.floci_endpoint
+    rds            = var.floci_endpoint
+    s3             = var.floci_endpoint
+    secretsmanager = var.floci_endpoint
+    sqs            = var.floci_endpoint
+    sts            = var.floci_endpoint
+  }
+}</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>terraform — variables.tf</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>variable &quot;aws_region&quot; {
+  description = &quot;Local FLOCI AWS-compatible region&quot;
+  type        = string
+  default     = &quot;us-west-2&quot;
+}
+
+variable &quot;floci_endpoint&quot; {
+  description = &quot;FLOCI local AWS endpoint&quot;
+  type        = string
+  default     = &quot;http://localhost:4566&quot;
+}
+
+variable &quot;environment&quot; {
+  description = &quot;Environment name&quot;
+  type        = string
+  default     = &quot;local&quot;
+}
+
+variable &quot;tenant_id&quot; {
+  description = &quot;Default tenant used for tutorial data&quot;
+  type        = string
+  default     = &quot;curry_bowl_express&quot;
+}
+
+variable &quot;eks_cluster_name&quot; {
+  description = &quot;FLOCI EKS cluster name&quot;
+  type        = string
+  default     = &quot;fip-local-eks&quot;
+}
+
+variable &quot;msk_cluster_name&quot; {
+  description = &quot;FLOCI MSK cluster name&quot;
+  type        = string
+  default     = &quot;fip-local-msk&quot;
+}</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>terraform — terraform.tfvars</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>aws_region       = &quot;us-west-2&quot;
+floci_endpoint   = &quot;http://localhost:4566&quot;
+environment      = &quot;local&quot;
+tenant_id        = &quot;curry_bowl_express&quot;
+eks_cluster_name = &quot;fip-local-eks&quot;
+msk_cluster_name = &quot;fip-local-msk&quot;</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>terraform — main.tf</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>locals {
+  project = &quot;feedback-intelligence-platform&quot;
+
+  tags = {
+    Project     = local.project
+    Environment = var.environment
+    Tenant      = var.tenant_id
+    ManagedBy   = &quot;terraform&quot;
+  }
+}
+
+# -------------------------------------------------------------------
+# Network foundation required by EKS and MSK
+# -------------------------------------------------------------------
+
+resource &quot;aws_vpc&quot; &quot;main&quot; {
+  cidr_block           = &quot;10.20.0.0/16&quot;
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  tags = merge(local.tags, {
+    Name = &quot;fip-local-vpc&quot;
+  })
+}
+
+resource &quot;aws_subnet&quot; &quot;private_a&quot; {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = &quot;10.20.1.0/24&quot;
+  availability_zone = &quot;${var.aws_region}a&quot;
+
+  tags = merge(local.tags, {
+    Name = &quot;fip-local-private-a&quot;
+  })
+}
+
+resource &quot;aws_subnet&quot; &quot;private_b&quot; {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = &quot;10.20.2.0/24&quot;
+  availability_zone = &quot;${var.aws_region}b&quot;
+
+  tags = merge(local.tags, {
+    Name = &quot;fip-local-private-b&quot;
+  })
+}
+
+resource &quot;aws_security_group&quot; &quot;platform&quot; {
+  name        = &quot;fip-local-platform-sg&quot;
+  description = &quot;Local platform security group for FLOCI EKS and MSK&quot;
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = &quot;Allow local platform internal traffic&quot;
+    from_port   = 0
+    to_port     = 0
+    protocol    = &quot;-1&quot;
+    cidr_blocks = [&quot;10.20.0.0/16&quot;, &quot;127.0.0.1/32&quot;]
+  }
+
+  egress {
+    description = &quot;Allow all local outbound traffic&quot;
+    from_port   = 0
+    to_port     = 0
+    protocol    = &quot;-1&quot;
+    cidr_blocks = [&quot;0.0.0.0/0&quot;]
+  }
+
+  tags = merge(local.tags, {
+    Name = &quot;fip-local-platform-sg&quot;
+  })
+}
+
+# -------------------------------------------------------------------
+# IAM roles for FLOCI EKS
+# -------------------------------------------------------------------
+
+resource &quot;aws_iam_role&quot; &quot;eks_cluster_role&quot; {
+  name = &quot;fip-local-eks-cluster-role&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Action = &quot;sts:AssumeRole&quot;
+      Effect = &quot;Allow&quot;
+      Principal = {
+        Service = &quot;eks.amazonaws.com&quot;
+      }
+    }]
+  })
+
+  tags = local.tags
+}
+
+resource &quot;aws_iam_role&quot; &quot;app_role&quot; {
+  name = &quot;fip-local-app-role&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Action = &quot;sts:AssumeRole&quot;
+      Effect = &quot;Allow&quot;
+      Principal = {
+        Service = &quot;eks.amazonaws.com&quot;
+      }
+    }]
+  })
+
+  tags = local.tags
+}
+
+# -------------------------------------------------------------------
+# FLOCI EKS
+# -------------------------------------------------------------------
+
+resource &quot;aws_eks_cluster&quot; &quot;main&quot; {
+  name     = var.eks_cluster_name
+  role_arn = aws_iam_role.eks_cluster_role.arn
+  version  = &quot;1.29&quot;
+
+  vpc_config {
+    subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_group_ids = [aws_security_group.platform.id]
+  }
+
+  tags = local.tags
+}
+
+# -------------------------------------------------------------------
+# FLOCI MSK / Kafka
+# -------------------------------------------------------------------
+
+resource &quot;aws_msk_cluster&quot; &quot;main&quot; {
+  cluster_name           = var.msk_cluster_name
+  kafka_version          = &quot;3.5.1&quot;
+  number_of_broker_nodes = 2
+
+  broker_node_group_info {
+    instance_type   = &quot;kafka.t3.small&quot;
+    client_subnets  = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_groups = [aws_security_group.platform.id]
+  }
+
+  tags = local.tags
+}
+
+# -------------------------------------------------------------------
+# S3 buckets
+# -------------------------------------------------------------------
+
+resource &quot;aws_s3_bucket&quot; &quot;raw&quot; {
+  bucket = &quot;fip-local-raw&quot;
+  tags   = local.tags
+}
+
+resource &quot;aws_s3_bucket&quot; &quot;processed&quot; {
+  bucket = &quot;fip-local-processed&quot;
+  tags   = local.tags
+}
+
+resource &quot;aws_s3_bucket&quot; &quot;artifacts&quot; {
+  bucket = &quot;fip-local-artifacts&quot;
+  tags   = local.tags
+}
+
+# -------------------------------------------------------------------
+# SQS DLQ
+# -------------------------------------------------------------------
+
+resource &quot;aws_sqs_queue&quot; &quot;feedback_dlq&quot; {
+  name                      = &quot;fip-local-feedback-dlq&quot;
+  message_retention_seconds = 1209600
+  tags                      = local.tags
+}
+
+# -------------------------------------------------------------------
+# ECR repositories
+# -------------------------------------------------------------------
+
+resource &quot;aws_ecr_repository&quot; &quot;api&quot; {
+  name                 = &quot;fip-local/api&quot;
+  image_tag_mutability = &quot;MUTABLE&quot;
+  tags                 = local.tags
+}
+
+resource &quot;aws_ecr_repository&quot; &quot;workers&quot; {
+  name                 = &quot;fip-local/workers&quot;
+  image_tag_mutability = &quot;MUTABLE&quot;
+  tags                 = local.tags
+}
+
+# -------------------------------------------------------------------
+# Secrets Manager
+# -------------------------------------------------------------------
+
+resource &quot;aws_secretsmanager_secret&quot; &quot;openai_api_key&quot; {
+  name = &quot;/feedback/local/openai_api_key&quot;
+  tags = local.tags
+}
+
+resource &quot;aws_secretsmanager_secret_version&quot; &quot;openai_api_key_value&quot; {
+  secret_id     = aws_secretsmanager_secret.openai_api_key.id
+  secret_string = &quot;sk-dummy-local-key-replace-in-prod&quot;
+}
+
+resource &quot;aws_secretsmanager_secret&quot; &quot;jwt_secret&quot; {
+  name = &quot;/feedback/local/jwt_secret&quot;
+  tags = local.tags
+}
+
+resource &quot;aws_secretsmanager_secret_version&quot; &quot;jwt_secret_value&quot; {
+  secret_id     = aws_secretsmanager_secret.jwt_secret.id
+  secret_string = &quot;local-jwt-secret-replace-in-prod&quot;
+}
+
+resource &quot;aws_secretsmanager_secret&quot; &quot;db_password&quot; {
+  name = &quot;/feedback/local/db_password&quot;
+  tags = local.tags
+}
+
+resource &quot;aws_secretsmanager_secret_version&quot; &quot;db_password_value&quot; {
+  secret_id     = aws_secretsmanager_secret.db_password.id
+  secret_string = &quot;local-db-password-replace-in-prod&quot;
+}
+
+# -------------------------------------------------------------------
+# CloudWatch Logs
+# -------------------------------------------------------------------
+
+resource &quot;aws_cloudwatch_log_group&quot; &quot;api&quot; {
+  name              = &quot;/fip/local/api&quot;
+  retention_in_days = 7
+  tags              = local.tags
+}
+
+resource &quot;aws_cloudwatch_log_group&quot; &quot;ingestion&quot; {
+  name              = &quot;/fip/local/ingestion&quot;
+  retention_in_days = 7
+  tags              = local.tags
+}</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>terraform — outputs.tf</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>output &quot;local_aws_endpoint&quot; {
+  value = var.floci_endpoint
+}
+
+output &quot;eks_cluster_name&quot; {
+  value = aws_eks_cluster.main.name
+}
+
+output &quot;msk_cluster_name&quot; {
+  value = aws_msk_cluster.main.cluster_name
+}
+
+output &quot;raw_bucket&quot; {
+  value = aws_s3_bucket.raw.bucket
+}
+
+output &quot;processed_bucket&quot; {
+  value = aws_s3_bucket.processed.bucket
+}
+
+output &quot;artifacts_bucket&quot; {
+  value = aws_s3_bucket.artifacts.bucket
+}
+
+output &quot;dlq_url&quot; {
+  value = aws_sqs_queue.feedback_dlq.url
+}
+
+output &quot;api_log_group&quot; {
+  value = aws_cloudwatch_log_group.api.name
+}
+
+output &quot;kafka_bootstrap_brokers&quot; {
+  value = try(aws_msk_cluster.main.bootstrap_brokers, &quot;localhost:9092&quot;)
+}</code></pre>
+</div>
+</section>
+
+<section class="section" id="s8">
+  <div class="section-header"><div class="section-number">08</div><div><h2>Helm Base Chart</h2><p>Create these under <code class="inline">infra/helm/feedback-platform/</code>.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>yaml — Chart.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>apiVersion: v2
+name: feedback-platform
+description: Phase 0 base Helm chart for Feedback Intelligence Platform
+type: application
+version: 0.1.0
+appVersion: &quot;0.1.0&quot;</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>yaml — values.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>namespace: feedback
+
+api:
+  name: feedback-api
+  image:
+    repository: nginx
+    tag: &quot;1.25&quot;
+    pullPolicy: IfNotPresent
+  replicas: 1
+  containerPort: 80
+  servicePort: 80
+
+env:
+  ENVIRONMENT: local
+  TENANT_ID: curry_bowl_express
+  AWS_ENDPOINT_URL: http://localhost:4566
+  RAW_BUCKET: fip-local-raw
+  PROCESSED_BUCKET: fip-local-processed
+  ARTIFACTS_BUCKET: fip-local-artifacts
+  KAFKA_BOOTSTRAP_SERVERS: &quot;from-terraform-output&quot;</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>yaml — values-local.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>namespace: feedback
+
+api:
+  name: feedback-api
+  image:
+    repository: nginx
+    tag: &quot;1.25&quot;
+    pullPolicy: IfNotPresent
+  replicas: 1
+  containerPort: 80
+  servicePort: 80
+
+env:
+  ENVIRONMENT: local
+  TENANT_ID: curry_bowl_express
+  AWS_ENDPOINT_URL: http://localhost:4566
+  RAW_BUCKET: fip-local-raw
+  PROCESSED_BUCKET: fip-local-processed
+  ARTIFACTS_BUCKET: fip-local-artifacts
+  KAFKA_BOOTSTRAP_SERVERS: &quot;from-terraform-output&quot;</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>helm template — templates/_helpers.tpl</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>{{/*
+Return application name. Never return empty.
+*/}}
+{{- define &quot;feedback-platform.apiName&quot; -}}
+{{- default &quot;feedback-api&quot; .Values.api.name -}}
+{{- end -}}</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>yaml — templates/deployment.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+  namespace: {{ default &quot;feedback&quot; .Values.namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+spec:
+  replicas: {{ default 1 .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    spec:
+      containers:
+        - name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+          image: &quot;{{ default &quot;nginx&quot; .Values.api.image.repository }}:{{ default &quot;1.25&quot; .Values.api.image.tag }}&quot;
+          imagePullPolicy: {{ default &quot;IfNotPresent&quot; .Values.api.image.pullPolicy }}
+          ports:
+            - containerPort: {{ default 80 .Values.api.containerPort }}
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ default 80 .Values.api.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ default 80 .Values.api.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 20</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-header"><span>yaml — templates/service.yaml</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+  namespace: {{ default &quot;feedback&quot; .Values.namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ include &quot;feedback-platform.apiName&quot; . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  ports:
+    - name: http
+      port: {{ default 80 .Values.api.servicePort }}
+      targetPort: {{ default 80 .Values.api.containerPort }}</code></pre>
+</div>
+</section>
+
+<section class="section" id="s9">
+  <div class="section-header"><div class="section-number">09</div><div><h2>Kafka Topic Script</h2><p>Create <code class="inline">scripts/create_topics.sh</code>.</p></div></div>
+  <div class="alert alert-info"><strong>Kafka CLI note:</strong>&nbsp; Homebrew may install <code class="inline">kafka-topics</code> instead of <code class="inline">kafka-topics.sh</code>. This script supports both.</div>
+<div class="code-block">
+  <div class="code-header"><span>bash — scripts/create_topics.sh</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code>#!/usr/bin/env bash
+set -euo pipefail
+
+KAFKA_TOPICS_BIN=&quot;${KAFKA_TOPICS_BIN:-$(command -v kafka-topics || command -v kafka-topics.sh || true)}&quot;
+BOOTSTRAP_SERVERS=&quot;${KAFKA_BOOTSTRAP_SERVERS:-$(terraform -chdir=infra/terraform/envs/local-floci output -raw kafka_bootstrap_brokers 2&gt;/dev/null || echo &quot;&quot;)}&quot;
+
+if [ -z &quot;${KAFKA_TOPICS_BIN}&quot; ]; then
+  echo &quot;Kafka CLI not installed. Skipping topic creation.&quot;
+  exit 0
+fi
+
+if [ -z &quot;${BOOTSTRAP_SERVERS}&quot; ]; then
+  echo &quot;Kafka bootstrap server is empty. Skipping topic creation.&quot;
+  exit 0
+fi
+
+echo &quot;Using Kafka CLI: ${KAFKA_TOPICS_BIN}&quot;
+echo &quot;Using Kafka bootstrap servers: ${BOOTSTRAP_SERVERS}&quot;
+
+topics=(
+  &quot;feedback.raw.events&quot;
+  &quot;feedback.validated.events&quot;
+  &quot;feedback.bronze.events&quot;
+  &quot;feedback.silver.events&quot;
+  &quot;feedback.gold.events&quot;
+  &quot;feedback.dlq.events&quot;
+)
+
+for topic in &quot;${topics[@]}&quot;; do
+  &quot;${KAFKA_TOPICS_BIN}&quot; \
+    --bootstrap-server &quot;${BOOTSTRAP_SERVERS}&quot; \
+    --create \
+    --if-not-exists \
+    --topic &quot;${topic}&quot; \
+    --partitions 3 \
+    --replication-factor 1
+done
+
+echo &quot;Kafka topics created/verified.&quot;</code></pre>
+</div>
+</section>
+
+<section class="section" id="s10">
+  <div class="section-header"><div class="section-number">10</div><div><h2>Execution Steps</h2><p>Run only after every file above is created.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>bash — execution steps</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code># 1) Confirm local tooling
+make doctor
+
+# 2) Copy env example for local usage
+cp .env.example .env
+
+# 3) Start FLOCI + apply Terraform + configure EKS + deploy Helm + verify
+make bootstrap</code></pre>
+</div>
+</section>
+
+<section class="section" id="s11">
+  <div class="section-header"><div class="section-number">11</div><div><h2>Verification Commands</h2><p>Use these for manual validation.</p></div></div>
+<div class="code-block">
+  <div class="code-header"><span>bash — verification commands</span><button onclick="copyCode(this)">📋 Copy</button></div>
+  <pre><code># Terraform outputs
+terraform -chdir=infra/terraform/envs/local-floci output
+
+# FLOCI S3
+aws --endpoint-url http://localhost:4566 s3 ls
+
+# FLOCI EKS
+aws --endpoint-url http://localhost:4566 eks describe-cluster \
+  --region us-west-2 \
+  --name fip-local-eks \
+  --query &#x27;cluster.name&#x27;
+
+# FLOCI MSK
+aws --endpoint-url http://localhost:4566 kafka list-clusters \
+  --region us-west-2 \
+  --query &#x27;ClusterInfoList[].ClusterName&#x27;
+
+# Kubernetes pod deployed by Helm
+kubectl get pods -n feedback
+kubectl get svc -n feedback
+
+# Optional Kafka CLI topic check.
+# If Terraform returns an internal Docker IP such as 172.17.0.4:9092,
+# this may timeout from macOS. That is handled safely in the Makefile.
+BOOTSTRAP=$(terraform -chdir=infra/terraform/envs/local-floci output -raw kafka_bootstrap_brokers)
+echo &quot;$BOOTSTRAP&quot;
+kafka-topics --list --bootstrap-server &quot;$BOOTSTRAP&quot; || true</code></pre>
+</div>
+</section>
+
+<section class="section" id="s12">
+  <div class="section-header"><div class="section-number">12</div><div><h2>Troubleshooting From Actual Run</h2><p>Errors handled in this final version.</p></div></div>
+  <table><thead><tr><th>Error</th><th>Fix</th></tr></thead><tbody>
+    <tr><td>Terraform initialized in an empty directory</td><td>Your `.tf` files were empty or missing. Use the final Terraform snippets and make sure `tf-check` uses `-s` so empty files fail fast.</td></tr><tr><td>No cluster found for name: fip-local-eks</td><td>Terraform did not create `aws_eks_cluster.main`, or you applied empty Terraform files. Recreate `main.tf` and rerun `make bootstrap`.</td></tr><tr><td>repo infra not found</td><td>Helm treated `infra/helm/feedback-platform` like a repo. Use `./infra/helm/feedback-platform` in the Helm command.</td></tr><tr><td>resource name may not be empty</td><td>The Helm deployment rendered an empty `metadata.name`. The final chart uses `default &quot;feedback-api&quot; .Values.api.name`.</td></tr><tr><td>kafka-topics command hangs or times out</td><td>FLOCI may return an internal Docker broker address like `172.17.0.4:9092`. The final Makefile treats this as a warning and does not fail Phase 0.</td></tr><tr><td>kafka-topics.sh command not found</td><td>Homebrew often installs `kafka-topics`, not `kafka-topics.sh`. The final script supports both.</td></tr>
+  </tbody></table>
+</section>
+
+<section class="section" id="s13">
+  <div class="section-header"><div class="section-number">13</div><div><h2>Phase 0 Completion Checklist</h2><p>Do not move to Phase 1 until these are true.</p></div></div>
+  <ul class="checklist">
+    <li>Terraform files are not empty and <code class="inline">make tf-check</code> passes.</li>
+    <li>Terraform output includes <code class="inline">eks_cluster_name</code>, <code class="inline">msk_cluster_name</code>, and bucket names.</li>
+    <li><code class="inline">kubectl get nodes</code> returns a Ready node.</li>
+    <li><code class="inline">kubectl get pods -n feedback</code> shows <code class="inline">feedback-api</code> running.</li>
+    <li>FLOCI S3 buckets exist.</li>
+    <li>FLOCI MSK cluster exists.</li>
+    <li>Kafka topic verification does not block Phase 0 if FLOCI returns an internal broker IP.</li>
+  </ul>
+</section>
+
+<div id="dynamicContent"></div>
+</main>
+</div>
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const old = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = old, 1500);
+  });
+}
+function saveHTML() {
+  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([html], {type: 'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fip-phase0-foundation-final-validated.html';
+  a.click();
+}
+let editMode = false;
+function toggleEditMode() {
+  editMode = !editMode;
+  document.querySelectorAll('[data-editable], pre').forEach(el => {
+    el.contentEditable = editMode ? 'true' : 'false';
+    el.spellcheck = false;
+  });
+  alert(editMode ? 'Edit mode on' : 'Edit mode off');
+}
+document.querySelectorAll('.sidebar a[href^="#"]').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+  });
+});
+</script>
+
+<script>
+// --- Editable / Savable Extension ---
+let __fipEditMode = false;
+function getEditableTargets(){
+  return document.querySelectorAll('main h1, main h2, main h3, main p, main li, main td, main th, main .card-title, main .alert, main .callout, main .hero-badge, main .badge, main .value, main .label, main pre');
+}
+function toggleEditMode(){
+  __fipEditMode = !__fipEditMode;
+  document.body.classList.toggle('edit-mode', __fipEditMode);
+  getEditableTargets().forEach(el => el.setAttribute('contenteditable', __fipEditMode ? 'true' : 'false'));
+}
+function toggleInsertPanel(){
+  const p = document.getElementById('insertPanel');
+  if(p) p.classList.toggle('open');
+}
+function getDynamicHost(){
+  let host = document.getElementById('dynamicContent');
+  if(!host){
+    host = document.createElement('div');
+    host.id = 'dynamicContent';
+    const main = document.querySelector('main') || document.body;
+    main.appendChild(host);
+  }
+  return host;
+}
+function addInfoBlock(){
+  getDynamicHost().insertAdjacentHTML('beforeend', '<div class="editable-new alert alert-info dynamic-insert" contenteditable="true"><strong>New highlight:</strong>&nbsp;Add your note here.</div>');
+}
+function addCodeBlock(){
+  getDynamicHost().insertAdjacentHTML('beforeend', '<div class="code-block editable-new dynamic-insert"><div class="code-header"><span>bash — new snippet</span><button onclick="copyCode(this)">📋 Copy</button></div><pre contenteditable="true"><code># Add command here</code></pre></div>');
+}
+function addTableBlock(){
+  getDynamicHost().insertAdjacentHTML('beforeend', '<div class="editable-new dynamic-insert"><table contenteditable="true"><tr><th>Column A</th><th>Column B</th></tr><tr><td>Add value</td><td>Add value</td></tr></table></div>');
+}
+function addSectionBlock(){
+  getDynamicHost().insertAdjacentHTML('beforeend', '<section class="section editable-new dynamic-insert"><div class="section-header"><div class="section-number num">NEW</div><div><h2 contenteditable="true">New Section</h2><p contenteditable="true">Add section description here.</p></div></div><p contenteditable="true">Add your content here.</p></section>');
+}
+function saveHTML(){
+  const clone = document.documentElement.cloneNode(true);
+  clone.querySelectorAll('.insert-panel,.save-toast').forEach(e => e.remove());
+  clone.querySelectorAll('[contenteditable]').forEach(e => e.setAttribute('contenteditable','false'));
+  const blob = new Blob(['<!doctype html>\n' + clone.outerHTML], {type:'text/html'});
+  const a = document.createElement('a');
+  const title = (document.title || 'fip-document').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  a.href = URL.createObjectURL(blob);
+  a.download = title + '-edited.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+  const toast = document.getElementById('saveToast');
+  if(toast){ toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1400); }
+}
+</script>
+
+</body>
+</html>

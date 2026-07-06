@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIP Phase 5 &mdash; Product UI | AI Feedback Intelligence Platform</title>
+<style>
+:root{
+  --bg:#0B0F1A;--surface:#111827;--surface2:#1A2235;
+  --border:#243047;--border-hi:#2E3F60;
+  --accent:#14B8A6;--accent-dim:#0D9488;--accent-glow:rgba(20,184,166,0.14);
+  --accent2:#3B82F6;--accent3:#F59E0B;--accent4:#EF4444;
+  --accent5:#8B5CF6;--accent6:#10B981;
+  --text:#E2E8F0;--text-muted:#94A3B8;--text-faint:#475569;
+  --radius:8px;--radius-lg:14px;
+  --font-mono:'JetBrains Mono','Fira Code',monospace;
+  --font-ui:'Inter','Segoe UI',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:15px;line-height:1.7;min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:3px}
+.phase-stripe{background:linear-gradient(135deg,#14B8A6 0%,#3B82F6 60%,#14B8A6 100%);min-height:9px}
+.topnav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.topnav-brand{display:flex;align-items:center;gap:12px}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;letter-spacing:-0.5px}
+.topnav-title{font-size:14px;font-weight:600;color:var(--text)}.topnav-sub{font-size:12px;color:var(--text-muted)}
+.phase-badge{background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
+.hero{padding:64px 40px 56px;max-width:1100px;margin:0 auto;position:relative}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.hero-number{position:absolute;right:30px;top:40px;font-size:180px;font-weight:900;color:rgba(20,184,166,0.04);line-height:1;user-select:none;font-family:var(--font-mono)}
+.hero h1{font-size:42px;font-weight:800;line-height:1.15;letter-spacing:-1px;margin-bottom:20px;max-width:700px}
+.hero h1 span{color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--text-muted);max-width:640px;margin-bottom:32px;line-height:1.8}
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-width:820px;margin-bottom:40px}
+.stat-item{background:var(--surface);padding:20px 24px;text-align:center}
+.stat-item .val{font-size:26px;font-weight:800;color:var(--accent);font-family:var(--font-mono);line-height:1;margin-bottom:4px}
+.stat-item .lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+.section-wrap{max-width:1100px;margin:0 auto;padding:0 40px 40px}
+.section-title{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.arch-diagram{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;margin-bottom:32px;overflow-x:auto}
+.arch-title{font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:24px;text-transform:uppercase;letter-spacing:1px}
+.arch-flow{display:flex;align-items:center;gap:0;min-width:700px}
+.arch-node{flex:1;background:var(--surface2);border:1px solid var(--border-hi);border-radius:10px;padding:16px 12px;text-align:center}
+.arch-node.active{border-color:var(--accent);background:var(--accent-glow);box-shadow:0 0 0 1px var(--accent) inset}
+.arch-node.done{border-color:#10B981;background:rgba(16,185,129,0.08)}.arch-node.upcoming{opacity:0.5}
+.arch-node-icon{font-size:20px;margin-bottom:5px}.arch-node-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}.arch-node-sub{font-size:10px;color:var(--text-muted)}
+.arch-arrow{font-size:16px;color:var(--accent);padding:0 6px;flex-shrink:0;font-weight:700}
+.steps-grid{display:flex;flex-direction:column;gap:32px;margin-bottom:40px}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.step-card-header{display:flex;align-items:stretch}
+.step-num-stripe{width:80px;background:linear-gradient(180deg,var(--accent) 0%,var(--accent-dim) 100%);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#000;font-family:var(--font-mono);flex-shrink:0;letter-spacing:-1px;min-height:90px}
+.step-header-content{padding:22px 28px;flex:1}
+.step-tag{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.step-header-content h3{font-size:19px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.3}
+.step-header-content p{font-size:13px;color:var(--text-muted);line-height:1.6}
+.step-body{padding:28px 28px 28px 108px;border-top:1px solid var(--border)}
+.code-block{background:#0D1117;border:1px solid var(--border-hi);border-radius:var(--radius);overflow:hidden;margin:16px 0;font-family:var(--font-mono)}
+.code-header{background:#161B22;border-bottom:1px solid var(--border-hi);padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+.code-header-left{display:flex;align-items:center;gap:10px}
+.code-lang{font-size:10px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:1px}
+.code-filename{font-size:10px;color:var(--text-faint);font-family:var(--font-mono)}
+.code-copy-btn{background:transparent;border:1px solid var(--border-hi);color:var(--text-muted);border-radius:5px;padding:3px 10px;font-size:10px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font-ui);letter-spacing:0.3px}
+.code-copy-btn:hover{border-color:var(--accent);color:var(--accent)}.code-copy-btn.copied{border-color:var(--accent6);color:var(--accent6)}
+.code-block pre{padding:18px;overflow-x:auto;font-size:12.5px;line-height:1.65;color:#ABB2BF}
+.kw{color:#C678DD}.fn{color:#61AFEF}.st{color:#98C379}.cm{color:#5C6370;font-style:italic}.nm{color:#E5C07B}.nu{color:#D19A66}.dc{color:#14B8A6}
+.callout{border-radius:var(--radius);padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.6}
+.callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.callout-body strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+.callout.danger{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5}.callout.danger strong{color:var(--accent4)}
+.callout.warning{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#FCD34D}.callout.warning strong{color:var(--accent3)}
+.callout.tip{background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.25);color:#99F6E4}.callout.tip strong{color:var(--accent)}
+.callout.info{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:#93C5FD}.callout.info strong{color:var(--accent2)}
+.analogy-box{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius);padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.65;color:#A7F3D0}
+.analogy-box .ai{font-size:20px;flex-shrink:0;margin-top:1px}
+.analogy-box strong{display:block;margin-bottom:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent6)}
+.tradeoff-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+.tradeoff-table th{background:var(--surface2);color:var(--text-muted);padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--border-hi)}
+.tradeoff-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+.tradeoff-table tr:last-child td{border-bottom:none}.tradeoff-table tr:hover td{background:rgba(255,255,255,0.02)}
+.chosen{color:var(--accent);font-weight:600}.pro{color:#6EE7B7}.con{color:#FCA5A5}
+.prod-issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:16px 0}
+.prod-issue-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.prod-issue-card.h{border-left:3px solid var(--accent4)}.prod-issue-card.m{border-left:3px solid var(--accent3)}.prod-issue-card.l{border-left:3px solid var(--accent)}
+.prod-issue-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}.prod-issue-body{font-size:12px;color:var(--text-muted);line-height:1.6}
+.sev{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-bottom:8px}
+.sev.h{background:rgba(239,68,68,0.2);color:#FCA5A5}.sev.m{background:rgba(245,158,11,0.2);color:#FCD34D}.sev.l{background:rgba(20,184,166,0.15);color:var(--accent)}
+.checklist-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:40px}
+.checklist-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}.checklist-subtitle{font-size:12px;color:var(--text-muted);margin-bottom:20px}
+.progress-bar-wrap{background:var(--border);border-radius:99px;height:6px;margin-bottom:20px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.4s ease}
+.clg{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin:16px 0 8px}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.check-item:last-child{border-bottom:none}
+.check-item input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;margin-top:3px;cursor:pointer}
+.check-label{font-size:13px;color:var(--text-muted);line-height:1.5}.check-item.done .check-label{color:var(--text-faint);text-decoration:line-through}
+.career-card{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(59,130,246,0.08));border:1px solid rgba(139,92,246,0.35);border-radius:var(--radius-lg);padding:28px;margin-bottom:32px}
+.career-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent5);margin-bottom:14px}
+.li-post-wrap{position:relative;margin-bottom:8px}
+.li-post{background:#1E293B;border-radius:var(--radius);padding:20px;font-size:13.5px;color:var(--text);line-height:1.75;white-space:pre-wrap;border:1px solid var(--border-hi);min-height:200px}
+.li-hashtags{color:var(--accent2)}
+.li-meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.li-chars{font-size:11px;color:var(--text-faint)}.li-chars.over{color:var(--accent4)}
+.copy-btn{background:var(--accent5);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.copy-btn:hover{opacity:0.85}.copy-btn.copied{background:var(--accent6)}
+.interview-qa{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.qa-item{background:var(--surface2);border-radius:var(--radius);padding:14px 18px;border-left:3px solid var(--accent5)}
+.qa-q{font-size:12px;font-weight:700;color:var(--accent5);margin-bottom:6px}
+.qa-a{font-size:13px;color:var(--text-muted);line-height:1.6}
+.floci-box{background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-lg);padding:22px;margin:20px 0}
+.floci-header{font-size:12px;font-weight:700;color:#818CF8;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.floci-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.floci-col-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:6px}
+.gen-box{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius-lg);padding:22px;margin:20px 0}
+.gen-header{font-size:12px;font-weight:700;color:var(--accent6);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.gen-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.gen-input{background:var(--surface2);border:1px solid var(--border-hi);border-radius:var(--radius);padding:7px 12px;color:var(--text);font-size:13px;font-family:var(--font-mono);width:120px;outline:none}
+.gen-input:focus{border-color:var(--accent6)}
+.gen-btn{background:var(--accent6);color:#000;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.gen-btn:hover{opacity:0.85}
+.gen-output{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);max-height:220px;overflow-y:auto;display:none}
+.gen-output.show{display:block}
+/* UI-specific: screen layout cards */
+.screen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}
+.screen-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.screen-card.active{border-color:var(--accent)}
+.screen-icon{font-size:24px;margin-bottom:8px}
+.screen-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.screen-desc{font-size:11px;color:var(--text-muted);line-height:1.55}
+.screen-route{display:inline-block;font-size:9px;font-weight:700;font-family:var(--font-mono);background:var(--surface);border:1px solid var(--border-hi);padding:2px 7px;border-radius:4px;margin-top:6px;color:var(--accent)}
+/* tech stack pills */
+.tech-stack{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.tech-pill{background:var(--surface2);border:1px solid var(--border-hi);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--text-muted)}
+.tech-pill.chosen{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+/* mock UI wireframe */
+.mock-ui{background:var(--surface2);border:1px solid var(--border-hi);border-radius:var(--radius-lg);padding:20px;margin:16px 0;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);line-height:1.8}
+.mock-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 14px;font-size:11px;color:var(--accent);margin:-20px -20px 14px -20px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.fip-toolbar{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.fip-btn{width:44px;height:44px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:transform 0.15s}
+.fip-btn:hover{transform:scale(1.08)}
+.fip-btn.save-btn{background:var(--accent);color:#000}
+.fip-btn.undo-btn,.fip-btn.search-btn,.fip-btn.export-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border-hi)}
+.fip-btn.edit-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000}
+.fip-toast{position:fixed;bottom:80px;right:24px;background:var(--accent);color:#000;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;opacity:0;transform:translateY(8px);transition:all 0.3s;z-index:9999;pointer-events:none}
+.fip-toast.show{opacity:1;transform:translateY(0)}
+.fip-search-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;display:none;align-items:center;justify-content:center}
+.fip-search-modal.open{display:flex}
+.fip-search-box{background:var(--surface);border:1px solid var(--border-hi);border-radius:var(--radius-lg);padding:24px;width:440px;display:flex;flex-direction:column;gap:12px}
+.fip-search-box h4{color:var(--text);font-size:15px;font-weight:700}
+.fip-search-box input{background:var(--surface2);border:1px solid var(--border-hi);border-radius:var(--radius);padding:9px 14px;color:var(--text);font-size:13px;outline:none}
+.fip-search-box input:focus{border-color:var(--accent)}
+.modal-btns{display:flex;gap:8px}
+.modal-btn{flex:1;padding:8px;border:none;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:600}
+.modal-btn.primary{background:var(--accent);color:#000}.modal-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border-hi)}
+@media(max-width:768px){.hero{padding:40px 20px}.hero h1{font-size:28px}.hero-number{display:none}.section-wrap{padding:0 20px 32px}.step-body{padding:20px}.topnav{padding:12px 20px}.arch-flow{min-width:500px}.floci-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="phase-stripe"></div>
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-logo">FIP</div>
+    <div><div class="topnav-title">AI Feedback Intelligence Platform</div><div class="topnav-sub">curry_bowl_express &middot; 12 Bay Area Locations</div></div>
+  </div>
+  <span class="phase-badge">Phase 05 &middot; Product UI</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-number">05</div>
+  <div class="hero-eyebrow">Phase 05 / 06 &middot; Manager-Facing Dashboard & API Gateway</div>
+  <h1>Building the <span>Product UI</span><br>FastAPI + React Dashboard</h1>
+  <p class="hero-desc" contenteditable="false" data-fip-edit="hero-desc">
+    Wire Phase 4's LangGraph agent behind a production FastAPI backend and a React dashboard
+    that gives Curry Bowl Express managers a single pane of glass &mdash; ask natural-language
+    questions, see live rating alerts, compare locations, and drill into review sentiment.
+    Runs locally on FLOCI with hot-reload. Same Docker image promotes to AWS ECS Fargate.
+    Every code block has a copy button. State management via Zustand; no Redux overhead.
+  </p>
+  <div class="stat-strip">
+    <div class="stat-item"><div class="val">6</div><div class="lbl">UI Screens</div></div>
+    <div class="stat-item"><div class="val">7</div><div class="lbl">API Endpoints</div></div>
+    <div class="stat-item"><div class="val">~8h</div><div class="lbl">Build Time</div></div>
+    <div class="stat-item"><div class="val">7</div><div class="lbl">Prod Issues</div></div>
+    <div class="stat-item"><div class="val">FLOCI</div><div class="lbl">Local Dev</div></div>
+  </div>
+</section>
+
+<div class="section-wrap">
+
+<!-- ROADMAP -->
+<div class="section-title">7-Phase Roadmap &mdash; Where Phase 5 Fits</div>
+<div class="arch-diagram">
+  <div class="arch-title">FIP Full Architecture &mdash; curry_bowl_express &middot; Phase 0 Locked Decisions</div>
+  <div class="arch-flow">
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 0</div><div class="arch-node-sub">Foundation</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 1</div><div class="arch-node-sub">Ingestion</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 2</div><div class="arch-node-sub">Data Platform</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 3</div><div class="arch-node-sub">RAG Layer</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 4</div><div class="arch-node-sub">Agents</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node active"><div class="arch-node-icon">&#128187;</div><div class="arch-node-name">Phase 5</div><div class="arch-node-sub">Product UI<br>&larr; You are here</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node upcoming"><div class="arch-node-icon">&#128640;</div><div class="arch-node-name">Phase 6</div><div class="arch-node-sub">Prod Deploy</div></div>
+  </div>
+  <div style="margin-top:18px;padding:14px 18px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text-muted)">
+    <strong style="color:var(--text)">Phase 0 Locked Decisions honoured here:</strong> &nbsp;
+    <strong style="color:#818CF8">FLOCI</strong> local dev (FastAPI + React on Docker, hot-reload) &middot;
+    <strong style="color:var(--accent)">LangGraph</strong> agent called from FastAPI via Lambda invoke &middot;
+    <strong style="color:var(--accent)">Qdrant</strong> read via Phase 3 RAG engine (no direct UI access) &middot;
+    <strong style="color:var(--accent)">dbt Gold</strong> analytics surfaced via Phase 4 analytics_query &middot;
+    <strong style="color:var(--accent)">spaCy + OpenAI</strong> NLP runs inside the agent &mdash; UI is pure display &middot;
+    <strong style="color:#EF4444">Hard safety boundary</strong> &mdash; UI only calls FastAPI; never touches DB directly
+  </div>
+</div>
+
+<!-- UI ARCHITECTURE -->
+<div class="section-title">Phase 5 Architecture &mdash; What We Are Building</div>
+<div class="arch-diagram">
+  <div class="arch-title">React SPA &rarr; FastAPI &rarr; LangGraph Agent &rarr; Phase 3 RAG + Phase 2 Gold</div>
+  <div class="analogy-box" style="margin-bottom:22px">
+    <div class="ai">&#128663;</div>
+    <div><strong>The Dashboard + Engine Room Analogy</strong>
+    A ship's bridge (React UI) is where the captain makes decisions &mdash; they see speed, heading, and alerts on clean displays.
+    The engine room (FastAPI + LangGraph agent) does the actual work. The captain never goes to the engine room to turn valves directly.
+    Phase 5 builds the bridge: a clean React dashboard that lets managers ask questions and see alerts without
+    ever touching Kafka, Qdrant, or S3. The engine room (Phases 1&ndash;4) remains unchanged.
+    </div>
+  </div>
+  <div class="screen-grid">
+    <div class="screen-card active">
+      <div class="screen-icon">&#127968;</div>
+      <div class="screen-name">Dashboard Home</div>
+      <div class="screen-desc">Live rating summary for all 12 locations. Alert banner if any dropped &gt;0.5 stars. Trend sparklines. Last ingestion timestamp from FLOCI Kafka consumer.</div>
+      <span class="screen-route">/dashboard</span>
+    </div>
+    <div class="screen-card active">
+      <div class="screen-icon">&#128172;</div>
+      <div class="screen-name">Ask Manager</div>
+      <div class="screen-desc">Natural-language question box. Sends to Phase 4 agent via FastAPI POST /ask. Shows intent, nodes visited, answer with citations, and alert status.</div>
+      <span class="screen-route">/ask</span>
+    </div>
+    <div class="screen-card active">
+      <div class="screen-icon">&#128202;</div>
+      <div class="screen-name">Location Analytics</div>
+      <div class="screen-desc">Recharts line chart of avg_rating over 30 days for selected location. Reads from Phase 2 dbt Gold via FastAPI GET /analytics/{location_id}.</div>
+      <span class="screen-route">/location/:id</span>
+    </div>
+    <div class="screen-card active">
+      <div class="screen-icon">&#9888;</div>
+      <div class="screen-name">Alerts Centre</div>
+      <div class="screen-desc">Table of all locations with rating drops &gt;0.5 stars this week. Red/amber/green severity badges. Drill-down to review text from RAG layer.</div>
+      <span class="screen-route">/alerts</span>
+    </div>
+    <div class="screen-card active">
+      <div class="screen-icon">&#128269;</div>
+      <div class="screen-name">Review Explorer</div>
+      <div class="screen-desc">Filtered view of raw reviews from Qdrant via Phase 3 RAG. Filter by location, platform, date range, and star rating. Each review shows embedding-retrieved context.</div>
+      <span class="screen-route">/reviews</span>
+    </div>
+    <div class="screen-card active">
+      <div class="screen-icon">&#9881;</div>
+      <div class="screen-name">System Status</div>
+      <div class="screen-desc">FLOCI/prod health checks: Kafka lag, Qdrant vector count, S3 Bronze/Silver/Gold file counts, last dbt run timestamp, Lambda cold start p95.</div>
+      <span class="screen-route">/status</span>
+    </div>
+  </div>
+</div>
+
+<!-- FLOCI SECTION -->
+<div class="section-title">FLOCI &mdash; Phase 5 Local Development</div>
+<div class="floci-box">
+  <div class="floci-header">&#128311; FLOCI for UI: FastAPI + React run in Docker with hot-reload; same image promotes to ECS Fargate</div>
+  <div class="analogy-box" style="margin-bottom:14px">
+    <div class="ai">&#127981;</div>
+    <div><strong>The Pop-Up Restaurant Analogy</strong>
+    A chef testing a new menu sets up a pop-up kitchen (FLOCI Docker Compose) that mirrors the real restaurant exactly &mdash; same equipment, same ingredients, same recipes &mdash; but in a low-stakes venue where mistakes don't reach paying customers.
+    Docker Compose with hot-reload is your pop-up kitchen: the React dev server and FastAPI uvicorn both watch for file changes and restart instantly.
+    The same Docker image that runs locally on FLOCI is the image that gets pushed to ECR and deployed to ECS Fargate in production &mdash; zero translation layer.
+    </div>
+  </div>
+  <div class="floci-grid">
+    <div>
+      <div class="floci-col-label">&#128311; FLOCI Local &mdash; docker-compose.phase5.yml</div>
+      <div class="code-block" style="margin:0">
+        <div class="code-header">
+          <div class="code-header-left"><span class="code-lang">yaml</span><span class="code-filename">infra/docker-compose.phase5.yml</span></div>
+          <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="cm"># Phase 5 adds FastAPI + React on top of Phase 1-4 FLOCI stack
+# All Phase 1-4 services (localstack:4566, kafka:9092, qdrant:6333) still running</span>
+version: '3.8'
+services:
+
+  <span class="cm"># FastAPI backend -- same image used in ECS Fargate prod</span>
+  api:
+    build: ./api
+    ports: ["8000:8000"]
+    volumes:
+      - "./api:/app"           <span class="cm"># hot-reload on file change</span>
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - KAFKA_BROKERS=kafka:9092
+      - GOLD_PARQUET_PATH=s3a://fip-curry-bowl-local-gold/fct_location_ratings/
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LAMBDA_INVOKE_MODE=local
+      - ENV=local
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on: [qdrant, kafka]
+
+  <span class="cm"># React frontend -- Vite dev server with proxy to FastAPI</span>
+  ui:
+    build: ./ui
+    ports: ["3000:3000"]
+    volumes:
+      - "./ui:/app"
+      - "/app/node_modules"    <span class="cm"># named volume: don't overwrite installed modules</span>
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: npm run dev -- --host 0.0.0.0
+    depends_on: [api]
+
+  nginx:
+    image: nginx:1.25-alpine
+    ports: ["80:80"]
+    volumes: ["./infra/nginx.conf:/etc/nginx/nginx.conf"]
+    depends_on: [api, ui]</pre>
+      </div>
+    </div>
+    <div>
+      <div class="floci-col-label">&#9729; Production (AWS ECS Fargate &mdash; same Terraform HCL)</div>
+      <div class="code-block" style="margin:0">
+        <div class="code-header">
+          <div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/ecs_ui.tf</span></div>
+          <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="cm"># Same Docker image, different env vars -- FLOCI to prod pattern</span>
+resource "aws_ecs_task_definition" "fip_api" {
+  family                   = "fip-api-${var.env}"
+  requires_compatibilities = ["FARGATE"]
+  cpu    = "512"   <span class="cm"># 0.5 vCPU -- FastAPI is lightweight</span>
+  memory = "1024"  <span class="cm"># 1 GB -- uvicorn workers + spaCy</span>
+  container_definitions = jsonencode([{
+    name  = "api"
+    image = "${var.ecr_repo}:${var.image_tag}"
+    environment = [
+      {name="ENV",             value="prod"},
+      {name="QDRANT_HOST",     value=var.qdrant_host},
+      {name="LAMBDA_INVOKE_MODE", value="aws"},
+    ]
+    portMappings = [{containerPort=8000}]
+  }])
+}
+
+<span class="cm"># React built to static files, served via CloudFront + S3</span>
+resource "aws_s3_bucket" "fip_ui_static" {
+  bucket = "fip-curry-bowl-ui-${var.env}"
+}</pre>
+      </div>
+    </div>
+  </div>
+  <div class="code-block" style="margin-top:12px">
+    <div class="code-header">
+      <div class="code-header-left"><span class="code-lang">bash</span><span class="code-filename">terminal &mdash; FLOCI Phase 5 setup</span></div>
+      <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="cm"># 1. Scaffold project directories</span>
+mkdir -p api/{routers,services,models} ui/src/{components,pages,stores,hooks}
+
+<span class="cm"># 2. Install FastAPI backend deps</span>
+cat > api/requirements.txt << 'EOF'
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+httpx==0.27.0
+structlog==24.1.0
+prometheus-client==0.20.0
+python-jose[cryptography]==3.3.0  <span class="cm"># JWT for manager auth</span>
+EOF
+pip install -r api/requirements.txt
+
+<span class="cm"># 3. Scaffold React + Vite + Tailwind (FLOCI hot-reload)</span>
+cd ui && npm create vite@latest . -- --template react
+npm install
+npm install axios zustand recharts react-router-dom @tanstack/react-query
+
+<span class="cm"># 4. Start FLOCI Phase 5 stack (all Phase 1-4 services + API + UI)</span>
+docker compose -f infra/docker-compose.phase5.yml up -d
+
+<span class="cm"># 5. Verify -- API health check</span>
+curl http://localhost:8000/health
+<span class="cm"># {"status": "ok", "env": "local", "phase": "5", "services": {...}}</span>
+
+<span class="cm"># 6. Open UI in browser</span>
+open http://localhost:3000</pre>
+  </div>
+</div>
+
+<!-- DATA GENERATOR -->
+<div class="section-title">Data Generator &mdash; Mock API Responses for UI Dev</div>
+<div class="gen-box">
+  <div class="gen-header">&#129514; FIPUIMockGenerator &mdash; Realistic API Response Fixtures for React Dev Without Live Backend</div>
+  <div class="analogy-box" style="margin-bottom:14px">
+    <div class="ai">&#127881;</div>
+    <div><strong>The Film Set Analogy</strong>
+    A film set uses fake storefronts, prop food, and painted backdrops &mdash; everything looks real on camera without the cost of building an actual city block.
+    The UI mock generator is your film set: it produces realistic FastAPI response fixtures so React components can be built, styled, and tested against real-looking data without a running FLOCI backend.
+    Swap the mock for the real API with one env variable change &mdash; <code>VITE_USE_MOCK=false</code>.
+    </div>
+  </div>
+  <div class="gen-controls">
+    <label style="font-size:12px;color:var(--text-muted)">Locations:</label>
+    <input type="number" id="gen-count" class="gen-input" value="12" min="1" max="12">
+    <button class="gen-btn" onclick="runGenerator()">&#9654; Generate Mock API Response</button>
+    <span id="gen-status" style="font-size:12px;color:var(--text-muted)"></span>
+  </div>
+  <div class="gen-output" id="gen-output"></div>
+  <div class="code-block" style="margin-top:14px">
+    <div class="code-header">
+      <div class="code-header-left"><span class="code-lang">python</span><span class="code-filename">scripts/generate_ui_fixtures.py</span></div>
+      <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="cm">"""
+FIP UI Mock Generator -- Phase 5
+Generates realistic FastAPI response fixtures for React component development.
+Reuses Phase 1 FIPDataGenerator for review text content.
+
+Usage:
+  python scripts/generate_ui_fixtures.py --endpoint dashboard
+  python scripts/generate_ui_fixtures.py --endpoint ask --question "worst ratings?"
+  python scripts/generate_ui_fixtures.py --endpoint alerts
+  python scripts/generate_ui_fixtures.py --all   # write all fixtures to ui/src/mocks/
+"""</span>
+<span class="kw">import</span> argparse, json, random
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta, timezone
+
+<span class="kw">import</span> sys; sys.path.insert(<span class="nu">0</span>, <span class="st">".."</span>)
+<span class="kw">from</span> scripts.data_generator <span class="kw">import</span> FIPDataGenerator   <span class="cm"># Phase 1 generator</span>
+
+<span class="nm">LOCATIONS</span> = [
+    (<span class="st">"cb-mission"</span>,    <span class="st">"Mission District"</span>),
+    (<span class="st">"cb-castro"</span>,     <span class="st">"Castro"</span>),
+    (<span class="st">"cb-soma"</span>,       <span class="st">"SoMa"</span>),
+    (<span class="st">"cb-tenderloin"</span>, <span class="st">"Tenderloin"</span>),
+    (<span class="st">"cb-richmond"</span>,   <span class="st">"Richmond"</span>),
+    (<span class="st">"cb-sunset"</span>,     <span class="st">"Sunset"</span>),
+    (<span class="st">"cb-oakland"</span>,    <span class="st">"Oakland"</span>),
+    (<span class="st">"cb-berkeley"</span>,   <span class="st">"Berkeley"</span>),
+    (<span class="st">"cb-sj-downtown"</span>,<span class="st">"SJ Downtown"</span>),
+    (<span class="st">"cb-sj-willow"</span>,  <span class="st">"SJ Willow Glen"</span>),
+    (<span class="st">"cb-sunnyvale"</span>,  <span class="st">"Sunnyvale"</span>),
+    (<span class="st">"cb-fremont"</span>,    <span class="st">"Fremont"</span>),
+]
+
+<span class="kw">class</span> <span class="nm">FIPUIMockGenerator</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, seed: int = <span class="nu">42</span>):
+        random.seed(seed)
+        self.gen = <span class="fn">FIPDataGenerator</span>(seed=seed)
+
+    <span class="kw">def</span> <span class="fn">dashboard</span>(self) -> dict:
+        <span class="cm">"""GET /api/dashboard response fixture."""</span>
+        locations = []
+        <span class="kw">for</span> loc_id, loc_name <span class="kw">in</span> <span class="nm">LOCATIONS</span>:
+            avg  = <span class="fn">round</span>(random.uniform(<span class="nu">2.8</span>, <span class="nu">4.9</span>), <span class="nu">2</span>)
+            prev = <span class="fn">round</span>(avg + random.uniform(-<span class="nu">0.8</span>, <span class="nu">0.6</span>), <span class="nu">2</span>)
+            locations.append({
+                <span class="st">"location_id"</span>:     loc_id,
+                <span class="st">"location_name"</span>:   loc_name,
+                <span class="st">"avg_rating_7d"</span>:   avg,
+                <span class="st">"avg_rating_14d"</span>:  prev,
+                <span class="st">"rating_delta"</span>:    <span class="fn">round</span>(avg - prev, <span class="nu">2</span>),
+                <span class="st">"review_count_7d"</span>: random.randint(<span class="nu">8</span>, <span class="nu">94</span>),
+                <span class="st">"alert"</span>:           (avg - prev) < -<span class="nu">0.5</span>,
+            })
+        <span class="kw">return</span> {
+            <span class="st">"locations"</span>:          sorted(locations, key=<span class="kw">lambda</span> x: x[<span class="st">"avg_rating_7d"</span>]),
+            <span class="st">"total_alerts"</span>:       sum(<span class="nu">1</span> <span class="kw">for</span> l <span class="kw">in</span> locations <span class="kw">if</span> l[<span class="st">"alert"</span>]),
+            <span class="st">"last_ingested_at"</span>:   datetime.now(timezone.utc).isoformat(),
+            <span class="st">"kafka_lag_messages"</span>: random.randint(<span class="nu">0</span>, <span class="nu">12</span>),
+        }
+
+    <span class="kw">def</span> <span class="fn">ask_response</span>(self, question: str = <span class="st">"Which location needs attention?"</span>) -> dict:
+        <span class="cm">"""POST /api/ask response fixture -- mirrors Phase 4 lambda_handler output."""</span>
+        review = self.gen.generate_one()
+        <span class="kw">return</span> {
+            <span class="st">"answer"</span>: (
+                <span class="st">f"Based on recent customer reviews, {review['location_name']} "</span>
+                <span class="st">f"shows the most concerning feedback pattern this week. "</span>
+                <span class="st">f"Recommended action: schedule a management visit and review "\span>
+                <span class="st">f"staffing levels for peak hours."</span>
+            ),
+            <span class="st">"intent"</span>:          <span class="st">"ALERT"</span>,
+            <span class="st">"nodes_visited"</span>:   [<span class="st">"intent_classifier"</span>, <span class="st">"alert_detector"</span>, <span class="st">"synthesize"</span>],
+            <span class="st">"alert_triggered"</span>: <span class="kw">True</span>,
+            <span class="st">"alert_details"</span>:   [{
+                <span class="st">"location_id"</span>:  review[<span class="st">"location_id"</span>],
+                <span class="st">"current_avg"</span>:  <span class="nu">3.1</span>,
+                <span class="st">"prev_avg"</span>:     <span class="nu">3.8</span>,
+                <span class="st">"drop_amount"</span>:  <span class="nu">0.7</span>,
+            }],
+            <span class="st">"sources"</span>: [
+                {<span class="st">"location_id"</span>: review[<span class="st">"location_id"</span>], <span class="st">"review_date"</span>: review[<span class="st">"review_date"</span>], <span class="st">"score"</span>: <span class="nu">0.91</span>},
+            ],
+            <span class="st">"latency_ms"</span>: random.randint(<span class="nu">820</span>, <span class="nu">3400</span>),
+        }
+
+    <span class="kw">def</span> <span class="fn">write_all</span>(self, out_dir: str = <span class="st">"ui/src/mocks"</span>):
+        <span class="kw">import</span> os; os.makedirs(out_dir, exist_ok=<span class="kw">True</span>)
+        fixtures = {
+            <span class="st">"dashboard.json"</span>: self.dashboard(),
+            <span class="st">"ask_response.json"</span>: self.ask_response(),
+        }
+        <span class="kw">for</span> name, data <span class="kw">in</span> fixtures.items():
+            path = os.path.join(out_dir, name)
+            <span class="kw">with</span> open(path, <span class="st">"w"</span>) <span class="kw">as</span> f: json.dump(data, f, indent=<span class="nu">2</span>)
+            print(f<span class="st">"Written: {path}"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(<span class="st">"--endpoint"</span>, choices=[<span class="st">"dashboard"</span>,<span class="st">"ask"</span>,<span class="st">"alerts"</span>])
+    ap.add_argument(<span class="st">"--all"</span>,      action=<span class="st">"store_true"</span>)
+    ap.add_argument(<span class="st">"--seed"</span>,     type=int, default=<span class="nu">42</span>)
+    args = ap.parse_args()
+    g = <span class="fn">FIPUIMockGenerator</span>(args.seed)
+    <span class="kw">if</span>   args.all:             g.write_all()
+    <span class="kw">elif</span> args.endpoint==<span class="st">"ask"</span>: print(json.dumps(g.ask_response(), indent=<span class="nu">2</span>))
+    <span class="kw">else</span>:                      print(json.dumps(g.dashboard(), indent=<span class="nu">2</span>))</pre>
+  </div>
+</div>
+
+<!-- STEPS -->
+<div class="section-title">Step-by-Step Implementation</div>
+<div class="steps-grid">
+
+<!-- STEP 1 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">01</div>
+    <div class="step-header-content">
+      <div class="step-tag">FastAPI Backend</div>
+      <h3>FastAPI App: Health, Auth Middleware & Agent Proxy Endpoint</h3>
+      <p>The FastAPI backend is a thin proxy between the React UI and the Phase 4 LangGraph agent.
+      It handles JWT auth, rate limiting, request validation, and structured logging.
+      The agent runs as a module-level singleton &mdash; same pattern as the Lambda handler in Phase 4.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127968;</div>
+      <div><strong>The Hotel Concierge Analogy</strong>
+      A hotel concierge never changes the bedsheets, cooks the food, or fixes the plumbing themselves.
+      They receive guest requests, route them to the right department, and return the response.
+      The FastAPI backend is the concierge: it receives manager questions from the React UI,
+      routes them to the Phase 4 LangGraph agent (the kitchen, housekeeping, maintenance team),
+      and returns the structured response. The concierge adds auth, rate limiting, and logging
+      &mdash; responsibilities that don't belong inside the agent.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #1: Agent Singleton Re-Init on Every Request</strong>
+      Importing and calling <code>build_graph()</code> inside a FastAPI route handler initialises LangGraph,
+      spaCy, and the Qdrant connection on every HTTP request &mdash; adding 5&ndash;10s of overhead.
+      Fix: initialise the agent at FastAPI startup using <code>@app.on_event("startup")</code>
+      and store it in <code>app.state.agent</code>. One init per Uvicorn worker process.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">python</span><span class="code-filename">api/main.py</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="cm">"""
+FIP FastAPI backend -- Phase 5.
+Thin proxy: Auth -> Validate -> Agent invoke -> Return structured response.
+Agent initialised at startup (one init per uvicorn worker process).
+"""</span>
+<span class="kw">import</span> os, time
+<span class="kw">from</span> contextlib <span class="kw">import</span> asynccontextmanager
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, Depends, HTTPException, Request
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
+<span class="kw">from</span> prometheus_client <span class="kw">import</span> Counter, Histogram, make_asgi_app
+<span class="kw">import</span> structlog
+
+log = structlog.get_logger(__name__)
+
+<span class="nm">REQUEST_COUNT</span> = Counter(<span class="st">"fip_http_requests_total"</span>, <span class="st">"HTTP requests"</span>, [<span class="st">"method"</span>, <span class="st">"endpoint"</span>, <span class="st">"status"</span>])
+<span class="nm">REQUEST_LATENCY</span> = Histogram(<span class="st">"fip_http_latency_seconds"</span>, <span class="st">"HTTP latency"</span>, [<span class="st">"endpoint"</span>])
+
+<span class="dc">@asynccontextmanager</span>
+<span class="kw">async def</span> lifespan(app: FastAPI):
+    <span class="cm"># ── Startup: init agent ONCE per uvicorn worker ──────────────</span>
+    <span class="kw">from</span> agent.handler <span class="kw">import</span> lambda_handler   <span class="cm"># Phase 4 handler</span>
+    app.state.agent_handler = lambda_handler
+    log.info(<span class="st">"agent_handler_ready"</span>, env=os.getenv(<span class="st">"ENV"</span>, <span class="st">"local"</span>))
+    <span class="kw">yield</span>
+    <span class="cm"># ── Shutdown (graceful) ───────────────────────────────────────</span>
+    log.info(<span class="st">"shutdown"</span>)
+
+app = FastAPI(title=<span class="st">"FIP API"</span>, version=<span class="st">"1.0.0"</span>, lifespan=lifespan)
+
+app.add_middleware(CORSMiddleware,
+    allow_origins=[<span class="st">"http://localhost:3000"</span>, os.getenv(<span class="st">"UI_ORIGIN"</span>, <span class="st">"*"</span>)],
+    allow_methods=[<span class="st">"*"</span>], allow_headers=[<span class="st">"*"</span>], allow_credentials=<span class="kw">True</span>)
+
+<span class="cm"># Prometheus metrics endpoint</span>
+app.mount(<span class="st">"/metrics"</span>, make_asgi_app())
+
+<span class="dc">@app.middleware</span>(<span class="st">"http"</span>)
+<span class="kw">async def</span> log_requests(request: Request, call_next):
+    start = time.monotonic()
+    response = <span class="kw">await</span> call_next(request)
+    elapsed = time.monotonic() - start
+    REQUEST_COUNT.labels(request.method, request.url.path, response.status_code).inc()
+    REQUEST_LATENCY.labels(request.url.path).observe(elapsed)
+    log.info(<span class="st">"http_request"</span>, method=request.method,
+             path=request.url.path, status=response.status_code,
+             latency_ms=<span class="fn">round</span>(elapsed*<span class="nu">1000</span>))
+    <span class="kw">return</span> response
+
+<span class="dc">@app.get</span>(<span class="st">"/health"</span>)
+<span class="kw">async def</span> health():
+    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"env"</span>: os.getenv(<span class="st">"ENV"</span>,<span class="st">"local"</span>), <span class="st">"phase"</span>: <span class="st">"5"</span>}
+
+<span class="cm"># Include routers (see next steps)</span>
+<span class="kw">from</span> api.routers <span class="kw">import</span> ask, dashboard, analytics, alerts
+app.include_router(ask.router,       prefix=<span class="st">"/api"</span>)
+app.include_router(dashboard.router, prefix=<span class="st">"/api"</span>)
+app.include_router(analytics.router, prefix=<span class="st">"/api"</span>)
+app.include_router(alerts.router,    prefix=<span class="st">"/api"</span>)</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">python</span><span class="code-filename">api/routers/ask.py</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">from</span> fastapi <span class="kw">import</span> APIRouter, HTTPException, Request
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+
+router = APIRouter()
+
+<span class="kw">class</span> <span class="nm">AskRequest</span>(BaseModel):
+    question:        str = Field(..., min_length=<span class="nu">3</span>, max_length=<span class="nu">500</span>)
+    session_id:      str = Field(default=<span class="st">"web-session"</span>)
+    location_filter: str | None = None
+
+<span class="kw">class</span> <span class="nm">AskResponse</span>(BaseModel):
+    answer:          str
+    intent:          str | None
+    nodes_visited:   list[str]
+    alert_triggered: bool
+    alert_details:   list[dict]
+    sources:         list[dict]
+    latency_ms:      int | None = None
+
+<span class="dc">@router.post</span>(<span class="st">"/ask"</span>, response_model=<span class="nm">AskResponse</span>)
+<span class="kw">async def</span> ask_agent(body: <span class="nm">AskRequest</span>, request: Request):
+    handler = request.app.state.agent_handler
+    <span class="kw">import</span> time; t0 = time.monotonic()
+    result = handler({
+        <span class="st">"session_id"</span>:     body.session_id,
+        <span class="st">"question"</span>:       body.question,
+        <span class="st">"location_filter"</span>: body.location_filter,
+    }, context=<span class="kw">None</span>)
+    <span class="kw">if</span> result.get(<span class="st">"error"</span>):
+        <span class="kw">raise</span> HTTPException(<span class="nu">500</span>, detail=result[<span class="st">"error"</span>])
+    <span class="kw">return</span> <span class="nm">AskResponse</span>(
+        answer=result[<span class="st">"answer"</span>], intent=result.get(<span class="st">"intent"</span>),
+        nodes_visited=result.get(<span class="st">"nodes_visited"</span>,[]),
+        alert_triggered=result.get(<span class="st">"alert_triggered"</span>,<span class="kw">False</span>),
+        alert_details=result.get(<span class="st">"alert_details"</span>,[]),
+        sources=result.get(<span class="st">"sources"</span>,[]),
+        latency_ms=<span class="fn">int</span>((time.monotonic()-t0)*<span class="nu">1000</span>),
+    )</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">02</div>
+    <div class="step-header-content">
+      <div class="step-tag">FastAPI Analytics & Dashboard Routes</div>
+      <h3>Dashboard Endpoint (DuckDB Gold) + Analytics Trend Endpoint</h3>
+      <p>The dashboard and analytics endpoints query Phase 2 dbt Gold Parquet via DuckDB read-only &mdash;
+      same pattern as Phase 4 analytics_query_node. These endpoints bypass the agent for pure
+      data retrieval: no LLM call, just fast SQL on Parquet. Under 200ms on FLOCI.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127862;</div>
+      <div><strong>The Supermarket Self-Checkout Analogy</strong>
+      A supermarket has cashiers (the agent) for complex situations and self-checkout lanes (direct DuckDB reads)
+      for simple, fast operations. Asking "show me today's ratings for all locations" doesn't need
+      an LLM &mdash; it's a simple SQL aggregation. Self-checkout is faster, cheaper, and never hallucinated.
+      Only route to the full agent (cashier) when you need natural-language understanding.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #2: No Caching on Dashboard Endpoint = N &times; DuckDB Scans</strong>
+      12 browser tabs open on the dashboard &rarr; 12 simultaneous DuckDB scans of Gold S3 Parquet &rarr; S3 cost spikes and p99 latency hits 8 seconds.
+      Fix: Redis cache on <code>GET /api/dashboard</code> with a 60-second TTL.
+      Dashboard data is never more fresh than the last dbt run (typically hourly), so 60s cache is free money.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">python</span><span class="code-filename">api/routers/dashboard.py</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> os, json, duckdb, hashlib
+<span class="kw">from</span> fastapi <span class="kw">import</span> APIRouter
+<span class="kw">import</span> redis, structlog
+
+router = APIRouter()
+log    = structlog.get_logger(__name__)
+<span class="nm">_cache</span> = redis.from_url(os.getenv(<span class="st">"REDIS_URL"</span>, <span class="st">"redis://localhost:6379"</span>))
+<span class="nm">GOLD</span>   = os.getenv(<span class="st">"GOLD_PARQUET_PATH"</span>, <span class="st">"s3a://fip-curry-bowl-local-gold/fct_location_ratings/"</span>)
+
+<span class="kw">def</span> gold_query(sql: str) -> list[dict]:
+    <span class="cm"># Exact same DuckDB in-memory pattern as Phase 4 analytics_query_node</span>
+    con = duckdb.connect(<span class="st">":memory:"</span>)
+    con.execute(<span class="st">"INSTALL httpfs; LOAD httpfs;"</span>)
+    con.execute(f<span class="st">"""SET s3_endpoint='{os.getenv("DUCKDB_S3_ENDPOINT","s3.amazonaws.com")}';
+                    SET s3_access_key_id='{os.getenv("DUCKDB_S3_ACCESS_KEY","")}';
+                    SET s3_secret_access_key='{os.getenv("DUCKDB_S3_SECRET_KEY","")}';"""</span>)
+    rel  = con.execute(sql)
+    cols = [d[<span class="nu">0</span>] <span class="kw">for</span> d <span class="kw">in</span> rel.description]
+    <span class="kw">return</span> [dict(zip(cols, r)) <span class="kw">for</span> r <span class="kw">in</span> rel.fetchall()]
+
+<span class="dc">@router.get</span>(<span class="st">"/dashboard"</span>)
+<span class="kw">async def</span> dashboard():
+    <span class="cm"># 60-second Redis cache -- dashboard data is dbt-run fresh, not realtime</span>
+    cached = _cache.get(<span class="st">"fip:dashboard"</span>)
+    <span class="kw">if</span> cached: <span class="kw">return</span> json.loads(cached)
+
+    rows = gold_query(f<span class="st">"""
+        WITH cur AS (SELECT location_id, ROUND(AVG(avg_rating),2) avg7,
+                     SUM(review_count) cnt
+                     FROM read_parquet('{GOLD}**/*.parquet')
+                     WHERE review_date >= CURRENT_DATE - INTERVAL '7 days'
+                     GROUP BY location_id),
+             prv AS (SELECT location_id, ROUND(AVG(avg_rating),2) avg14
+                     FROM read_parquet('{GOLD}**/*.parquet')
+                     WHERE review_date BETWEEN CURRENT_DATE-INTERVAL '14 days'
+                                           AND CURRENT_DATE-INTERVAL '7 days'
+                     GROUP BY location_id)
+        SELECT c.location_id, c.avg7, p.avg14,
+               ROUND(c.avg7 - p.avg14, 2) delta, c.cnt
+        FROM cur c LEFT JOIN prv p USING(location_id)
+        ORDER BY c.avg7 ASC"""</span>)
+
+    result = {
+        <span class="st">"locations"</span>:    rows,
+        <span class="st">"total_alerts"</span>: sum(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> rows <span class="kw">if</span> (r.get(<span class="st">"delta"</span>) <span class="kw">or</span> <span class="nu">0</span>) < -<span class="nu">0.5</span>),
+    }
+    _cache.setex(<span class="st">"fip:dashboard"</span>, <span class="nu">60</span>, json.dumps(result))
+    log.info(<span class="st">"dashboard_queried"</span>, locations=len(rows))
+    <span class="kw">return</span> result
+
+<span class="dc">@router.get</span>(<span class="st">"/analytics/{location_id}"</span>)
+<span class="kw">async def</span> location_trend(location_id: str):
+    rows = gold_query(f<span class="st">"""
+        SELECT review_date, avg_rating, review_count
+        FROM read_parquet('{GOLD}**/*.parquet')
+        WHERE location_id = '{location_id}'
+        ORDER BY review_date DESC LIMIT 30"""</span>)
+    <span class="kw">return</span> {<span class="st">"location_id"</span>: location_id, <span class="st">"trend"</span>: rows}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">03</div>
+    <div class="step-header-content">
+      <div class="step-tag">React Dashboard Home</div>
+      <h3>Dashboard Component: Live Ratings Grid + Alert Banner + Zustand State</h3>
+      <p>The React entry screen. Zustand manages global state (no Redux boilerplate).
+      React Query handles API fetching with auto-refresh every 60 seconds.
+      Alert banner fires when any location has a negative rating delta from the dashboard endpoint.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#128247;</div>
+      <div><strong>The MRI Control Room Analogy</strong>
+      The MRI machine (backend, agents, data pipeline) does complex invisible work.
+      The radiologist's control room (React Dashboard) shows the results on clean displays.
+      Zustand is the control room's state board: one source of truth visible to every screen.
+      React Query is the automatic refresh cycle: the control room updates the display every
+      60 seconds without the radiologist pressing a button, the same way the dashboard re-fetches
+      from the FastAPI backend on a fixed interval.
+      </div>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">&#9888;</div>
+      <div class="callout-body"><strong>Production Issue #3: useEffect Fetch on Every Render = API Storm</strong>
+      A common React mistake: fetching data inside <code>useEffect([])</code> in every component that needs
+      the dashboard data. 6 components &rarr; 6 simultaneous GET /api/dashboard calls on page load.
+      Fix: React Query with a shared query key &mdash; all components subscribe to the same cached response.
+      Only one network call per 60-second window regardless of how many components consume the data.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">jsx</span><span class="code-filename">ui/src/stores/dashboardStore.js</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> { create } <span class="kw">from</span> <span class="st">'zustand'</span>
+
+<span class="cm">// Zustand -- no reducers, no actions, no boilerplate</span>
+<span class="cm">// One global store, used by Dashboard, Alerts, and Ask screens</span>
+<span class="kw">export const</span> useDashboardStore = create((set) => ({
+  locations:        [],
+  totalAlerts:      <span class="nu">0</span>,
+  selectedLocation: <span class="kw">null</span>,
+  askResult:        <span class="kw">null</span>,
+  isAsking:         <span class="kw">false</span>,
+
+  setLocations: (locations, totalAlerts) =>
+    set({ locations, totalAlerts }),
+
+  selectLocation: (locationId) =>
+    set({ selectedLocation: locationId }),
+
+  setAskResult: (result) =>
+    set({ askResult: result }),
+
+  setAsking: (v) =>
+    set({ isAsking: v }),
+
+  clearAskResult: () =>
+    set({ askResult: <span class="kw">null</span> }),
+}))</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">jsx</span><span class="code-filename">ui/src/pages/Dashboard.jsx</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> { useQuery } <span class="kw">from</span> <span class="st">'@tanstack/react-query'</span>
+<span class="kw">import</span> { useDashboardStore } <span class="kw">from</span> <span class="st">'../stores/dashboardStore'</span>
+<span class="kw">import</span> axios <span class="kw">from</span> <span class="st">'axios'</span>
+
+<span class="kw">const</span> API = <span class="kw">import</span>.meta.env.VITE_API_URL || <span class="st">'http://localhost:8000'</span>
+
+<span class="kw">function</span> RatingBadge({ delta }) {
+  <span class="kw">const</span> colour = delta &lt; -<span class="nu">0.5</span> ? <span class="st">'text-red-400 bg-red-900/30'</span>
+               : delta &lt;  <span class="nu">0</span>   ? <span class="st">'text-yellow-400 bg-yellow-900/30'</span>
+               :                  <span class="st">'text-emerald-400 bg-emerald-900/30'</span>
+  <span class="kw">return</span> (
+    &lt;span className={`text-xs font-bold px-2 py-0.5 rounded-full ${colour}`}&gt;
+      {delta &gt;= <span class="nu">0</span> ? <span class="st">'+'</span> : <span class="st">''</span>}{delta?.toFixed(<span class="nu">2</span>)} &#9651;
+    &lt;/span&gt;
+  )
+}
+
+<span class="kw">export default function</span> Dashboard() {
+  <span class="kw">const</span> { setLocations } = useDashboardStore()
+
+  <span class="cm">// React Query: shared cache key, auto-refetch every 60s</span>
+  <span class="kw">const</span> { data, isLoading } = useQuery({
+    queryKey: [<span class="st">'dashboard'</span>],
+    queryFn:  () =&gt; axios.get(`${API}/api/dashboard`).then(r =&gt; r.data),
+    refetchInterval: <span class="nu">60_000</span>,   <span class="cm">// poll every 60s (dbt run cadence)</span>
+    staleTime:       <span class="nu">55_000</span>,   <span class="cm">// don't refetch if data is &lt;55s old</span>
+    onSuccess: (d) =&gt; setLocations(d.locations, d.total_alerts),
+  })
+
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;div className=<span class="st">"p-8 text-slate-400"</span>&gt;Loading...&lt;/div&gt;
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"p-6 space-y-6"</span>&gt;
+      <span class="cm">// Alert banner -- shows when any location has dropped &gt;0.5 stars</span>
+      {data?.total_alerts &gt; <span class="nu">0</span> &amp;&amp; (
+        &lt;div className=<span class="st">"bg-red-900/30 border border-red-500/40 rounded-lg p-4 flex gap-3"</span>&gt;
+          &lt;span className=<span class="st">"text-2xl"</span>&gt;&#9888;&lt;/span&gt;
+          &lt;div&gt;
+            &lt;p className=<span class="st">"font-bold text-red-300"</span>&gt;
+              {data.total_alerts} location{data.total_alerts &gt; <span class="nu">1</span> ? <span class="st">'s'</span> : <span class="st">''</span>} need attention
+            &lt;/p&gt;
+            &lt;p className=<span class="st">"text-sm text-red-400"</span>&gt;
+              Rating dropped &gt;0.5 stars vs last week. Go to Alerts tab for details.
+            &lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      )}
+
+      &lt;div className=<span class="st">"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"</span>&gt;
+        {data?.locations.map((loc) =&gt; (
+          &lt;div key={loc.location_id}
+               className=<span class="st">"bg-slate-800 border border-slate-700 rounded-xl p-4 hover:border-teal-500/40 transition cursor-pointer"</span>&gt;
+            &lt;div className=<span class="st">"flex justify-between items-start mb-2"</span>&gt;
+              &lt;h3 className=<span class="st">"font-semibold text-white"</span>&gt;{loc.location_id.replace(<span class="st">'cb-'</span>,<span class="st">''</span>)}&lt;/h3&gt;
+              &lt;RatingBadge delta={loc.delta} /&gt;
+            &lt;/div&gt;
+            &lt;p className=<span class="st">"text-3xl font-black text-teal-400 font-mono"</span>&gt;{loc.avg7}&lt;/p&gt;
+            &lt;p className=<span class="st">"text-xs text-slate-500 mt-1"</span>&gt;{loc.cnt} reviews this week&lt;/p&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">04</div>
+    <div class="step-header-content">
+      <div class="step-tag">Ask Manager Screen</div>
+      <h3>Natural-Language Question Box: Stream Agent Response to UI</h3>
+      <p>The centrepiece of the UI. Managers type a question; the React component POST /api/ask
+      to the FastAPI backend, which invokes the Phase 4 LangGraph agent and streams the response back.
+      Shows intent, nodes visited, alert status, and source citations &mdash; all from the agent state.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127744;</div>
+      <div><strong>The Mission Control Analogy</strong>
+      NASA Mission Control asks "what is the spacecraft's trajectory?" and gets a structured answer:
+      current speed, heading, fuel level, and recommended action &mdash; not raw telemetry numbers.
+      The Ask Manager screen is Mission Control: the manager types a natural-language question
+      and gets a structured answer with intent label, nodes visited (the diagnostic trail),
+      alert status, and cited review sources &mdash; not raw Qdrant vectors or SQL results.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #4: No Loading State = Manager Thinks It Crashed</strong>
+      The Phase 4 agent takes 2&ndash;8 seconds to respond. A bare <code>fetch()</code> with no loading indicator
+      leaves the manager staring at a frozen input box, assuming the app crashed.
+      Fix: set <code>isAsking: true</code> in Zustand immediately on submit, show a pulsing "Thinking..." badge
+      with the nodes visited updating in real-time (server-sent events or polling the agent status).</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">jsx</span><span class="code-filename">ui/src/pages/AskManager.jsx</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="st">'react'</span>
+<span class="kw">import</span> { useMutation } <span class="kw">from</span> <span class="st">'@tanstack/react-query'</span>
+<span class="kw">import</span> { useDashboardStore } <span class="kw">from</span> <span class="st">'../stores/dashboardStore'</span>
+<span class="kw">import</span> axios <span class="kw">from</span> <span class="st">'axios'</span>
+
+<span class="kw">const</span> API = <span class="kw">import</span>.meta.env.VITE_API_URL || <span class="st">'http://localhost:8000'</span>
+
+<span class="kw">const</span> INTENT_COLOURS = {
+  SUMMARY: <span class="st">'bg-blue-900/40 text-blue-300'</span>,
+  TREND:   <span class="st">'bg-purple-900/40 text-purple-300'</span>,
+  COMPARE: <span class="st">'bg-amber-900/40 text-amber-300'</span>,
+  ALERT:   <span class="st">'bg-red-900/40 text-red-300'</span>,
+}
+
+<span class="kw">export default function</span> AskManager() {
+  <span class="kw">const</span> [question, setQuestion] = useState(<span class="st">''</span>)
+  <span class="kw">const</span> { askResult, isAsking, setAskResult, setAsking } = useDashboardStore()
+
+  <span class="kw">const</span> mutation = useMutation({
+    mutationFn: (q) =&gt;
+      axios.post(`${API}/api/ask`, { question: q, session_id: <span class="st">'web-ui'</span> })
+           .then(r =&gt; r.data),
+    onMutate:   () =&gt; setAsking(<span class="kw">true</span>),
+    onSuccess:  (data) =&gt; { setAskResult(data); setAsking(<span class="kw">false</span>) },
+    onError:    () =&gt; setAsking(<span class="kw">false</span>),
+  })
+
+  <span class="kw">const</span> handleSubmit = (e) =&gt; {
+    e.preventDefault()
+    <span class="kw">if</span> (question.trim()) mutation.mutate(question)
+  }
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"p-6 space-y-6 max-w-3xl"</span>&gt;
+      &lt;form onSubmit={handleSubmit} className=<span class="st">"space-y-3"</span>&gt;
+        &lt;textarea
+          value={question} onChange={e =&gt; setQuestion(e.target.value)}
+          placeholder=<span class="st">"Ask anything: 'Which location needs attention this week?'"</span>
+          className=<span class="st">"w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white resize-none h-28 focus:border-teal-500 focus:outline-none"</span>
+        /&gt;
+        &lt;button type=<span class="st">"submit"</span> disabled={isAsking || !question.trim()}
+          className=<span class="st">"bg-teal-500 text-black font-bold px-6 py-2.5 rounded-lg hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed"</span>&gt;
+          {isAsking ? <span class="st">'&#129504; Thinking...'</span> : <span class="st">'Ask Agent'</span>}
+        &lt;/button&gt;
+      &lt;/form&gt;
+
+      {isAsking &amp;&amp; (
+        &lt;div className=<span class="st">"bg-slate-800 border border-slate-700 rounded-xl p-5 animate-pulse"</span>&gt;
+          &lt;div className=<span class="st">"h-4 bg-slate-700 rounded w-3/4 mb-2"</span>&gt;&lt;/div&gt;
+          &lt;div className=<span class="st">"h-4 bg-slate-700 rounded w-1/2"</span>&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      )}
+
+      {askResult &amp;&amp; !isAsking &amp;&amp; (
+        &lt;div className=<span class="st">"bg-slate-800 border border-slate-700 rounded-xl p-5 space-y-4"</span>&gt;
+          <span class="cm">// Intent + nodes trail</span>
+          &lt;div className=<span class="st">"flex flex-wrap gap-2 items-center"</span>&gt;
+            &lt;span className={`text-xs font-bold px-2.5 py-1 rounded-full ${INTENT_COLOURS[askResult.intent]}`}&gt;
+              {askResult.intent}
+            &lt;/span&gt;
+            {askResult.nodes_visited.map(n =&gt; (
+              &lt;span key={n} className=<span class="st">"text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono"</span>&gt;
+                {n}
+              &lt;/span&gt;
+            ))}
+          &lt;/div&gt;
+
+          {askResult.alert_triggered &amp;&amp; (
+            &lt;div className=<span class="st">"bg-red-900/30 border border-red-500/40 rounded-lg p-3"</span>&gt;
+              &lt;p className=<span class="st">"text-red-300 font-bold text-sm"</span>&gt;&#9888; Alert Detected&lt;/p&gt;
+              {askResult.alert_details.map(a =&gt; (
+                &lt;p key={a.location_id} className=<span class="st">"text-xs text-red-400 mt-1"</span>&gt;
+                  {a.location_id}: dropped {a.drop_amount} stars (was {a.prev_avg}, now {a.current_avg})
+                &lt;/p&gt;
+              ))}
+            &lt;/div&gt;
+          )}
+
+          &lt;p className=<span class="st">"text-slate-200 leading-relaxed"</span>&gt;{askResult.answer}&lt;/p&gt;
+
+          {askResult.sources?.length &gt; <span class="nu">0</span> &amp;&amp; (
+            &lt;div className=<span class="st">"text-xs text-slate-500"</span>&gt;
+              Sources: {askResult.sources.map(s =&gt; s.location_id).join(<span class="st">', '</span>)}
+            &lt;/div&gt;
+          )}
+
+          &lt;p className=<span class="st">"text-xs text-slate-600"</span>&gt;
+            Latency: {askResult.latency_ms}ms
+          &lt;/p&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  )
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">05</div>
+    <div class="step-header-content">
+      <div class="step-tag">Location Analytics Chart</div>
+      <h3>Recharts 30-Day Rating Trend + React Router Drill-Down</h3>
+      <p>Clicking a location card on Dashboard navigates to <code>/location/:id</code>.
+      This page fetches the 30-day rating trend from <code>GET /api/analytics/{location_id}</code>
+      and renders a Recharts LineChart. The chart data comes from Phase 2 dbt Gold &mdash;
+      exact same Parquet files Phase 4 agents query for analytics.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#128200;</div>
+      <div><strong>The Stock Ticker Analogy</strong>
+      A stock price chart shows the same underlying data as the raw trade log &mdash; but visualised so a human can instantly spot trends, drops, and recoveries without reading thousands of numbers.
+      The Recharts LineChart does the same for rating data: the same avg_rating values that live in the dbt Gold Parquet become a visual trend line that a manager can interpret in 2 seconds.
+      The chart doesn't add new data &mdash; it adds comprehension.
+      </div>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">&#9888;</div>
+      <div class="callout-body"><strong>Production Issue #5: Recharts Renders Empty on Missing Data Points</strong>
+      If a location has zero reviews on a specific day (e.g. the store was closed), that date is missing from the Parquet partition.
+      Recharts renders a gap in the line &mdash; a broken chart that looks like a bug.
+      Fix: fill missing dates with the previous day's value in the FastAPI route before returning to the frontend.
+      Use DuckDB's <code>GENERATE_SERIES</code> to produce a full date spine and LEFT JOIN the review data against it.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">jsx</span><span class="code-filename">ui/src/pages/LocationTrend.jsx</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> { useParams } <span class="kw">from</span> <span class="st">'react-router-dom'</span>
+<span class="kw">import</span> { useQuery } <span class="kw">from</span> <span class="st">'@tanstack/react-query'</span>
+<span class="kw">import</span> { LineChart, Line, XAxis, YAxis, CartesianGrid,
+         Tooltip, ReferenceLine, ResponsiveContainer } <span class="kw">from</span> <span class="st">'recharts'</span>
+<span class="kw">import</span> axios <span class="kw">from</span> <span class="st">'axios'</span>
+
+<span class="kw">const</span> API = <span class="kw">import</span>.meta.env.VITE_API_URL || <span class="st">'http://localhost:8000'</span>
+
+<span class="kw">export default function</span> LocationTrend() {
+  <span class="kw">const</span> { id } = useParams()
+
+  <span class="kw">const</span> { data, isLoading } = useQuery({
+    queryKey: [<span class="st">'trend'</span>, id],
+    queryFn:  () =&gt; axios.get(`${API}/api/analytics/${id}`).then(r =&gt; r.data),
+    staleTime: <span class="nu">300_000</span>,  <span class="cm">// 5 min cache -- trend doesn't change fast</span>
+  })
+
+  <span class="kw">const</span> chartData = (data?.trend || [])
+    .slice().reverse()  <span class="cm">// chronological order for chart</span>
+    .map(r =&gt; ({
+      date:   r.review_date?.slice(<span class="nu">5</span>),  <span class="cm">// "MM-DD" format</span>
+      rating: parseFloat(r.avg_rating),
+      count:  r.review_count,
+    }))
+
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;div className=<span class="st">"p-8 text-slate-400"</span>&gt;Loading trend...&lt;/div&gt;
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"p-6 space-y-4"</span>&gt;
+      &lt;h2 className=<span class="st">"text-xl font-bold text-white"</span>&gt;
+        {id} &mdash; 30-Day Rating Trend
+      &lt;/h2&gt;
+      &lt;div className=<span class="st">"bg-slate-800 border border-slate-700 rounded-xl p-6"</span>&gt;
+        &lt;ResponsiveContainer width=<span class="st">"100%"</span> height={280}&gt;
+          &lt;LineChart data={chartData}&gt;
+            &lt;CartesianGrid strokeDasharray=<span class="st">"3 3"</span> stroke=<span class="st">"#334155"</span> /&gt;
+            &lt;XAxis dataKey=<span class="st">"date"</span> tick={{fill:<span class="st">'#64748b'</span>, fontSize:11}} /&gt;
+            &lt;YAxis domain={[<span class="nu">1</span>, <span class="nu">5</span>]} tick={{fill:<span class="st">'#64748b'</span>, fontSize:11}} /&gt;
+            &lt;Tooltip
+              contentStyle={{background:<span class="st">'#1e293b'</span>, border:<span class="st">'1px solid #334155'</span>}}
+              labelStyle={{color:<span class="st">'#94a3b8'</span>}}
+            /&gt;
+            <span class="cm">// Alert threshold line at 3.5</span>
+            &lt;ReferenceLine y={<span class="nu">3.5</span>} stroke=<span class="st">"#ef4444"</span> strokeDasharray=<span class="st">"4 4"</span>
+              label={{value:<span class="st">'Alert threshold'</span>, fill:<span class="st">'#ef4444'</span>, fontSize:<span class="nu">10</span>}} /&gt;
+            &lt;Line type=<span class="st">"monotone"</span> dataKey=<span class="st">"rating"</span>
+                  stroke=<span class="st">"#14b8a6"</span> strokeWidth={<span class="nu">2</span>} dot={<span class="kw">false</span>}
+                  activeDot={{r:<span class="nu">5</span>, fill:<span class="st">'#14b8a6'</span>}} /&gt;
+          &lt;/LineChart&gt;
+        &lt;/ResponsiveContainer&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">06</div>
+    <div class="step-header-content">
+      <div class="step-tag">App Shell + Routing + Auth Guard</div>
+      <h3>React Router Layout Shell, JWT Auth Middleware, Vite Config</h3>
+      <p>Wire all screens together in a React Router shell with a persistent sidebar nav.
+      JWT auth guard protects all routes &mdash; managers log in with their store credentials.
+      Vite proxy config routes <code>/api/*</code> to FastAPI in dev, eliminating CORS issues locally.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127968;</div>
+      <div><strong>The Shopping Mall Analogy</strong>
+      A shopping mall has a main entrance (auth guard), a directory board at the front (sidebar nav),
+      and individual stores inside (screen components). You can't enter a store without passing through the entrance.
+      React Router is the mall's internal corridor: it routes shoppers (users) to the right store (screen)
+      based on the URL. The sidebar is the directory board &mdash; always visible, always current.
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">jsx</span><span class="code-filename">ui/src/App.jsx</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> { BrowserRouter, Routes, Route, Navigate } <span class="kw">from</span> <span class="st">'react-router-dom'</span>
+<span class="kw">import</span> { QueryClient, QueryClientProvider } <span class="kw">from</span> <span class="st">'@tanstack/react-query'</span>
+<span class="kw">import</span> Dashboard   <span class="kw">from</span> <span class="st">'./pages/Dashboard'</span>
+<span class="kw">import</span> AskManager  <span class="kw">from</span> <span class="st">'./pages/AskManager'</span>
+<span class="kw">import</span> LocationTrend <span class="kw">from</span> <span class="st">'./pages/LocationTrend'</span>
+<span class="kw">import</span> Alerts      <span class="kw">from</span> <span class="st">'./pages/Alerts'</span>
+<span class="kw">import</span> Sidebar     <span class="kw">from</span> <span class="st">'./components/Sidebar'</span>
+<span class="kw">import</span> Login       <span class="kw">from</span> <span class="st">'./pages/Login'</span>
+<span class="kw">import</span> { useAuthStore } <span class="kw">from</span> <span class="st">'./stores/authStore'</span>
+
+<span class="kw">const</span> qc = <span class="kw">new</span> QueryClient({ defaultOptions: { queries: { retry: <span class="nu">1</span> } } })
+
+<span class="kw">function</span> AuthGuard({ children }) {
+  <span class="kw">const</span> token = useAuthStore(s =&gt; s.token)
+  <span class="kw">return</span> token ? children : &lt;Navigate to=<span class="st">"/login"</span> replace /&gt;
+}
+
+<span class="kw">export default function</span> App() {
+  <span class="kw">return</span> (
+    &lt;QueryClientProvider client={qc}&gt;
+      &lt;BrowserRouter&gt;
+        &lt;Routes&gt;
+          &lt;Route path=<span class="st">"/login"</span> element={&lt;Login /&gt;} /&gt;
+          &lt;Route path=<span class="st">"/*"</span> element={
+            &lt;AuthGuard&gt;
+              &lt;div className=<span class="st">"flex min-h-screen bg-slate-900"</span>&gt;
+                &lt;Sidebar /&gt;
+                &lt;main className=<span class="st">"flex-1 overflow-auto"</span>&gt;
+                  &lt;Routes&gt;
+                    &lt;Route path=<span class="st">"/"</span>              element={&lt;Navigate to=<span class="st">"/dashboard"</span> replace /&gt;} /&gt;
+                    &lt;Route path=<span class="st">"/dashboard"</span>    element={&lt;Dashboard /&gt;} /&gt;
+                    &lt;Route path=<span class="st">"/ask"</span>          element={&lt;AskManager /&gt;} /&gt;
+                    &lt;Route path=<span class="st">"/location/:id"</span> element={&lt;LocationTrend /&gt;} /&gt;
+                    &lt;Route path=<span class="st">"/alerts"</span>       element={&lt;Alerts /&gt;} /&gt;
+                  &lt;/Routes&gt;
+                &lt;/main&gt;
+              &lt;/div&gt;
+            &lt;/AuthGuard&gt;
+          } /&gt;
+        &lt;/Routes&gt;
+      &lt;/BrowserRouter&gt;
+    &lt;/QueryClientProvider&gt;
+  )
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left"><span class="code-lang">js</span><span class="code-filename">ui/vite.config.js</span></div>
+        <button class="code-copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="st">'vite'</span>
+<span class="kw">import</span> react <span class="kw">from</span> <span class="st">'@vitejs/plugin-react'</span>
+
+<span class="kw">export default</span> defineConfig({
+  plugins: [react()],
+  server: {
+    port: <span class="nu">3000</span>,
+    proxy: {
+      <span class="cm">// In FLOCI dev: /api/* proxied to FastAPI -- no CORS issues</span>
+      <span class="st">'/api'</span>: { target: <span class="st">'http://localhost:8000'</span>, changeOrigin: <span class="kw">true</span> },
+    },
+  },
+})</pre>
+    </div>
+  </div>
+</div>
+
+</div><!-- /steps-grid -->
+
+<!-- TRADEOFFS -->
+<div class="section-title">Production Architecture Tradeoffs</div>
+<table class="tradeoff-table">
+  <tr><th>Decision</th><th>Choice Made</th><th>Why</th><th>Tradeoff Accepted</th></tr>
+  <tr>
+    <td>Frontend framework</td><td class="chosen">React + Vite &#10003;</td>
+    <td class="pro">Fastest dev iteration with HMR; largest ecosystem; Recharts, React Query, Zustand all first-class</td>
+    <td class="con">SPA requires CloudFront CDN distribution; server-side rendering needs Next.js if SEO matters (it doesn't for internal dashboards)</td>
+  </tr>
+  <tr>
+    <td>State management</td><td class="chosen">Zustand &#10003;</td>
+    <td class="pro">Zero boilerplate vs Redux; no providers, no reducers, no actions; works with React Query out of the box</td>
+    <td class="con">No time-travel debugging like Redux DevTools; acceptable for small team internal tool</td>
+  </tr>
+  <tr>
+    <td>Data fetching</td><td class="chosen">React Query (TanStack) &#10003;</td>
+    <td class="pro">Shared query cache across components; auto-refetch on stale; loading/error states built in; no useEffect hell</td>
+    <td class="con">Learning curve for devs used to useEffect; adds 13KB bundle size</td>
+  </tr>
+  <tr>
+    <td>API design</td><td class="chosen">FastAPI thin proxy &#10003;</td>
+    <td class="pro">Agent logic stays in Phase 4; API is dumb pass-through; easy to swap agent implementation</td>
+    <td class="con">Extra network hop vs calling agent directly; adds ~5ms latency per request</td>
+  </tr>
+  <tr>
+    <td>Charts library</td><td class="chosen">Recharts &#10003;</td>
+    <td class="pro">React-native, declarative, TypeScript-friendly, zero config</td>
+    <td class="con">Less customisable than D3 for complex visualisations; no WebGL for large datasets</td>
+  </tr>
+</table>
+
+<!-- PROD ISSUES -->
+<div class="section-title">Production Issues Reference Map</div>
+<div class="prod-issues">
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#1 Agent Re-Init on Every Request</div><div class="prod-issue-body">Calling build_graph() inside a route handler adds 5&ndash;10s to every HTTP request. Fix: lifespan() context manager initialises handler once per Uvicorn worker process and stores in app.state.</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#2 No Cache on Dashboard Endpoint</div><div class="prod-issue-body">12 browser tabs = 12 simultaneous DuckDB S3 scans. Fix: Redis cache on GET /api/dashboard with 60s TTL. Dashboard data is never fresher than the last dbt run (hourly).</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#3 useEffect Fetch Storm</div><div class="prod-issue-body">Each component fetching independently = N simultaneous API calls on page load. Fix: React Query shared query key &mdash; all components subscribe to one cached response. One network call per stale window.</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#4 No Loading State for 2&ndash;8s Agent Response</div><div class="prod-issue-body">Manager sees frozen input and thinks app crashed. Fix: Zustand isAsking flag + pulsing skeleton immediately on submit; show nodes_visited updating in real time via polling /api/ask/status.</div></div>
+  <div class="prod-issue-card m"><div class="sev m">Med</div><div class="prod-issue-title">#5 Recharts Gap on Missing Date</div><div class="prod-issue-body">Zero reviews on a day = missing Parquet row = broken line in chart. Fix: DuckDB GENERATE_SERIES date spine + LEFT JOIN fills missing dates with forward-fill of previous day's rating.</div></div>
+  <div class="prod-issue-card m"><div class="sev m">Med</div><div class="prod-issue-title">#6 CORS Errors in Production</div><div class="prod-issue-body">Vite proxy hides CORS in dev. In prod, React on CloudFront calls FastAPI on ECS from a different origin &rarr; 403. Fix: FastAPI CORSMiddleware with explicit allowed origins from Terraform output (not wildcard *).</div></div>
+  <div class="prod-issue-card m"><div class="sev m">Med</div><div class="prod-issue-title">#7 JWT Not Invalidated on Logout</div><div class="prod-issue-body">JWT stored in localStorage. Logout clears client-side but token is still valid until expiry. Fix: short JWT TTL (15 min) + refresh token pattern; or Redis token blocklist for immediate invalidation.</div></div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="section-title">Phase 5 Implementation Checklist</div>
+<div class="checklist-section">
+  <div class="checklist-title">Phase 5 &mdash; Product UI</div>
+  <div class="checklist-subtitle">Auto-saved to browser storage. Ctrl+S to manually save edits.</div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <span id="progress-label" style="font-size:12px;color:var(--text-muted)">0 / 0 completed</span>
+  <div class="clg">Environment &amp; FLOCI</div>
+  <label class="check-item" id="ci-1"><input type="checkbox" data-ci="ci-1"><span class="check-label">docker-compose.phase5.yml up: API (port 8000) + UI (port 3000) + Nginx (port 80) running</span></label>
+  <label class="check-item" id="ci-2"><input type="checkbox" data-ci="ci-2"><span class="check-label">curl http://localhost:8000/health returns {"status":"ok","env":"local","phase":"5"}</span></label>
+  <label class="check-item" id="ci-3"><input type="checkbox" data-ci="ci-3"><span class="check-label">React UI opens at http://localhost:3000 with hot-reload working (edit a file, see change in &lt;1s)</span></label>
+  <label class="check-item" id="ci-4"><input type="checkbox" data-ci="ci-4"><span class="check-label">Vite proxy /api/* routes to FastAPI correctly (no CORS errors in browser console)</span></label>
+  <label class="check-item" id="ci-5"><input type="checkbox" data-ci="ci-5"><span class="check-label">Terraform ECS task definition: 0.5 vCPU, 1GB memory, correct ECR image tag</span></label>
+  <div class="clg">Mock Generator</div>
+  <label class="check-item" id="ci-6"><input type="checkbox" data-ci="ci-6"><span class="check-label">FIPUIMockGenerator: dashboard fixture has 12 locations with alert flags set correctly</span></label>
+  <label class="check-item" id="ci-7"><input type="checkbox" data-ci="ci-7"><span class="check-label">Mock fixtures written to ui/src/mocks/ and React components render correctly from mock data</span></label>
+  <label class="check-item" id="ci-8"><input type="checkbox" data-ci="ci-8"><span class="check-label">VITE_USE_MOCK=false switches from mock to live FastAPI without component changes</span></label>
+  <div class="clg">FastAPI Backend</div>
+  <label class="check-item" id="ci-9"><input type="checkbox" data-ci="ci-9"><span class="check-label">lifespan(): agent handler initialised once at startup, stored in app.state.agent_handler</span></label>
+  <label class="check-item" id="ci-10"><input type="checkbox" data-ci="ci-10"><span class="check-label">POST /api/ask: returns AskResponse with intent, nodes_visited, alert_triggered, sources</span></label>
+  <label class="check-item" id="ci-11"><input type="checkbox" data-ci="ci-11"><span class="check-label">GET /api/dashboard: Redis 60s cache confirmed (second request returns from cache, &lt;5ms)</span></label>
+  <label class="check-item" id="ci-12"><input type="checkbox" data-ci="ci-12"><span class="check-label">GET /api/analytics/{location_id}: 30-day trend data returned with no date gaps</span></label>
+  <label class="check-item" id="ci-13"><input type="checkbox" data-ci="ci-13"><span class="check-label">Prometheus /metrics endpoint: request count, latency histograms visible</span></label>
+  <div class="clg">React Frontend</div>
+  <label class="check-item" id="ci-14"><input type="checkbox" data-ci="ci-14"><span class="check-label">Zustand dashboardStore: locations, totalAlerts, askResult, isAsking all update correctly</span></label>
+  <label class="check-item" id="ci-15"><input type="checkbox" data-ci="ci-15"><span class="check-label">Dashboard: rating grid renders all 12 locations, alert banner fires when delta &lt; -0.5</span></label>
+  <label class="check-item" id="ci-16"><input type="checkbox" data-ci="ci-16"><span class="check-label">AskManager: submit shows pulsing skeleton while agent is running (isAsking=true)</span></label>
+  <label class="check-item" id="ci-17"><input type="checkbox" data-ci="ci-17"><span class="check-label">LocationTrend: Recharts LineChart renders 30 days of data, reference line at 3.5 stars visible</span></label>
+  <label class="check-item" id="ci-18"><input type="checkbox" data-ci="ci-18"><span class="check-label">React Router: all 6 routes resolve correctly, auth guard redirects unauthenticated to /login</span></label>
+  <div class="clg">End-to-End Tests</div>
+  <label class="check-item" id="ci-19"><input type="checkbox" data-ci="ci-19"><span class="check-label">E2E: open dashboard &rarr; click location card &rarr; trend chart loads (React Router drill-down works)</span></label>
+  <label class="check-item" id="ci-20"><input type="checkbox" data-ci="ci-20"><span class="check-label">E2E: Ask "Which location dropped most this week?" &rarr; agent returns ALERT intent + alert_details</span></label>
+  <label class="check-item" id="ci-21"><input type="checkbox" data-ci="ci-21"><span class="check-label">E2E: open 3 browser tabs simultaneously &rarr; only 1 API call to /dashboard (React Query dedup)</span></label>
+</div>
+
+<!-- CAREER -->
+<div class="section-title">LinkedIn Post &amp; Interview Prep</div>
+<div class="career-card">
+  <div class="career-label">&#128226; LinkedIn Post &mdash; Copy &amp; Post Directly</div>
+  <div class="li-post-wrap">
+  <div class="li-post" id="li-post-content" contenteditable="false" data-fip-edit="li-post-p5">I built a full-stack dashboard for a restaurant AI platform. React + FastAPI + LangGraph agents on a shared Docker stack.
+
+Three things that surprised me and what I learned from each:
+
+&#128293; The agent re-init that killed performance
+My first FastAPI route handler called build_graph() (LangGraph initialisation) on every HTTP request. That's 5-10 seconds of startup every time a manager clicked anything.
+
+FastAPI's lifespan() context manager runs once at startup and once at shutdown. Initialise the agent there, store it in app.state. Every subsequent request reuses the same object. The first manager question takes 2.8 seconds. Every subsequent one in the same Uvicorn process takes 400ms.
+
+Module-level singletons are the right pattern for expensive objects. This applies whether you're writing FastAPI, Lambda handlers, or Flask apps.
+
+&#128293; The useEffect fetch storm
+Three components all needed dashboard data. Each did its own useEffect([], []) fetch. Three components = three simultaneous GET /api/dashboard calls on every page load. Multiply by 12 concurrent users = 36 DuckDB S3 scans per page refresh.
+
+React Query with a shared query key solves this completely: all three components subscribe to the same cached response. One network call. Zero code duplication. Automatic staleness-based refetch. This is the reason to use React Query instead of bare fetch() calls.
+
+&#128293; The chart gap that looked like a bug
+A location with zero reviews on a Wednesday had no row in the Parquet partition for that date. Recharts rendered a gap in the rating line. Every time I showed a manager, they pointed at the gap and asked "is the data broken?"
+
+Fix: DuckDB GENERATE_SERIES produces a complete date spine for the last 30 days. LEFT JOIN the rating data against it. Fill missing values with the previous day's rating using a window function. The chart is now always a continuous line.
+
+Lesson: data gaps are invisible in SQL but very visible in charts.
+
+Phase 5 of 6 complete. React dashboard live on FLOCI, wired to Phase 4 LangGraph agents.
+
+<span class="li-hashtags">#React #FastAPI #Python #DataEngineering #BuildingInPublic #AIEngineering #FullStack #RestaurantTech</span></div>
+  </div>
+  <div class="li-meta">
+    <span class="li-chars" id="li-char-count">0 / 3000 chars</span>
+    <button class="copy-btn" id="li-copy-btn" onclick="copyLinkedIn()">&#128203; Copy for LinkedIn</button>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="career-label">&#127919; Interview Q&amp;A &mdash; Engineering Manager / Senior Full-Stack / Senior AI Engineer</div>
+    <div class="interview-qa">
+      <div class="qa-item">
+        <div class="qa-q">Q: How does the Phase 5 UI enforce the Phase 0 hard safety boundary without duplicating it?</div>
+        <div class="qa-a">It doesn't need to &mdash; that's the point of the layered architecture. The React UI only calls FastAPI endpoints. FastAPI only calls the Phase 4 lambda_handler. The handler only invokes the LangGraph agent. The agent's analytics_query_node uses DuckDB in-memory (enforces read-only at driver level), and the synthesize node's system prompt forbids SQL output (enforces at LLM level). The UI has no direct connection to Qdrant, Kafka, S3, or any database. If a manager somehow injected a malicious question, it would be classified by the intent_classifier, routed to a read-only DuckDB or RAG query, and the safety-bounded synthesize node would respond. The UI's only job is to display results and submit questions. Safety lives at Phase 4, not Phase 5.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Q: Why use React Query instead of just useEffect for API calls?</div>
+        <div class="qa-a">Three reasons. First, deduplication: multiple components that need the same data share one cached response via a shared query key. useEffect in each component creates N simultaneous network calls. Second, staleness management: React Query knows when data is stale and refetches automatically &mdash; you configure staleTime and refetchInterval declaratively, not imperatively with setInterval in useEffect. Third, loading and error states are standardised: every useQuery call returns the same {data, isLoading, error} shape, so components handle loading states consistently without ad-hoc boolean flags. The practical result: our dashboard refetches every 60 seconds, all three components that display location data share one cached response, and the loading skeleton is the same pattern everywhere. That would take 3x the code with useEffect.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Q: How do you ensure the FLOCI development environment produces the same behaviour as production?</div>
+        <div class="qa-a">The key is that we use the same Docker image in both environments &mdash; not just the same code. The Dockerfile is the build artifact, not the Python source code. The docker-compose.phase5.yml mounts source volumes for hot-reload in dev, but the final Docker image baked for ECS Fargate contains the same pinned requirements.txt, same Python version, and same OS base layer. The only differences between local and prod are environment variables: in FLOCI, QDRANT_HOST=qdrant (Docker network name), DUCKDB_S3_ENDPOINT=http://localstack:4566, and LAMBDA_INVOKE_MODE=local. In prod, these point to the real services. The Terraform ECS task definition uses the same variable pattern: var.qdrant_host and var.duckdb_s3_endpoint. The engineer changes one .tfvars file, not the application code.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Q: How would you handle real-time rating alerts &mdash; not polling every 60 seconds?</div>
+        <div class="qa-a">For true real-time, we'd add a Server-Sent Events (SSE) endpoint to FastAPI: GET /api/alerts/stream. The FastAPI endpoint keeps an open connection and pushes events whenever the alert_detector identifies a new drop. On the React side, useEffect opens an EventSource connection to this endpoint and updates the Zustand alerts store when a message arrives &mdash; no polling, no React Query interval. The alert_detector would run on a Kafka consumer that subscribes to a new Kafka topic (fip.alerts) published by a background worker that runs DuckDB checks every 5 minutes. This is intentionally Phase 6 infrastructure: in Phase 5 we prove the UI concept works with 60s polling; we only build real-time streaming when we know what the acceptable latency SLA actually is. Premature real-time infrastructure is expensive to operate and maintain.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /section-wrap -->
+
+<div class="fip-toolbar">
+  <button class="fip-btn edit-btn"   id="fip-edit-toggle" title="Toggle edit (Ctrl+E)">&#9998;</button>
+  <button class="fip-btn save-btn"   id="fip-save"        title="Save (Ctrl+S)">&#128190;</button>
+  <button class="fip-btn undo-btn"   id="fip-undo"        title="Undo (Ctrl+Z)">&#8617;</button>
+  <button class="fip-btn search-btn" id="fip-search-open" title="Find &amp; Replace">&#128269;</button>
+  <button class="fip-btn export-btn" id="fip-export"      title="Export HTML">&#128228;</button>
+</div>
+<div class="fip-toast" id="fip-toast"></div>
+<div class="fip-search-modal" id="fip-search-modal">
+  <div class="fip-search-box">
+    <h4>&#128269; Find &amp; Replace</h4>
+    <input type="text" id="fip-find-input" placeholder="Find text...">
+    <input type="text" id="fip-replace-input" placeholder="Replace with...">
+    <div class="modal-btns">
+      <button class="modal-btn primary" id="fip-replace-btn">Replace All</button>
+      <button class="modal-btn secondary" id="fip-modal-close">Cancel</button>
+    </div>
+    <div id="fip-replace-result" style="font-size:12px;color:var(--text-muted)"></div>
+  </div>
+</div>
+
+<script>
+const LS_KEY='fip-phase5-product-ui',HISTORY_KEY='fip-phase5-history',CHECK_KEY='fip-phase5-checks',MAX_HIST=30;
+let editMode=false,editHistory=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');
+
+function toast(m,d=2200){const e=document.getElementById('fip-toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d)}
+function saveAll(){const d={};document.querySelectorAll('[data-fip-edit]').forEach(e=>{d[e.dataset.fipEdit]=e.innerHTML});editHistory.push(JSON.stringify(d));if(editHistory.length>MAX_HIST)editHistory.shift();localStorage.setItem(HISTORY_KEY,JSON.stringify(editHistory));localStorage.setItem(LS_KEY,JSON.stringify(d));toast('Saved')}
+function restoreSaved(){const r=localStorage.getItem(LS_KEY);if(!r)return;const d=JSON.parse(r);document.querySelectorAll('[data-fip-edit]').forEach(e=>{if(d[e.dataset.fipEdit]!==undefined)e.innerHTML=d[e.dataset.fipEdit]})}
+function undoLast(){if(editHistory.length<2){toast('Nothing to undo');return}editHistory.pop();const prev=JSON.parse(editHistory[editHistory.length-1]||'{}');if(typeof prev==='object'&&!Array.isArray(prev)){document.querySelectorAll('[data-fip-edit]').forEach(e=>{if(prev[e.dataset.fipEdit]!==undefined)e.innerHTML=prev[e.dataset.fipEdit]})}localStorage.setItem(HISTORY_KEY,JSON.stringify(editHistory));toast('Undone')}
+function toggleEditMode(){editMode=!editMode;document.querySelectorAll('[data-fip-edit]').forEach(e=>{e.contentEditable=editMode?'true':'false'});toast(editMode?'Edit mode ON':'Edit mode OFF')}
+function exportHTML(){const b=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fip-phase5-product-ui.html';a.click();toast('Exported')}
+function doFindReplace(){const f=document.getElementById('fip-find-input').value,r=document.getElementById('fip-replace-input').value;if(!f)return;let c=0;document.querySelectorAll('[data-fip-edit]').forEach(e=>{const b=e.innerHTML,a=b.split(f).join(r);if(b!==a){e.innerHTML=a;c++}});document.getElementById('fip-replace-result').textContent=c>0?`Replaced in ${c} element(s)`:'No matches';if(c)saveAll()}
+function copyLinkedIn(){const t=document.getElementById('li-post-content').innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById('li-copy-btn');b.textContent='Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy for LinkedIn';b.classList.remove('copied')},2500)}).catch(()=>toast('Copy failed - select text manually'))}
+function updateCharCount(){const t=document.getElementById('li-post-content');const el=document.getElementById('li-char-count');if(!t||!el)return;const n=t.innerText.length;el.textContent=`${n} / 3000 chars`;el.classList.toggle('over',n>3000)}
+function copyCode(btn){const pre=btn.closest('.code-block').querySelector('pre');if(!pre)return;const txt=pre.innerText||pre.textContent;navigator.clipboard.writeText(txt).then(()=>{const o=btn.textContent;btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied')},2000)}).catch(()=>toast('Select text manually to copy'))}
+function initChecklist(){const raw=localStorage.getItem(CHECK_KEY);const saved=(raw&&!raw.startsWith('['))?JSON.parse(raw):{};document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb=>{const k=cb.dataset.ci;if(saved[k]){cb.checked=true;cb.closest('.check-item').classList.add('done')}cb.addEventListener('change',()=>{cb.closest('.check-item').classList.toggle('done',cb.checked);const st=(()=>{const r=localStorage.getItem(CHECK_KEY);return(r&&!r.startsWith('['))?JSON.parse(r):{}})();st[k]=cb.checked;localStorage.setItem(CHECK_KEY,JSON.stringify(st));updateProgress()})});updateProgress()}
+function updateProgress(){const a=document.querySelectorAll('.check-item input[type=checkbox]'),d=document.querySelectorAll('.check-item input[type=checkbox]:checked');const p=a.length?Math.round(d.length/a.length*100):0;const pf=document.getElementById('progress-fill');const pl=document.getElementById('progress-label');if(pf)pf.style.width=p+'%';if(pl)pl.textContent=`${d.length} / ${a.length} completed`}
+function runGenerator(){
+  const n=parseInt(document.getElementById('gen-count').value)||12;
+  const locs=[['cb-mission','Mission'],['cb-castro','Castro'],['cb-soma','SoMa'],['cb-tenderloin','Tenderloin'],['cb-richmond','Richmond'],['cb-sunset','Sunset'],['cb-oakland','Oakland'],['cb-berkeley','Berkeley'],['cb-sj-downtown','SJ Downtown'],['cb-sj-willow','SJ Willow Glen'],['cb-sunnyvale','Sunnyvale'],['cb-fremont','Fremont']];
+  const use=locs.slice(0,Math.min(n,12));
+  const locations=use.map(([id,name])=>{
+    const avg=+(2.8+Math.random()*2.1).toFixed(2);
+    const prev=+(avg+(Math.random()-0.5)*0.8).toFixed(2);
+    return{location_id:id,location_name:name,avg7:avg,avg14:prev,delta:+(avg-prev).toFixed(2),cnt:Math.floor(Math.random()*90)+8,alert:(avg-prev)<-0.5};
+  });
+  const result={locations:locations.sort((a,b)=>a.avg7-b.avg7),total_alerts:locations.filter(l=>l.alert).length,last_ingested_at:new Date().toISOString(),kafka_lag_messages:Math.floor(Math.random()*12)};
+  const el=document.getElementById('gen-output');
+  el.textContent=JSON.stringify(result,null,2);el.classList.add('show');
+  document.getElementById('gen-status').textContent=`Generated GET /api/dashboard response: ${n} locations, ${result.total_alerts} alerts`;
+}
+
+document.getElementById('fip-edit-toggle').addEventListener('click',toggleEditMode);
+document.getElementById('fip-save').addEventListener('click',saveAll);
+document.getElementById('fip-undo').addEventListener('click',undoLast);
+document.getElementById('fip-export').addEventListener('click',exportHTML);
+document.getElementById('fip-search-open').addEventListener('click',()=>document.getElementById('fip-search-modal').classList.add('open'));
+document.getElementById('fip-modal-close').addEventListener('click',()=>document.getElementById('fip-search-modal').classList.remove('open'));
+document.getElementById('fip-replace-btn').addEventListener('click',doFindReplace);
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undoLast()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='e'){e.preventDefault();toggleEditMode()}
+  if(e.key==='Escape')document.getElementById('fip-search-modal').classList.remove('open')
+});
+document.addEventListener('DOMContentLoaded',()=>{
+  restoreSaved();
+  initChecklist();
+  document.querySelectorAll('[data-fip-edit]').forEach(e=>{e.contentEditable='false'});
+  const lp=document.getElementById('li-post-content');
+  if(lp){updateCharCount();lp.addEventListener('input',updateCharCount)}
+});
+</script>
+</body>
+</html>

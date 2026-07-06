@@ -33,6 +33,8 @@ Table of Contents
 * 21. Current status⁠￼
 * 22. How I’m using this repo⁠￼
 * 23. Future roadmap⁠￼
+* 24. Claude Code setup⁠￼
+* 25. Phase-wise branches (for learners)⁠￼
 
 ⸻
 
@@ -795,21 +797,13 @@ This project is being developed phase by phase.
 
 Current focus:
 
-* Phase 0 — FLOCI-first local foundation
-* Terraform module structure
-* local-to-AWS mapping
-* EKS-first deployment setup
-* dummy data strategy
-* common event contract
-* production standards baseline
+* Phase 0 — FLOCI-first local foundation (implemented)
+* Phase 1 — ingestion workers on EKS + MSK (implemented)
+* Phase 2 — data platform worker + dbt gold marts (in progress)
 
 Upcoming:
 
-* source simulators
-* ingestion workers
-* Bronze/Silver/Gold models
-* NLP enrichment
-* vector indexing
+* vector indexing and RAG APIs
 * agentic analytics
 * voice copilot
 
@@ -855,6 +849,44 @@ Planned next steps include:
 * dashboard + chat interface
 * evaluation and quality scorecards
 * AWS production deployment patterns
+
+⸻
+
+24. Claude Code setup
+
+This repo is structured for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with project context, slash commands, skills, hooks, and agents.
+
+| Path | Purpose |
+|------|---------|
+| `CLAUDE.md` | Always-loaded project guide (phases, Make targets, FLOCI rules) |
+| `.claude/settings.json` | FLOCI env defaults and tool permissions |
+| `.claude/commands/` | Slash commands: `/phase0`, `/phase1`, `/phase2`, `/status`, `/help` |
+| `.claude-plugin/` | Bundled plugin (skills, hooks, agents) |
+
+**Quick start:**
+
+```bash
+# In Claude Code, from repo root
+claude plugin add ./.claude-plugin
+
+export AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-west-2
+```
+
+Then use `/help` or `/phase2` to run phase workflows. See `CLAUDE.md` for full operational rules.
+
+⸻
+
+25. Phase-wise branches (for learners)
+
+Code is organized into **separate Git branches per phase** so you can clone once, checkout the phase you want, and run it without unfinished work from later phases.
+
+```bash
+git checkout phase-0   # FLOCI foundation  → make bootstrap
+git checkout phase-1   # ingestion         → make phase1
+git checkout phase-2   # data platform+dbt → make phase2
+```
+
+Branch naming, maintainer commit rules, and legacy branch notes: **`docs/PHASE_BRANCHES.md`**.
 
 ⸻
 

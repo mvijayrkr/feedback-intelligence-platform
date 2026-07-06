@@ -1,0 +1,1 @@
+select * from {{ ref('stg_feedback_events_enriched') }} where event_id is not null

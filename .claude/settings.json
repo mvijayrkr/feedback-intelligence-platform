@@ -1,0 +1,28 @@
+{
+  "env": {
+    "AWS_ACCESS_KEY_ID": "test",
+    "AWS_SECRET_ACCESS_KEY": "test",
+    "AWS_DEFAULT_REGION": "us-west-2"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(docker:*)",
+      "Bash(kubectl:*)",
+      "Bash(helm:*)",
+      "Bash(terraform:*)",
+      "Bash(floci:*)",
+      "Bash(aws:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(dbt:*)",
+      "Read",
+      "Write",
+      "Edit"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(terraform destroy*)"
+    ]
+  }
+}

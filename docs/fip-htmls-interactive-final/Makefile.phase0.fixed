@@ -1,0 +1,116 @@
+# Makefile — Phase 0 foundation setup with safe Terraform execution
+# Key fix: use terraform -chdir=$(TF_DIR) for init/plan/apply/destroy.
+# Do not use:
+#   cd $(TF_DIR)
+#   terraform apply
+# because each Makefile recipe line can run in a separate shell unless carefully configured.
+
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
+AWS_REGION ?= us-west-2
+FLOCI_ENDPOINT ?= http://localhost:4566
+TF_DIR := infra/terraform/envs/local-floci
+HELM_CHART := infra/helm/feedback-platform
+NAMESPACE := feedback
+CLUSTER_NAME := feedback-eks-local
+
+.PHONY: help doctor scaffold bootstrap floci-start tf-check tf-init tf-plan tf-apply secrets-inject k8s-config topics helm-install verify tf-destroy clean
+
+help:
+	@echo "Phase 0 commands:"
+	@echo "  make doctor      # verify tools"
+	@echo "  make scaffold    # create folders only"
+	@echo "  make bootstrap   # start FLOCI → Terraform → Secrets → Topics → Helm → Verify"
+	@echo "  make tf-destroy  # destroy local Terraform resources"
+	@echo "  make clean       # stop FLOCI"
+
+doctor:
+	@command -v floci >/dev/null || (echo "❌ floci not installed"; exit 1)
+	@command -v aws >/dev/null || (echo "❌ aws cli not installed"; exit 1)
+	@command -v terraform >/dev/null || (echo "❌ terraform not installed"; exit 1)
+	@command -v kubectl >/dev/null || echo "⚠️ kubectl missing; Kubernetes verification will be skipped"
+	@command -v helm >/dev/null || echo "⚠️ helm missing; Helm deployment will be skipped"
+	@echo "✅ Local tool check complete"
+
+scaffold:
+	mkdir -p apps/{api,web,agent-service,voice-service}
+	mkdir -p services/{data-generator,ingestion-worker,cleaning-worker,nlp-worker,embedding-worker,action-worker}
+	mkdir -p shared/{schemas,config,logging,auth}
+	mkdir -p data/dummy/{google_reviews,reddit_mentions,delivery_reviews,surveys,voice_transcripts,manager_notes,qr_feedback}
+	mkdir -p data/dbt/models/{bronze,silver,gold}
+	mkdir -p data/sql/{postgres,snowflake}
+	mkdir -p infra/terraform/envs/local-floci
+	mkdir -p infra/terraform/envs/prod-aws
+	mkdir -p infra/helm/feedback-platform/templates
+	mkdir -p scripts
+	@echo "✅ Repo folders created"
+
+bootstrap: doctor floci-start tf-check tf-init tf-apply secrets-inject k8s-config topics helm-install verify
+	@echo "✅ Phase 0 local foundation is running"
+
+floci-start:
+	floci start
+	aws --endpoint-url $(FLOCI_ENDPOINT) sts get-caller-identity
+	aws --endpoint-url $(FLOCI_ENDPOINT) s3 ls || true
+
+tf-check:
+	@test -f $(TF_DIR)/versions.tf || (echo "❌ Missing $(TF_DIR)/versions.tf"; exit 1)
+	@test -f $(TF_DIR)/provider.tf || (echo "❌ Missing $(TF_DIR)/provider.tf"; exit 1)
+	@test -f $(TF_DIR)/main.tf || (echo "❌ Missing $(TF_DIR)/main.tf"; exit 1)
+	@echo "✅ Terraform config files found"
+	@ls -la $(TF_DIR)
+
+tf-init:
+	terraform -chdir=$(TF_DIR) init -upgrade
+
+tf-plan:
+	terraform -chdir=$(TF_DIR) plan
+
+tf-apply:
+	terraform -chdir=$(TF_DIR) apply -auto-approve
+	terraform -chdir=$(TF_DIR) output || true
+
+secrets-inject:
+	aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager put-secret-value --secret-id /feedback/local/openai_api_key --secret-string "sk-dummy-local-key-replace-in-prod" || true
+	aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager put-secret-value --secret-id /feedback/local/jwt_secret --secret-string "local-jwt-secret-$$(openssl rand -hex 16)" || true
+	aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager put-secret-value --secret-id /feedback/local/db_password --secret-string "local-db-password-$$(openssl rand -hex 8)" || true
+
+k8s-config:
+	@if command -v kubectl >/dev/null; then \
+	  aws --endpoint-url $(FLOCI_ENDPOINT) eks update-kubeconfig --region $(AWS_REGION) --name $(CLUSTER_NAME) || true; \
+	  kubectl get nodes || true; \
+	else \
+	  echo "⚠️ kubectl not installed; skipping kubeconfig verification"; \
+	fi
+
+topics:
+	chmod +x scripts/create_topics.sh
+	./scripts/create_topics.sh || true
+
+helm-install:
+	@if command -v helm >/dev/null && command -v kubectl >/dev/null; then \
+	  kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f - || true; \
+	  helm upgrade --install feedback-platform $(HELM_CHART) \
+	    --namespace $(NAMESPACE) --create-namespace \
+	    -f $(HELM_CHART)/values-local.yaml \
+	    --wait --timeout 120s || true; \
+	else \
+	  echo "⚠️ helm/kubectl missing; skipping Helm install"; \
+	fi
+
+verify:
+	@echo "🔎 S3 buckets:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) s3 ls || true
+	@echo "🔎 Secrets:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager list-secrets --query 'SecretList[].Name' || true
+	@echo "🔎 Kubernetes:"
+	kubectl get pods -n $(NAMESPACE) || true
+	@echo "🔎 Kafka topics:"
+	kafka-topics.sh --list --bootstrap-server localhost:9092 || true
+
+tf-destroy:
+	terraform -chdir=$(TF_DIR) destroy -auto-approve
+
+clean:
+	floci stop

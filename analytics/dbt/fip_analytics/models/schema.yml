@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: stg_feedback_events_enriched
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+  - name: gold_feedback_events
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: embedding_text
+        tests: [not_null]
+  - name: mart_embedding_input
+    columns:
+      - name: event_id
+        tests: [not_null, unique]

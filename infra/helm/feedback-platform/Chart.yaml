@@ -1,0 +1,6 @@
+apiVersion: v2
+name: feedback-platform
+description: Phase 0 base Helm chart for Feedback Intelligence Platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,19 @@
+name: fip_analytics
+version: "1.0.0"
+config-version: 2
+profile: fip_analytics
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+models:
+  fip_analytics:
+    staging:
+      +schema: staging
+      +materialized: view
+    gold:
+      +schema: gold_mart
+      +materialized: table
+    marts:
+      +schema: analytics
+      +materialized: table
