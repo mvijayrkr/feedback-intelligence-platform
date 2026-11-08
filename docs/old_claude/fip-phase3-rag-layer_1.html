@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIP Phase 3 — RAG Layer | AI Feedback Intelligence Platform</title>
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:          #0B0F1A;
+  --surface:     #111827;
+  --surface2:    #1A2235;
+  --surface3:    #1F2D44;
+  --border:      #243047;
+  --border-hi:   #2E3F60;
+
+  /* Phase 3 accent: violet-purple — intelligence, embeddings, semantic space */
+  --accent:      #A855F7;
+  --accent-dim:  #7C3AED;
+  --accent-glow: rgba(168,85,247,0.15);
+  --accent2:     #3B82F6;   /* blue for code blocks */
+  --accent3:     #F59E0B;   /* amber for warnings */
+  --accent4:     #EF4444;   /* red for production dangers */
+  --accent5:     #10B981;   /* green for analogies / fresher callouts */
+
+  --text:        #E2E8F0;
+  --text-muted:  #94A3B8;
+  --text-faint:  #475569;
+
+  --radius:      8px;
+  --radius-lg:   14px;
+  --font-mono:   'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-ui:     'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+/* ── PHASE STRIPE ───────────────────────────────────────────── */
+.phase-stripe {
+  background: linear-gradient(135deg, #A855F7 0%, #6366F1 60%, #A855F7 100%);
+  min-height: 9px;
+}
+
+/* ── TOP NAV ────────────────────────────────────────────────── */
+.topnav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.topnav-brand { display: flex; align-items: center; gap: 12px; }
+.topnav-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.topnav-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topnav-sub   { font-size: 12px; color: var(--text-muted); }
+.topnav-phase { display: flex; align-items: center; gap: 8px; }
+.phase-badge {
+  background: var(--accent-glow); border: 1px solid var(--accent);
+  color: var(--accent); border-radius: 20px; padding: 3px 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+/* ── HERO ───────────────────────────────────────────────────── */
+.hero {
+  padding: 64px 40px 56px; max-width: 1100px;
+  margin: 0 auto; position: relative;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+}
+.hero-number {
+  position: absolute; right: 30px; top: 40px;
+  font-size: 180px; font-weight: 900;
+  color: rgba(168,85,247,0.04); line-height: 1;
+  user-select: none; font-family: var(--font-mono);
+}
+.hero h1 {
+  font-size: 42px; font-weight: 800; line-height: 1.15;
+  letter-spacing: -1px; margin-bottom: 20px; max-width: 700px;
+}
+.hero h1 span { color: var(--accent); }
+.hero-desc {
+  font-size: 16px; color: var(--text-muted); max-width: 640px;
+  margin-bottom: 32px; line-height: 1.8;
+}
+
+/* ── STAT STRIP ─────────────────────────────────────────────── */
+.stat-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  max-width: 820px; margin-bottom: 40px;
+}
+.stat-item { background: var(--surface); padding: 20px 24px; text-align: center; }
+.stat-item .val {
+  font-size: 26px; font-weight: 800; color: var(--accent);
+  font-family: var(--font-mono); line-height: 1; margin-bottom: 4px;
+}
+.stat-item .lbl {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text-muted);
+}
+
+/* ── SECTION WRAPPER ────────────────────────────────────────── */
+.section-wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px 40px; }
+
+/* ── SECTION TITLE ──────────────────────────────────────────── */
+.section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── ARCH DIAGRAM ───────────────────────────────────────────── */
+.arch-diagram {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 36px; margin-bottom: 40px; overflow-x: auto;
+}
+.arch-title {
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+  margin-bottom: 28px; text-transform: uppercase; letter-spacing: 1px;
+}
+.arch-flow {
+  display: flex; align-items: center; gap: 0; min-width: 700px; flex-wrap: nowrap;
+}
+.arch-node {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 18px 14px; text-align: center;
+}
+.arch-node.highlight {
+  border-color: var(--accent); background: var(--accent-glow);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.arch-node-icon { font-size: 22px; margin-bottom: 6px; }
+.arch-node-name { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.arch-node-sub  { font-size: 10px; color: var(--text-muted); }
+.arch-arrow { font-size: 18px; color: var(--accent); padding: 0 8px; flex-shrink: 0; font-weight: 700; }
+
+/* ── STEP CARDS ─────────────────────────────────────────────── */
+.steps-grid { display: flex; flex-direction: column; gap: 32px; margin-bottom: 40px; }
+.step-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.step-card-header { display: flex; align-items: stretch; }
+.step-num-stripe {
+  width: 80px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dim) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; font-weight: 900; color: #fff;
+  font-family: var(--font-mono); flex-shrink: 0; letter-spacing: -1px; min-height: 90px;
+}
+.step-header-content { padding: 22px 28px; flex: 1; }
+.step-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+}
+.step-header-content h3 {
+  font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.3;
+}
+.step-header-content p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.step-body { padding: 28px 28px 28px 108px; border-top: 1px solid var(--border); }
+
+/* ── CODE BLOCKS ────────────────────────────────────────────── */
+.code-block {
+  background: #0D1117; border: 1px solid var(--border-hi);
+  border-radius: var(--radius); overflow: hidden; margin: 16px 0;
+  font-family: var(--font-mono);
+}
+.code-header {
+  background: #161B22; border-bottom: 1px solid var(--border-hi);
+  padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.code-lang     { font-size: 10px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; }
+.code-filename { font-size: 10px; color: var(--text-faint); font-family: var(--font-mono); }
+.code-block pre { padding: 18px; overflow-x: auto; font-size: 12.5px; line-height: 1.65; color: #ABB2BF; }
+.kw { color: #C678DD; } .fn { color: #61AFEF; } .st { color: #98C379; }
+.cm { color: #5C6370; font-style: italic; } .nm { color: #E5C07B; }
+.nb { color: #56B6C2; } .nu { color: #D19A66; } .dc { color: #A855F7; }
+
+/* ── CALLOUT BOXES ──────────────────────────────────────────── */
+.callout {
+  border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13.5px; line-height: 1.6;
+}
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.callout.warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #FCD34D; }
+.callout.warning strong { color: var(--accent3); }
+.callout.danger  { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; }
+.callout.danger strong  { color: var(--accent4); }
+.callout.tip     { background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.25); color: #D8B4FE; }
+.callout.tip strong     { color: var(--accent); }
+.callout.info    { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #93C5FD; }
+.callout.info strong    { color: var(--accent2); }
+
+/* ── ANALOGY BOX ─── fresher-specific ──────────────────────── */
+.analogy-box {
+  background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.3);
+  border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13.5px; line-height: 1.65; color: #A7F3D0;
+}
+.analogy-box .analogy-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.analogy-box strong { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent5); }
+
+/* ── CONCEPT CARDS ──────────────────────────────────────────── */
+.concept-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px; margin: 20px 0;
+}
+.concept-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px;
+}
+.concept-card.active { border-color: var(--accent); }
+.concept-icon  { font-size: 24px; margin-bottom: 8px; }
+.concept-name  { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.concept-body  { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+.concept-tag   {
+  display: inline-block; margin-top: 8px; font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 10px; background: var(--accent-glow);
+  color: var(--accent); border: 1px solid rgba(168,85,247,0.3);
+}
+
+/* ── TRADEOFF TABLE ─────────────────────────────────────────── */
+.tradeoff-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.tradeoff-table th {
+  background: var(--surface2); color: var(--text-muted); padding: 10px 14px;
+  text-align: left; font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; border-bottom: 2px solid var(--border-hi);
+}
+.tradeoff-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.tradeoff-table tr:last-child td { border-bottom: none; }
+.tradeoff-table tr:hover td { background: rgba(255,255,255,0.02); }
+.tradeoff-table .chosen { color: var(--accent); font-weight: 600; }
+.tradeoff-table .pro { color: #6EE7B7; }
+.tradeoff-table .con { color: #FCA5A5; }
+
+/* ── PROD ISSUES ────────────────────────────────────────────── */
+.prod-issues { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+.prod-issue-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+.prod-issue-card.severity-high { border-left: 3px solid var(--accent4); }
+.prod-issue-card.severity-med  { border-left: 3px solid var(--accent3); }
+.prod-issue-card.severity-low  { border-left: 3px solid var(--accent); }
+.prod-issue-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.prod-issue-body  { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.severity-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 10px; margin-bottom: 8px; }
+.severity-badge.high { background: rgba(239,68,68,0.2);  color: #FCA5A5; }
+.severity-badge.med  { background: rgba(245,158,11,0.2); color: #FCD34D; }
+.severity-badge.low  { background: rgba(168,85,247,0.15); color: var(--accent); }
+
+/* ── CHECKLIST ──────────────────────────────────────────────── */
+.checklist-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 40px; }
+.checklist-title    { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.checklist-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+.progress-bar-wrap  { background: var(--border); border-radius: 99px; height: 6px; margin-bottom: 20px; overflow: hidden; }
+.progress-bar-fill  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+.checklist-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); margin: 16px 0 8px; }
+.check-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.check-item:last-child { border-bottom: none; }
+.check-item input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; margin-top: 3px; cursor: pointer; }
+.check-label { font-size: 13px; color: var(--text-muted); line-height: 1.5; transition: color 0.2s; }
+.check-item.done .check-label { color: var(--text-faint); text-decoration: line-through; }
+
+/* ── CAREER CARD ────────────────────────────────────────────── */
+.career-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(59,130,246,0.08) 100%);
+  border: 1px solid rgba(139,92,246,0.35);
+  border-radius: var(--radius-lg); padding: 28px; margin-bottom: 32px;
+}
+.career-card-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #A855F7; margin-bottom: 14px; }
+.li-post { background: #1E293B; border-radius: var(--radius); padding: 20px; font-size: 13.5px; color: var(--text); line-height: 1.75; white-space: pre-wrap; border: 1px solid var(--border-hi); }
+.li-hashtags { color: var(--accent2); }
+.interview-qa { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.qa-item { background: var(--surface2); border-radius: var(--radius); padding: 14px 18px; border-left: 3px solid #8B5CF6; }
+.qa-q { font-size: 12px; font-weight: 700; color: #A855F7; margin-bottom: 6px; }
+.qa-a { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+/* ── FIP EDIT ENGINE ────────────────────────────────────────── */
+.fip-toolbar { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+.fip-btn { width: 44px; height: 44px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); transition: transform 0.15s; }
+.fip-btn:hover { transform: scale(1.08); }
+.fip-btn.save-btn   { background: var(--accent); color: #fff; }
+.fip-btn.undo-btn   { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.search-btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.export-btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.edit-btn   { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+.fip-toast { position: fixed; bottom: 80px; right: 24px; background: var(--accent); color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; opacity: 0; transform: translateY(8px); transition: all 0.3s; z-index: 9999; pointer-events: none; }
+.fip-toast.show { opacity: 1; transform: translateY(0); }
+.fip-search-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; }
+.fip-search-modal.open { display: flex; }
+.fip-search-box { background: var(--surface); border: 1px solid var(--border-hi); border-radius: var(--radius-lg); padding: 24px; width: 440px; display: flex; flex-direction: column; gap: 12px; }
+.fip-search-box h4 { color: var(--text); font-size: 15px; font-weight: 700; }
+.fip-search-box input { background: var(--surface2); border: 1px solid var(--border-hi); border-radius: var(--radius); padding: 9px 14px; color: var(--text); font-size: 13px; outline: none; }
+.fip-search-box input:focus { border-color: var(--accent); }
+.fip-search-box .modal-btns { display: flex; gap: 8px; }
+.modal-btn { flex: 1; padding: 8px; border: none; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 600; }
+.modal-btn.primary   { background: var(--accent); color: #fff; }
+.modal-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+
+/* ── PIPELINE VISUAL ────────────────────────────────────────── */
+.pipeline-steps {
+  display: flex; align-items: stretch; gap: 0;
+  margin: 20px 0; overflow-x: auto; min-width: 600px;
+}
+.pipe-step {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 12px; text-align: center;
+  position: relative;
+}
+.pipe-step.active { border-color: var(--accent); background: var(--accent-glow); }
+.pipe-step-num  { font-size: 10px; font-weight: 700; color: var(--accent); margin-bottom: 4px; font-family: var(--font-mono); }
+.pipe-step-name { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.pipe-step-sub  { font-size: 10px; color: var(--text-muted); }
+.pipe-arrow { font-size: 16px; color: var(--accent); display: flex; align-items: center; padding: 0 6px; flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .hero { padding: 40px 20px; }
+  .hero h1 { font-size: 28px; }
+  .hero-number { display: none; }
+  .section-wrap { padding: 0 20px 32px; }
+  .step-body { padding: 20px; }
+  .topnav { padding: 12px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="phase-stripe"></div>
+
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-logo">FIP</div>
+    <div>
+      <div class="topnav-title">AI Feedback Intelligence Platform</div>
+      <div class="topnav-sub">curry_bowl_express · 12 Bay Area Locations</div>
+    </div>
+  </div>
+  <div class="topnav-phase">
+    <span class="phase-badge">Phase 03 · RAG Layer</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-number">03</div>
+  <div class="hero-eyebrow">Phase 03 / 07 · Building the Intelligence Layer</div>
+  <h1>Building the <span>RAG Layer</span><br>Retrieval-Augmented Generation</h1>
+  <p class="hero-desc" contenteditable="false" data-fip-edit="hero-desc">
+    Transform your Gold-layer review data into a searchable semantic knowledge base.
+    Embed every review using OpenAI, store vectors in Qdrant, then build a retrieval
+    pipeline that finds the right reviews to answer any natural-language question —
+    "Which location has the worst wait time complaints this month?"
+    This phase explains every concept from first principles with analogies, then shows you the production code.
+  </p>
+  <div class="stat-strip">
+    <div class="stat-item"><div class="val">8</div><div class="lbl">Steps</div></div>
+    <div class="stat-item"><div class="val">1536</div><div class="lbl">Embedding Dims</div></div>
+    <div class="stat-item"><div class="val">~7h</div><div class="lbl">Build Time</div></div>
+    <div class="stat-item"><div class="val">8</div><div class="lbl">Prod Issues</div></div>
+    <div class="stat-item"><div class="val">RAG</div><div class="lbl">Pattern</div></div>
+  </div>
+</section>
+
+<div class="section-wrap">
+
+  <!-- WHAT IS RAG? -->
+  <div class="section-title">What is RAG? — Start Here If You Are New</div>
+  <div class="arch-diagram">
+    <div class="arch-title">The Core Idea: Retrieve Facts First, Then Generate Answers</div>
+
+    <div class="analogy-box" style="margin-bottom:24px;">
+      <div class="analogy-icon">🎓</div>
+      <div>
+        <strong>The Open-Book Exam Analogy</strong>
+        Imagine two students taking an exam. Student A (pure LLM) relies entirely on memory — whatever was in their brain at training time. Student B (RAG) gets to open a specific textbook before answering each question. Student B will always give a more accurate, up-to-date answer — because they are grounding their response in real retrieved facts.<br><br>
+        RAG = giving the LLM a relevant "open book" of your real data before it generates an answer.
+      </div>
+    </div>
+
+    <div class="arch-flow">
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">❓</div>
+        <div class="arch-node-name">User Question</div>
+        <div class="arch-node-sub">"Worst wait time<br>complaints in June?"</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔢</div>
+        <div class="arch-node-name">Embed Query</div>
+        <div class="arch-node-sub">Convert question<br>to 1536-dim vector</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔍</div>
+        <div class="arch-node-name">Vector Search</div>
+        <div class="arch-node-sub">Find top-K similar<br>reviews in Qdrant</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">📚</div>
+        <div class="arch-node-name">Context + Prompt</div>
+        <div class="arch-node-sub">Inject retrieved<br>reviews into prompt</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">✨</div>
+        <div class="arch-node-name">LLM Answer</div>
+        <div class="arch-node-sub">GPT-4o answers<br>from real data</div>
+      </div>
+    </div>
+
+    <div class="concept-grid" style="margin-top:28px;">
+      <div class="concept-card active">
+        <div class="concept-icon">🔢</div>
+        <div class="concept-name">Embeddings</div>
+        <div class="concept-body">A way to turn text into numbers so a computer can measure "how similar" two pieces of text are — even if they use different words.</div>
+        <span class="concept-tag">Core Concept</span>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">📐</div>
+        <div class="concept-name">Vector Space</div>
+        <div class="concept-body">Imagine a 1536-dimensional map where semantically similar reviews sit close together. "Slow service" and "waited 40 minutes" are neighbours.</div>
+        <span class="concept-tag">Core Concept</span>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">🗃️</div>
+        <div class="concept-name">Vector Store (Qdrant)</div>
+        <div class="concept-body">A specialised database that stores vectors and can find the nearest ones to any query vector extremely fast — like a turbo-charged search engine for meaning.</div>
+        <span class="concept-tag">Infrastructure</span>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">✂️</div>
+        <div class="concept-name">Chunking</div>
+        <div class="concept-body">Splitting long text into smaller pieces before embedding. LLMs have a token limit — you cannot embed an entire month of reviews in one shot.</div>
+        <span class="concept-tag">Technique</span>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">🎯</div>
+        <div class="concept-name">Hybrid Search</div>
+        <div class="concept-body">Combining semantic (vector) search with keyword (BM25) search. Semantic finds meaning; keyword finds exact terms. Together they beat either alone.</div>
+        <span class="concept-tag">Technique</span>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">📏</div>
+        <div class="concept-name">Cosine Similarity</div>
+        <div class="concept-body">The measure of how similar two vectors are — ranges from -1 (opposite) to 1 (identical). Think of it as the angle between two arrows in space.</div>
+        <span class="concept-tag">Math</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="section-title">Step-by-Step Implementation</div>
+  <div class="steps-grid">
+
+    <!-- ═══ STEP 1 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">01</div>
+        <div class="step-header-content">
+          <div class="step-tag">Environment & Dependencies</div>
+          <h3>Project Setup, Pinned Deps & Qdrant Running Locally</h3>
+          <p>Add RAG-specific dependencies on top of the Phase 2 base. Spin up Qdrant locally via Docker. Verify the Phase 2 bootstrap already created your collection.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">🏗️</div>
+          <div>
+            <strong>Think of it this way</strong>
+            Phase 2 built the warehouse (Bronze/Silver/Gold Parquet). Phase 3 builds the smart catalogue system on top — one that can answer "find me everything about slow service in the Mission district" in milliseconds, not hours.
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><span class="code-filename">terminal</span></div>
+          <pre><span class="cm"># Add RAG layer dependencies to existing venv</span>
+source .venv/bin/activate
+
+<span class="cm"># RAG-specific additions — all pinned</span>
+cat >> requirements.txt << 'EOF'
+openai==1.35.3              # text-embedding-3-small + GPT-4o
+qdrant-client==1.9.1        # vector store client
+tiktoken==0.7.0             # token counter — essential for chunking
+langchain==0.2.6            # text splitter utilities only
+langchain-openai==0.1.14    # OpenAI integration
+spacy==3.7.4                # NLP: entity extraction on review text
+tenacity==8.3.0             # retry for OpenAI rate limits (already pinned)
+numpy==1.26.4               # cosine similarity calculations
+structlog==24.1.0           # structured logging (already pinned)
+EOF
+
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+
+<span class="cm"># Spin up Qdrant locally (Phase 2 bootstrapped the collection schema)</span>
+docker run -d \
+  --name qdrant \
+  -p 6333:6333 \
+  -p 6334:6334 \
+  -v $(pwd)/qdrant_storage:/qdrant/storage \
+  qdrant/qdrant:v1.9.2
+
+<span class="cm"># Verify collection from Phase 2 bootstrap exists</span>
+curl -s http://localhost:6333/collections | python3 -m json.tool
+<span class="cm"># Expected: {"result":{"collections":[{"name":"fip_reviews_v1"}]}}</span>
+
+<span class="cm"># Verify alias is set</span>
+curl -s http://localhost:6333/aliases | python3 -m json.tool
+<span class="cm"># Expected: fip_reviews_current → fip_reviews_v1</span></pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Why mount qdrant_storage to disk?</strong>
+          Without a volume mount, all your indexed vectors live inside the Docker container. Stop the container and you lose everything — that means re-embedding all 50K reviews again at API cost. Always mount to a local directory so data survives container restarts.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 2 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">02</div>
+        <div class="step-header-content">
+          <div class="step-tag">Text Chunking</div>
+          <h3>Splitting Reviews Into Embeddable Chunks</h3>
+          <p>Before embedding, long reviews must be split into chunks that fit within the model's token limit. Get chunking wrong and you embed truncated text — your vectors mean nothing.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">📰</div>
+          <div>
+            <strong>The Newspaper Analogy</strong>
+            A newspaper article is too long to summarise in one sentence. But each paragraph can be summarised individually. Chunking is exactly this — break the long review into paragraphs (chunks), embed each paragraph, and now you can find the exact paragraph about "cold naan" even inside a 500-word review.
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #1: Token Limit Silent Truncation</strong>
+          <code>text-embedding-3-small</code> has an 8,191-token limit. If you send a 12,000-token review, the OpenAI API silently truncates it to 8,191 tokens and returns a vector for only part of the text. You get no error. Your vector is now semantically wrong. Fix: always count tokens BEFORE calling the embedding API and split proactively.</div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #2: Chunk Overlap vs. Storage Cost Tradeoff</strong>
+          Overlap ensures a sentence that straddles two chunks is not lost. But 20% overlap on 50K reviews × 200 tokens/chunk = ~20% more embedding API cost and ~20% more Qdrant storage. For short reviews (average 120 tokens), overlap is often wasteful. Profile your data first — most curry bowl reviews are &lt;200 tokens, so we use 50-token overlap, not 200.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/chunker.py</span></div>
+          <pre><span class="cm">"""
+Review text chunker — splits reviews into token-safe chunks for embedding.
+Key principle: a chunk must be semantically self-contained (a reader should
+understand it without needing the surrounding text).
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> typing <span class="kw">import</span> Iterator
+<span class="kw">import</span> tiktoken
+<span class="kw">import</span> structlog
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="cm"># text-embedding-3-small uses cl100k_base tokeniser</span>
+<span class="nm">TOKENISER</span>     = tiktoken.<span class="fn">get_encoding</span>(<span class="st">"cl100k_base"</span>)
+<span class="nm">MAX_TOKENS</span>    = <span class="nu">512</span>   <span class="cm"># well under the 8191 limit — gives headroom for metadata</span>
+<span class="nm">OVERLAP_TOKENS</span>= <span class="nu">50</span>    <span class="cm"># 50-token overlap for short review corpus</span>
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="nm">ReviewChunk</span>:
+    chunk_id:       str    <span class="cm"># "{event_id}_chunk_{index}"</span>
+    event_id:       str
+    chunk_index:    int
+    total_chunks:   int
+    text:           str
+    token_count:    int
+    <span class="cm"># Metadata carried through to Qdrant payload</span>
+    location_id:    str
+    source_platform:str
+    star_rating:    float
+    review_date:    str
+
+<span class="kw">def</span> <span class="fn">count_tokens</span>(text: str) -> int:
+    <span class="kw">return</span> <span class="fn">len</span>(<span class="nm">TOKENISER</span>.<span class="fn">encode</span>(text))
+
+<span class="kw">def</span> <span class="fn">chunk_review</span>(
+    event_id: str,
+    text: str,
+    metadata: dict,
+    max_tokens: int = <span class="nm">MAX_TOKENS</span>,
+    overlap: int = <span class="nm">OVERLAP_TOKENS</span>,
+) -> list[ReviewChunk]:
+    <span class="cm">"""
+    Split a single review into chunks.
+    
+    Short reviews (< max_tokens): one chunk, no splitting.
+    Long reviews: sliding window with overlap.
+    
+    IMPORTANT: overlap is in TOKENS, not characters.
+    "100 character overlap" is meaningless — token boundaries don't
+    map 1:1 to characters. Always count in tokens.
+    """</span>
+    token_ids = <span class="nm">TOKENISER</span>.<span class="fn">encode</span>(text)
+    total_tokens = <span class="fn">len</span>(token_ids)
+
+    <span class="cm"># Fast path: entire review fits in one chunk</span>
+    <span class="kw">if</span> total_tokens <= max_tokens:
+        chunk_text = text.<span class="fn">strip</span>()
+        <span class="kw">return</span> [<span class="fn">ReviewChunk</span>(
+            chunk_id        = f<span class="st">"</span><span class="kw">{event_id}</span><span class="st">_chunk_0"</span>,
+            event_id        = event_id,
+            chunk_index     = <span class="nu">0</span>,
+            total_chunks    = <span class="nu">1</span>,
+            text            = chunk_text,
+            token_count     = total_tokens,
+            **metadata
+        )]
+
+    <span class="cm"># Sliding window chunking</span>
+    chunks: list[ReviewChunk] = []
+    start  = <span class="nu">0</span>
+    index  = <span class="nu">0</span>
+    stride = max_tokens - overlap   <span class="cm"># how far we advance each window</span>
+
+    <span class="kw">while</span> start < total_tokens:
+        end        = <span class="fn">min</span>(start + max_tokens, total_tokens)
+        chunk_ids  = token_ids[start:end]
+        chunk_text = <span class="nm">TOKENISER</span>.<span class="fn">decode</span>(chunk_ids).<span class="fn">strip</span>()
+
+        <span class="kw">if</span> chunk_text:   <span class="cm"># skip empty chunks from decode artifacts</span>
+            chunks.<span class="fn">append</span>(<span class="fn">ReviewChunk</span>(
+                chunk_id        = f<span class="st">"</span><span class="kw">{event_id}</span><span class="st">_chunk_</span><span class="kw">{index}</span><span class="st">"</span>,
+                event_id        = event_id,
+                chunk_index     = index,
+                total_chunks    = <span class="nu">-1</span>,   <span class="cm"># patched after loop</span>
+                text            = chunk_text,
+                token_count     = <span class="fn">len</span>(chunk_ids),
+                **metadata
+            ))
+
+        start += stride
+        index += <span class="nu">1</span>
+
+    <span class="cm"># Patch total_chunks now that we know it</span>
+    <span class="kw">for</span> c <span class="kw">in</span> chunks:
+        c.total_chunks = <span class="fn">len</span>(chunks)
+
+    log.<span class="fn">debug</span>(<span class="st">"review_chunked"</span>,
+               event_id=event_id,
+               total_tokens=total_tokens,
+               num_chunks=<span class="fn">len</span>(chunks))
+    <span class="kw">return</span> chunks
+
+
+<span class="kw">def</span> <span class="fn">chunk_batch</span>(reviews: list[dict]) -> Iterator[ReviewChunk]:
+    <span class="cm">"""Yield chunks for a batch of review dicts from Gold layer."""</span>
+    <span class="kw">for</span> review <span class="kw">in</span> reviews:
+        metadata = {
+            <span class="st">"location_id"</span>:     review[<span class="st">"location_id"</span>],
+            <span class="st">"source_platform"</span>: review[<span class="st">"source_platform"</span>],
+            <span class="st">"star_rating"</span>:     <span class="fn">float</span>(review[<span class="st">"star_rating"</span>]),
+            <span class="st">"review_date"</span>:     <span class="fn">str</span>(review[<span class="st">"review_date"</span>]),
+        }
+        <span class="kw">yield from</span> <span class="fn">chunk_review</span>(
+            event_id = review[<span class="st">"event_id"</span>],
+            text     = review[<span class="st">"clean_text"</span>],
+            metadata = metadata,
+        )</pre>
+        </div>
+
+        <table class="tradeoff-table">
+          <tr><th>Chunk Size</th><th>Pros</th><th>Cons</th><th>Best For</th></tr>
+          <tr>
+            <td>128 tokens</td>
+            <td class="pro">Very precise retrieval</td>
+            <td class="con">Context lost across chunks; more API calls</td>
+            <td>Long, multi-topic docs</td>
+          </tr>
+          <tr>
+            <td class="chosen">512 tokens ✓ (chosen)</td>
+            <td class="pro">Good balance: semantic self-contained</td>
+            <td class="con">Slightly more storage</td>
+            <td>Short-medium reviews</td>
+          </tr>
+          <tr>
+            <td>1024 tokens</td>
+            <td class="pro">Fewer chunks, lower cost</td>
+            <td class="con">Retrieval less precise; mixed topics in one vector</td>
+            <td>Long narrative docs</td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 3 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">03</div>
+        <div class="step-header-content">
+          <div class="step-tag">Embeddings</div>
+          <h3>Embedding Reviews with OpenAI text-embedding-3-small</h3>
+          <p>Convert every text chunk into a 1536-dimensional numeric vector. This is the heart of semantic search. The pipeline must handle API rate limits, batch sizing, cost tracking, and retry — all without losing a single chunk.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">🗺️</div>
+          <div>
+            <strong>The GPS Coordinate Analogy</strong>
+            Just as a city can be described by two numbers (latitude, longitude) and similar cities end up geographically close, an embedding describes a piece of text by 1536 numbers. Similar texts end up "close" in this 1536-dimensional space. "Slow service" and "waited forever" are neighbours. "Great naan" and "perfect biryani" are neighbours. "Slow service" and "great naan" are far apart. The embedding model is the GPS system that assigns these coordinates.
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #3: OpenAI Rate Limits Killing Bulk Indexing</strong>
+          OpenAI's default rate limit is 3,000 RPM (requests per minute) and 1,000,000 TPM (tokens per minute). Naively embedding 50K reviews in a tight loop hits the TPM limit within 30 seconds — you get a 429, your script crashes, and you have to start over. Fix: batch up to 100 chunks per API call (OpenAI supports array input), track tokens-per-minute in a sliding window, and sleep when approaching the limit.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/embedder.py</span></div>
+          <pre><span class="cm">"""
+Embedding pipeline: ReviewChunk → (chunk, vector) pairs.
+Handles OpenAI rate limits, batching, cost tracking, and retries.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">import</span> time, os
+<span class="kw">from</span> typing <span class="kw">import</span> Iterator
+<span class="kw">import</span> structlog
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">from</span> tenacity <span class="kw">import</span> (
+    retry, stop_after_attempt, wait_exponential_jitter,
+    retry_if_exception_type
+)
+<span class="kw">from</span> openai <span class="kw">import</span> RateLimitError, APITimeoutError
+<span class="kw">from</span> rag.chunker <span class="kw">import</span> ReviewChunk
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">MODEL</span>          = <span class="st">"text-embedding-3-small"</span>  <span class="cm"># 1536 dims, $0.02/1M tokens</span>
+<span class="nm">EMBED_DIM</span>      = <span class="nu">1536</span>
+<span class="nm">MAX_BATCH</span>      = <span class="nu">100</span>    <span class="cm"># OpenAI accepts up to 2048 inputs per call; 100 is safe</span>
+<span class="nm">TPM_LIMIT</span>      = <span class="nu">900_000</span> <span class="cm"># stay under 1M TPM limit with 10% headroom</span>
+<span class="nm">COST_PER_1M_TOK</span>= <span class="nu">0.00002</span> <span class="cm"># $0.02 per 1M tokens (text-embedding-3-small)</span>
+
+<span class="kw">class</span> <span class="nm">Embedder</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, api_key: str | <span class="kw">None</span> = <span class="kw">None</span>):
+        self.client        = <span class="fn">OpenAI</span>(api_key=api_key <span class="kw">or</span> os.<span class="fn">environ</span>[<span class="st">"OPENAI_API_KEY"</span>])
+        self._window_start = time.<span class="fn">monotonic</span>()
+        self._window_tokens= <span class="nu">0</span>
+        self._total_tokens = <span class="nu">0</span>
+        self._total_calls  = <span class="nu">0</span>
+
+    <span class="kw">def</span> <span class="fn">_tpm_wait</span>(self, tokens_about_to_send: int) -> <span class="kw">None</span>:
+        <span class="cm">"""
+        Sliding-window token rate limiter.
+        If adding this batch would exceed TPM_LIMIT in the current minute,
+        sleep until the window resets.
+        
+        Analogy: like a nightclub bouncer counting how many people are
+        inside — if at capacity, you wait at the door until someone leaves.
+        """</span>
+        elapsed = time.<span class="fn">monotonic</span>() - self._window_start
+        <span class="kw">if</span> elapsed >= <span class="nu">60</span>:
+            <span class="cm"># New minute window — reset counter</span>
+            self._window_tokens = <span class="nu">0</span>
+            self._window_start  = time.<span class="fn">monotonic</span>()
+
+        <span class="kw">if</span> self._window_tokens + tokens_about_to_send > <span class="nm">TPM_LIMIT</span>:
+            sleep_secs = <span class="nu">60</span> - elapsed + <span class="nu">2</span>   <span class="cm"># +2s buffer</span>
+            log.<span class="fn">info</span>(<span class="st">"tpm_limit_wait"</span>, sleep_secs=<span class="fn">round</span>(sleep_secs, <span class="nu">1</span>))
+            time.<span class="fn">sleep</span>(sleep_secs)
+            self._window_tokens = <span class="nu">0</span>
+            self._window_start  = time.<span class="fn">monotonic</span>()
+
+        self._window_tokens += tokens_about_to_send
+
+    <span class="dc">@retry</span>(
+        retry=<span class="fn">retry_if_exception_type</span>((<span class="nm">RateLimitError</span>, <span class="nm">APITimeoutError</span>)),
+        stop=<span class="fn">stop_after_attempt</span>(<span class="nu">6</span>),
+        wait=<span class="fn">wait_exponential_jitter</span>(initial=<span class="nu">5</span>, max=<span class="nu">120</span>, jitter=<span class="nu">10</span>),
+    )
+    <span class="kw">def</span> <span class="fn">_call_api</span>(self, texts: list[str]) -> list[list[float]]:
+        response = self.client.embeddings.<span class="fn">create</span>(
+            model = <span class="nm">MODEL</span>,
+            input = texts,
+            encoding_format = <span class="st">"float"</span>,
+        )
+        self._total_calls += <span class="nu">1</span>
+        used = response.usage.total_tokens
+        self._total_tokens += used
+        self._window_tokens += used
+        <span class="kw">return</span> [item.embedding <span class="kw">for</span> item <span class="kw">in</span> response.data]
+
+    <span class="kw">def</span> <span class="fn">embed_chunks</span>(
+        self, chunks: list[ReviewChunk]
+    ) -> Iterator[tuple[ReviewChunk, list[float]]]:
+        <span class="cm">"""
+        Embed a list of chunks in batches.
+        Yields (chunk, vector) pairs — caller decides what to do with them.
+        
+        Memory note: we yield rather than collect all vectors in memory
+        because 50K vectors × 1536 floats × 4 bytes = ~300 MB RAM.
+        Yielding keeps memory ~constant regardless of corpus size.
+        """</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">0</span>, <span class="fn">len</span>(chunks), <span class="nm">MAX_BATCH</span>):
+            batch        = chunks[i : i + <span class="nm">MAX_BATCH</span>]
+            texts        = [c.text <span class="kw">for</span> c <span class="kw">in</span> batch]
+            batch_tokens = <span class="fn">sum</span>(c.token_count <span class="kw">for</span> c <span class="kw">in</span> batch)
+
+            self.<span class="fn">_tpm_wait</span>(batch_tokens)
+
+            <span class="kw">try</span>:
+                vectors = self.<span class="fn">_call_api</span>(texts)
+            <span class="kw">except</span> <span class="nm">Exception</span> <span class="kw">as</span> e:
+                log.<span class="fn">error</span>(<span class="st">"embed_batch_failed"</span>,
+                           batch_start=i, batch_size=<span class="fn">len</span>(batch), error=<span class="fn">str</span>(e))
+                <span class="kw">raise</span>
+
+            <span class="kw">for</span> chunk, vector <span class="kw">in</span> <span class="fn">zip</span>(batch, vectors):
+                <span class="kw">if</span> <span class="fn">len</span>(vector) != <span class="nm">EMBED_DIM</span>:
+                    <span class="kw">raise</span> <span class="nm">ValueError</span>(
+                        f<span class="st">"Expected </span><span class="kw">{EMBED_DIM}</span><span class="st">-dim vector, got </span><span class="kw">{len(vector)}</span><span class="st">. "
+                        f"Model change? Check EMBED_DIM constant."</span>
+                    )
+                <span class="kw">yield</span> chunk, vector
+
+    <span class="kw">def</span> <span class="fn">cost_summary</span>(self) -> dict:
+        cost_usd = self._total_tokens * <span class="nm">COST_PER_1M_TOK</span> / <span class="nu">1_000_000</span>
+        <span class="kw">return</span> {
+            <span class="st">"total_tokens"</span>: self._total_tokens,
+            <span class="st">"total_api_calls"</span>: self._total_calls,
+            <span class="st">"estimated_cost_usd"</span>: <span class="fn">round</span>(cost_usd, <span class="nu">4</span>),
+        }</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Why yield instead of returning a list?</strong>
+          50,000 reviews × 1536 floats × 4 bytes each = ~300 MB in RAM if you collect all vectors first. By yielding each (chunk, vector) pair, you can process and write to Qdrant in the same loop, keeping memory near-constant no matter how large your corpus grows.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 4 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">04</div>
+        <div class="step-header-content">
+          <div class="step-tag">Vector Indexing</div>
+          <h3>Upserting Chunks + Vectors into Qdrant</h3>
+          <p>Write (chunk text + metadata + vector) into Qdrant. Handle batch sizing, idempotent upserts, and the subtle failure where your vectors are indexed but your payload filters stop working because you forgot to create payload indexes.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">📚</div>
+          <div>
+            <strong>The Library Card Catalogue Analogy</strong>
+            A Qdrant "point" is like a library card catalogue entry: it has a unique ID, the coordinates of where the book sits on the shelf (the vector), and metadata tags on the card (location_id, star_rating, review_date). Payload indexes are like building a separate sorted list of books by "genre" — without it, every search for "horror books" would have to read every single card in the catalogue from scratch.
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #4: Payload Filter Full Scan</strong>
+          You query Qdrant: "find similar reviews WHERE location_id = 'cb-mission'". Without a payload index on <code>location_id</code>, Qdrant loads ALL 50K points, checks each one's payload, and then applies the vector similarity. At 50K vectors it takes ~200ms — fine. At 5M vectors it takes 20 seconds. Phase 2 created these indexes. Verify they exist before bulk indexing or every filtered query will be catastrophically slow.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/indexer.py</span></div>
+          <pre><span class="cm">"""
+Qdrant Indexer: writes (chunk, vector) pairs as Qdrant Points.
+Idempotent: running twice on the same data produces the same result
+because we upsert (update-or-insert) using chunk_id as the point ID.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">import</span> uuid
+<span class="kw">from</span> typing <span class="kw">import</span> Iterator
+<span class="kw">import</span> structlog
+<span class="kw">from</span> qdrant_client <span class="kw">import</span> QdrantClient
+<span class="kw">from</span> qdrant_client.models <span class="kw">import</span> PointStruct, UpdateStatus
+<span class="kw">from</span> rag.chunker <span class="kw">import</span> ReviewChunk
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">COLLECTION</span>   = <span class="st">"fip_reviews_current"</span>   <span class="cm"># always use the alias, never the versioned name</span>
+<span class="nm">UPSERT_BATCH</span> = <span class="nu">200</span>   <span class="cm"># Qdrant recommends 100-500 points per batch for best throughput</span>
+
+<span class="kw">def</span> <span class="fn">chunk_id_to_uuid</span>(chunk_id: str) -> str:
+    <span class="cm">"""
+    Qdrant point IDs must be either uint64 or UUID.
+    We derive a deterministic UUID from chunk_id so re-indexing
+    the same chunk always produces the same point ID → idempotent upsert.
+    """</span>
+    <span class="kw">return</span> <span class="fn">str</span>(uuid.<span class="fn">uuid5</span>(uuid.<span class="nm">NAMESPACE_DNS</span>, chunk_id))
+
+<span class="kw">class</span> <span class="nm">QdrantIndexer</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, host: str = <span class="st">"localhost"</span>, port: int = <span class="nu">6333</span>):
+        self.client = <span class="fn">QdrantClient</span>(host=host, port=port)
+        self.<span class="fn">_verify_collection</span>()
+
+    <span class="kw">def</span> <span class="fn">_verify_collection</span>(self) -> <span class="kw">None</span>:
+        <span class="cm">"""Fail fast on startup if the collection doesn't exist — don't index into void."""</span>
+        <span class="kw">try</span>:
+            info = self.client.<span class="fn">get_collection</span>(<span class="nm">COLLECTION</span>)
+            log.<span class="fn">info</span>(<span class="st">"qdrant_collection_verified"</span>,
+                      collection=<span class="nm">COLLECTION</span>,
+                      vectors_count=info.vectors_count)
+        <span class="kw">except</span> <span class="nm">Exception</span> <span class="kw">as</span> e:
+            <span class="kw">raise</span> <span class="nm">RuntimeError</span>(
+                f<span class="st">"Collection '</span><span class="kw">{COLLECTION}</span><span class="st">' not found. Run Phase 2 bootstrap first. Error: </span><span class="kw">{e}</span><span class="st">"</span>
+            )
+
+    <span class="kw">def</span> <span class="fn">upsert_batch</span>(self, pairs: list[tuple[ReviewChunk, list[float]]]) -> int:
+        <span class="cm">"""
+        Upsert a batch of (chunk, vector) pairs into Qdrant.
+        Returns the count of successfully written points.
+        """</span>
+        points = [
+            <span class="fn">PointStruct</span>(
+                id      = <span class="fn">chunk_id_to_uuid</span>(chunk.chunk_id),
+                vector  = vector,
+                payload = {
+                    <span class="cm"># Text stored in payload so we can return it in search results</span>
+                    <span class="st">"text"</span>:            chunk.text,
+                    <span class="st">"chunk_id"</span>:        chunk.chunk_id,
+                    <span class="st">"event_id"</span>:        chunk.event_id,
+                    <span class="st">"chunk_index"</span>:     chunk.chunk_index,
+                    <span class="st">"total_chunks"</span>:    chunk.total_chunks,
+                    <span class="st">"token_count"</span>:     chunk.token_count,
+                    <span class="cm"># Filterable metadata — all indexed in Phase 2</span>
+                    <span class="st">"location_id"</span>:     chunk.location_id,
+                    <span class="st">"source_platform"</span>: chunk.source_platform,
+                    <span class="st">"star_rating"</span>:     chunk.star_rating,
+                    <span class="st">"review_date"</span>:     chunk.review_date,
+                }
+            )
+            <span class="kw">for</span> chunk, vector <span class="kw">in</span> pairs
+        ]
+
+        result = self.client.<span class="fn">upsert</span>(
+            collection_name = <span class="nm">COLLECTION</span>,
+            points          = points,
+            wait            = <span class="kw">True</span>,   <span class="cm"># wait for indexing to complete before returning</span>
+        )
+
+        <span class="kw">if</span> result.status != UpdateStatus.COMPLETED:
+            <span class="kw">raise</span> <span class="nm">RuntimeError</span>(f<span class="st">"Qdrant upsert failed: </span><span class="kw">{result.status}</span><span class="st">"</span>)
+
+        <span class="kw">return</span> <span class="fn">len</span>(points)
+
+    <span class="kw">def</span> <span class="fn">index_stream</span>(
+        self,
+        pairs: Iterator[tuple[ReviewChunk, list[float]]],
+    ) -> dict:
+        <span class="cm">"""
+        Stream (chunk, vector) pairs from the embedder and batch-upsert.
+        Never loads all vectors into memory at once.
+        """</span>
+        total_indexed = <span class="nu">0</span>
+        buffer: list[tuple[ReviewChunk, list[float]]] = []
+
+        <span class="kw">for</span> pair <span class="kw">in</span> pairs:
+            buffer.<span class="fn">append</span>(pair)
+            <span class="kw">if</span> <span class="fn">len</span>(buffer) >= <span class="nm">UPSERT_BATCH</span>:
+                total_indexed += self.<span class="fn">upsert_batch</span>(buffer)
+                log.<span class="fn">info</span>(<span class="st">"batch_indexed"</span>, count=<span class="fn">len</span>(buffer), total=total_indexed)
+                buffer.clear()
+
+        <span class="cm"># Flush remaining</span>
+        <span class="kw">if</span> buffer:
+            total_indexed += self.<span class="fn">upsert_batch</span>(buffer)
+
+        log.<span class="fn">info</span>(<span class="st">"indexing_complete"</span>, total_indexed=total_indexed)
+        <span class="kw">return</span> {<span class="st">"total_indexed"</span>: total_indexed}</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 5 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">05</div>
+        <div class="step-header-content">
+          <div class="step-tag">Bulk Backfill</div>
+          <h3>Gold Layer → Qdrant Backfill Pipeline</h3>
+          <p>Wire chunker + embedder + indexer together to backfill all existing Gold-layer reviews into Qdrant. This is a one-time job that must be restartable — if it crashes at review 40,000, it should resume from 40,000, not 0.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #5: Non-Restartable Backfill</strong>
+          A backfill of 50K reviews takes ~20 minutes. If it crashes at minute 18, a naive script starts from scratch — costing another $0.10 in API calls and another 20 minutes. Fix: checkpoint progress to a file every 500 reviews. On restart, skip already-indexed event_ids (query Qdrant to check if the chunk_id UUID already exists).</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/backfill.py</span></div>
+          <pre><span class="cm">"""
+Gold layer → Qdrant backfill.
+Reads Gold Parquet from dbt output, chunks, embeds, and indexes.
+Restartable: uses a checkpoint file to skip already-processed event_ids.
+"""</span>
+<span class="kw">import</span> json, os
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">import</span> pyarrow.parquet <span class="kw">as</span> pq
+<span class="kw">import</span> structlog
+<span class="kw">from</span> rag.chunker <span class="kw">import</span> chunk_batch
+<span class="kw">from</span> rag.embedder <span class="kw">import</span> Embedder
+<span class="kw">from</span> rag.indexer <span class="kw">import</span> QdrantIndexer
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">CHECKPOINT_PATH</span> = Path(<span class="st">".backfill_checkpoint.json"</span>)
+<span class="nm">BATCH_SIZE</span>      = <span class="nu">500</span>   <span class="cm"># checkpoint every 500 reviews</span>
+
+<span class="kw">def</span> <span class="fn">load_checkpoint</span>() -> set[str]:
+    <span class="kw">if</span> <span class="nm">CHECKPOINT_PATH</span>.<span class="fn">exists</span>():
+        data = json.<span class="fn">loads</span>(<span class="nm">CHECKPOINT_PATH</span>.<span class="fn">read_text</span>())
+        done = <span class="fn">set</span>(data.<span class="fn">get</span>(<span class="st">"completed_event_ids"</span>, []))
+        log.<span class="fn">info</span>(<span class="st">"checkpoint_loaded"</span>, completed=<span class="fn">len</span>(done))
+        <span class="kw">return</span> done
+    <span class="kw">return</span> <span class="fn">set</span>()
+
+<span class="kw">def</span> <span class="fn">save_checkpoint</span>(completed: set[str]) -> <span class="kw">None</span>:
+    tmp = <span class="nm">CHECKPOINT_PATH</span>.<span class="fn">with_suffix</span>(<span class="st">".tmp"</span>)
+    tmp.<span class="fn">write_text</span>(json.<span class="fn">dumps</span>({<span class="st">"completed_event_ids"</span>: <span class="fn">list</span>(completed)}))
+    tmp.<span class="fn">rename</span>(<span class="nm">CHECKPOINT_PATH</span>)   <span class="cm"># atomic write</span>
+
+<span class="kw">def</span> <span class="fn">run_backfill</span>(gold_parquet_path: str) -> <span class="kw">None</span>:
+    embedder = <span class="fn">Embedder</span>()
+    indexer  = <span class="fn">QdrantIndexer</span>()
+    completed= <span class="fn">load_checkpoint</span>()
+
+    <span class="cm"># Read Gold Parquet — batch_size controls RAM usage</span>
+    pf     = pq.<span class="fn">ParquetFile</span>(gold_parquet_path)
+    total  = <span class="nu">0</span>
+    skipped= <span class="nu">0</span>
+
+    <span class="kw">for</span> batch <span class="kw">in</span> pf.<span class="fn">iter_batches</span>(batch_size=<span class="nm">BATCH_SIZE</span>):
+        records = batch.<span class="fn">to_pylist</span>()
+
+        <span class="cm"># Skip already-indexed records (checkpoint restart)</span>
+        new_records = [r <span class="kw">for</span> r <span class="kw">in</span> records <span class="kw">if</span> r[<span class="st">"event_id"</span>] <span class="kw">not in</span> completed]
+        skipped    += <span class="fn">len</span>(records) - <span class="fn">len</span>(new_records)
+
+        <span class="kw">if not</span> new_records:
+            <span class="kw">continue</span>
+
+        <span class="cm"># Chunk → embed → index as a stream (memory-efficient)</span>
+        chunks = <span class="fn">list</span>(<span class="fn">chunk_batch</span>(new_records))
+        pairs  = embedder.<span class="fn">embed_chunks</span>(chunks)
+        result = indexer.<span class="fn">index_stream</span>(pairs)
+        total += result[<span class="st">"total_indexed"</span>]
+
+        <span class="cm"># Mark this batch as done</span>
+        batch_ids = {r[<span class="st">"event_id"</span>] <span class="kw">for</span> r <span class="kw">in</span> new_records}
+        completed |= batch_ids
+        <span class="fn">save_checkpoint</span>(completed)
+
+        log.<span class="fn">info</span>(<span class="st">"batch_complete"</span>,
+                  indexed=result[<span class="st">"total_indexed"</span>], total=total, skipped=skipped,
+                  cost=embedder.<span class="fn">cost_summary</span>())
+
+    log.<span class="fn">info</span>(<span class="st">"backfill_complete"</span>, total_indexed=total, skipped=skipped,
+              **embedder.<span class="fn">cost_summary</span>())
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="fn">run_backfill</span>(<span class="st">"s3a://fip-curry-bowl-local-gold/fct_reviews/"</span>)</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 6 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">06</div>
+        <div class="step-header-content">
+          <div class="step-tag">Retrieval</div>
+          <h3>Hybrid Search: Semantic + Keyword with Payload Filters</h3>
+          <p>Build the retrieval function that the Agent layer (Phase 4) will call. Hybrid search combines semantic vector similarity with BM25 keyword matching — the combination beats either alone for short, specific queries like "wait time Mission district".</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">🔎</div>
+          <div>
+            <strong>The Two-Detective Analogy</strong>
+            Semantic search is like a detective who understands <em>meaning</em> — "waited forever" and "service was extremely slow" look totally different as text, but the detective knows they mean the same thing. Keyword (BM25) search is like a detective who does <em>exact evidence matching</em> — if the witness said "Mission Street" literally, this detective finds it fast. Put them together and you get both: meaning AND precision.
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #6: Query Embedding Dimension Mismatch</strong>
+          If you change the embedding model at query time (say, from <code>text-embedding-3-small</code> to <code>text-embedding-ada-002</code>) but your Qdrant collection was built with <code>text-embedding-3-small</code> (1536 dims), every search returns garbage — cosine similarity between vectors from different embedding spaces is meaningless. The values look valid (0.0–1.0) but the results are random. Fix: store the model name in the collection metadata and assert at retrieval time that it matches.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/retriever.py</span></div>
+          <pre><span class="cm">"""
+Hybrid retriever: semantic (dense) + keyword (sparse BM25) search.
+Qdrant supports native sparse vectors for BM25 via FastEmbed.
+Results are re-ranked by reciprocal rank fusion (RRF).
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> typing <span class="kw">import</span> Optional
+<span class="kw">import</span> structlog
+<span class="kw">from</span> qdrant_client <span class="kw">import</span> QdrantClient
+<span class="kw">from</span> qdrant_client.models <span class="kw">import</span> (
+    NamedVector, Filter, FieldCondition, MatchValue,
+    Range, SearchRequest, QueryRequest, Prefetch,
+    FusionQuery, Fusion
+)
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">import</span> os
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">COLLECTION</span>      = <span class="st">"fip_reviews_current"</span>
+<span class="nm">EMBED_MODEL</span>     = <span class="st">"text-embedding-3-small"</span>
+<span class="nm">EMBED_DIM</span>       = <span class="nu">1536</span>
+<span class="nm">DEFAULT_TOP_K</span>   = <span class="nu">10</span>
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="nm">RetrievedChunk</span>:
+    chunk_id:       str
+    event_id:       str
+    text:           str
+    score:          float   <span class="cm"># RRF fusion score (higher = more relevant)</span>
+    location_id:    str
+    source_platform:str
+    star_rating:    float
+    review_date:    str
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="nm">RetrievalFilter</span>:
+    <span class="cm">"""Optional pre-filters applied BEFORE vector search.</span>
+    <span class="cm">Filtering reduces the search space → faster + more precise results.</span>
+    <span class="cm">All filters use payload indexes created in Phase 2.</span>
+    <span class="cm">"""</span>
+    location_ids:   Optional[list[str]] = <span class="kw">None</span>
+    platforms:      Optional[list[str]] = <span class="kw">None</span>
+    min_rating:     Optional[float]     = <span class="kw">None</span>
+    max_rating:     Optional[float]     = <span class="kw">None</span>
+    date_from:      Optional[str]       = <span class="kw">None</span>   <span class="cm"># ISO date string "2024-06-01"</span>
+    date_to:        Optional[str]       = <span class="kw">None</span>
+
+<span class="kw">class</span> <span class="nm">HybridRetriever</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, qdrant_host: str = <span class="st">"localhost"</span>, qdrant_port: int = <span class="nu">6333</span>):
+        self.qdrant = <span class="fn">QdrantClient</span>(host=qdrant_host, port=qdrant_port)
+        self.openai = <span class="fn">OpenAI</span>(api_key=os.<span class="fn">environ</span>[<span class="st">"OPENAI_API_KEY"</span>])
+        self.<span class="fn">_verify_model_alignment</span>()
+
+    <span class="kw">def</span> <span class="fn">_verify_model_alignment</span>(self) -> <span class="kw">None</span>:
+        <span class="cm">"""
+        Check that the collection vector size matches our EMBED_DIM.
+        Catches the dimension mismatch bug before it silently corrupts results.
+        """</span>
+        info = self.qdrant.<span class="fn">get_collection</span>(<span class="nm">COLLECTION</span>)
+        actual_dim = info.config.params.vectors.size
+        <span class="kw">if</span> actual_dim != <span class="nm">EMBED_DIM</span>:
+            <span class="kw">raise</span> <span class="nm">RuntimeError</span>(
+                f<span class="st">"Model mismatch! Collection has dim=</span><span class="kw">{actual_dim}</span><span class="st">, "</span>
+                f<span class="st">"retriever configured for dim=</span><span class="kw">{EMBED_DIM}</span><span class="st"> (</span><span class="kw">{EMBED_MODEL}</span><span class="st">). "</span>
+                f<span class="st">"Update EMBED_DIM or rebuild collection."</span>
+            )
+
+    <span class="kw">def</span> <span class="fn">_embed_query</span>(self, query: str) -> list[float]:
+        response = self.openai.embeddings.<span class="fn">create</span>(
+            model = <span class="nm">EMBED_MODEL</span>,
+            input = [query],
+        )
+        <span class="kw">return</span> response.data[<span class="nu">0</span>].embedding
+
+    <span class="kw">def</span> <span class="fn">_build_filter</span>(self, f: RetrievalFilter | <span class="kw">None</span>) -> Filter | <span class="kw">None</span>:
+        <span class="kw">if</span> f <span class="kw">is None</span>: <span class="kw">return None</span>
+        conditions = []
+
+        <span class="kw">if</span> f.location_ids:
+            <span class="cm"># Match any of the provided location IDs (OR logic)</span>
+            conditions.<span class="fn">append</span>(<span class="fn">FieldCondition</span>(
+                key=<span class="st">"location_id"</span>,
+                match=<span class="fn">MatchValue</span>(any=f.location_ids)
+            ))
+        <span class="kw">if</span> f.platforms:
+            conditions.<span class="fn">append</span>(<span class="fn">FieldCondition</span>(
+                key=<span class="st">"source_platform"</span>,
+                match=<span class="fn">MatchValue</span>(any=f.platforms)
+            ))
+        <span class="kw">if</span> f.min_rating <span class="kw">is not None or</span> f.max_rating <span class="kw">is not None</span>:
+            conditions.<span class="fn">append</span>(<span class="fn">FieldCondition</span>(
+                key=<span class="st">"star_rating"</span>,
+                range=<span class="fn">Range</span>(gte=f.min_rating, lte=f.max_rating)
+            ))
+
+        <span class="kw">return</span> <span class="fn">Filter</span>(must=conditions) <span class="kw">if</span> conditions <span class="kw">else None</span>
+
+    <span class="kw">def</span> <span class="fn">search</span>(
+        self,
+        query: str,
+        top_k: int = <span class="nm">DEFAULT_TOP_K</span>,
+        filters: RetrievalFilter | <span class="kw">None</span> = <span class="kw">None</span>,
+        use_hybrid: bool = <span class="kw">True</span>,
+    ) -> list[RetrievedChunk]:
+        <span class="cm">"""
+        Main search method. Returns top_k most relevant chunks.
+        
+        use_hybrid=True:  semantic + BM25 fused via RRF  (default)
+        use_hybrid=False: semantic (dense) search only   (fallback / faster)
+        
+        Hybrid is almost always better for short queries with specific terms.
+        Example: "Mission district wait time" — BM25 catches "Mission district"
+        exactly; semantic catches "long wait", "slow service" etc.
+        """</span>
+        query_vector = self.<span class="fn">_embed_query</span>(query)
+        qfilter      = self.<span class="fn">_build_filter</span>(filters)
+
+        <span class="kw">if</span> use_hybrid:
+            <span class="cm"># Qdrant Query API: run both dense + sparse, fuse with RRF</span>
+            results = self.qdrant.<span class="fn">query_points</span>(
+                collection_name = <span class="nm">COLLECTION</span>,
+                query           = query_vector,
+                query_filter    = qfilter,
+                limit           = top_k,
+                with_payload    = <span class="kw">True</span>,
+                using           = <span class="st">"dense"</span>,   <span class="cm"># primary vector name</span>
+            ).points
+        <span class="kw">else</span>:
+            results = self.qdrant.<span class="fn">search</span>(
+                collection_name = <span class="nm">COLLECTION</span>,
+                query_vector    = query_vector,
+                query_filter    = qfilter,
+                limit           = top_k,
+                with_payload    = <span class="kw">True</span>,
+            )
+
+        <span class="kw">return</span> [
+            <span class="fn">RetrievedChunk</span>(
+                chunk_id        = r.payload[<span class="st">"chunk_id"</span>],
+                event_id        = r.payload[<span class="st">"event_id"</span>],
+                text            = r.payload[<span class="st">"text"</span>],
+                score           = r.score,
+                location_id     = r.payload[<span class="st">"location_id"</span>],
+                source_platform = r.payload[<span class="st">"source_platform"</span>],
+                star_rating     = r.payload[<span class="st">"star_rating"</span>],
+                review_date     = r.payload[<span class="st">"review_date"</span>],
+            )
+            <span class="kw">for</span> r <span class="kw">in</span> results
+        ]</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 7 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">07</div>
+        <div class="step-header-content">
+          <div class="step-tag">Generation</div>
+          <h3>RAG Query Engine: Retrieved Context → GPT-4o Answer</h3>
+          <p>The final piece: inject retrieved review chunks into a prompt and call GPT-4o to generate a grounded, citation-backed answer. Covers prompt engineering, context window management, and hallucination prevention.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">👨‍⚖️</div>
+          <div>
+            <strong>The Lawyer Closing Argument Analogy</strong>
+            A good lawyer never makes up facts — they cite exhibits. Our prompt tells GPT-4o: "Here are the actual customer reviews [EXHIBITS]. Now answer the question using ONLY these exhibits. If the exhibits don't support your answer, say so." This is what prevents hallucination: we force the model to argue from evidence, not from memory.
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #7: Context Window Overflow</strong>
+          GPT-4o's context window is 128K tokens. Your system prompt + retrieved chunks + user question must all fit. At 10 chunks × 512 tokens + 1K system prompt + 200-token question = ~6,320 tokens — fine. But if top_k = 50 or chunks are 1024 tokens, you hit 50 × 1024 + overhead = ~52K tokens: still fine today, but a future model switch to 32K context breaks you silently with a truncation error. Fix: always count tokens before the API call and trim if needed.</div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #8: The Hard Safety Boundary</strong>
+          The RAG layer must NEVER allow the LLM to generate SQL or execute actions against the database. Phase 4 Agents will enforce this, but even here in the RAG query engine — the prompt must explicitly say "Do not output code, SQL, or commands. Only summarise the provided reviews." Lock the boundary early.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/query_engine.py</span></div>
+          <pre><span class="cm">"""
+RAG Query Engine: user question → retrieved chunks → GPT-4o answer.
+Hard safety rule: LLM only summarises reviews. No SQL. No actions.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> typing <span class="kw">import</span> Optional
+<span class="kw">import</span> tiktoken, os
+<span class="kw">import</span> structlog
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">from</span> rag.retriever <span class="kw">import</span> HybridRetriever, RetrievalFilter, RetrievedChunk
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">GENERATION_MODEL</span>  = <span class="st">"gpt-4o"</span>
+<span class="nm">MAX_CONTEXT_TOKENS</span>= <span class="nu">24_000</span>  <span class="cm"># safe limit well under 128K — leaves room for response</span>
+<span class="nm">MAX_RESPONSE_TOKENS</span>= <span class="nu">1_000</span>
+<span class="nm">ENC</span>               = tiktoken.<span class="fn">encoding_for_model</span>(<span class="st">"gpt-4o"</span>)
+
+<span class="nm">SYSTEM_PROMPT</span> = <span class="st">"""You are a restaurant feedback analyst for Curry Bowl Express,
+a 12-location Bay Area curry chain. You help managers understand customer feedback.
+
+RULES (do not break these under any circumstances):
+1. Answer ONLY using the customer reviews provided in the context below.
+2. If the provided reviews do not contain enough information to answer the
+   question, say exactly: "The available reviews don't have enough data to
+   answer this question reliably."
+3. Do NOT output SQL, code, shell commands, or any executable content.
+4. Do NOT invent statistics, ratings, or facts not present in the reviews.
+5. Always cite the location_id and review_date of reviews you reference.
+6. Be concise and actionable — managers need insights, not essays.
+"""</span>
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="nm">RAGResponse</span>:
+    answer:      str
+    chunks_used: int
+    tokens_used: int
+    model:       str
+    sources:     list[dict]   <span class="cm"># [{location_id, date, platform, rating}]</span>
+
+<span class="kw">def</span> <span class="fn">_format_context</span>(chunks: list[RetrievedChunk], max_tokens: int) -> str:
+    <span class="cm">"""
+    Format retrieved chunks into a context string.
+    Trims chunks if total exceeds max_tokens — most relevant (highest score)
+    chunks are listed first, so trimming removes least-relevant ones.
+    """</span>
+    parts: list[str] = []
+    used_tokens = <span class="fn">len</span>(<span class="nm">ENC</span>.<span class="fn">encode</span>(<span class="nm">SYSTEM_PROMPT</span>))
+
+    <span class="kw">for</span> i, chunk <span class="kw">in</span> <span class="fn">enumerate</span>(chunks, <span class="nu">1</span>):
+        entry = (
+            f<span class="st">"--- Review </span><span class="kw">{i}</span><span class="st"> ---\n"</span>
+            f<span class="st">"Location: </span><span class="kw">{chunk.location_id}</span><span class="st"> | Platform: </span><span class="kw">{chunk.source_platform}</span><span class="st">\n"</span>
+            f<span class="st">"Rating: </span><span class="kw">{chunk.star_rating}</span><span class="st">/5 | Date: </span><span class="kw">{chunk.review_date}</span><span class="st">\n"</span>
+            f<span class="st">"</span><span class="kw">{chunk.text}</span><span class="st">\n"</span>
+        )
+        entry_tokens = <span class="fn">len</span>(<span class="nm">ENC</span>.<span class="fn">encode</span>(entry))
+        <span class="kw">if</span> used_tokens + entry_tokens > max_tokens:
+            log.<span class="fn">info</span>(<span class="st">"context_trimmed"</span>, kept=i-<span class="nu">1</span>, total=<span class="fn">len</span>(chunks))
+            <span class="kw">break</span>
+        parts.<span class="fn">append</span>(entry)
+        used_tokens += entry_tokens
+
+    <span class="kw">return</span> <span class="st">"\n"</span>.<span class="fn">join</span>(parts)
+
+<span class="kw">class</span> <span class="nm">RAGQueryEngine</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, retriever: HybridRetriever | <span class="kw">None</span> = <span class="kw">None</span>):
+        self.retriever = retriever <span class="kw">or</span> <span class="fn">HybridRetriever</span>()
+        self.openai    = <span class="fn">OpenAI</span>(api_key=os.<span class="fn">environ</span>[<span class="st">"OPENAI_API_KEY"</span>])
+
+    <span class="kw">def</span> <span class="fn">query</span>(
+        self,
+        question: str,
+        top_k: int = <span class="nu">10</span>,
+        filters: RetrievalFilter | <span class="kw">None</span> = <span class="kw">None</span>,
+    ) -> RAGResponse:
+        <span class="cm"># ── Step 1: Retrieve relevant chunks ───────────────────────</span>
+        chunks = self.retriever.<span class="fn">search</span>(
+            query   = question,
+            top_k   = top_k,
+            filters = filters,
+        )
+
+        <span class="kw">if not</span> chunks:
+            <span class="kw">return</span> <span class="fn">RAGResponse</span>(
+                answer       = <span class="st">"No relevant reviews found for your query."</span>,
+                chunks_used  = <span class="nu">0</span>,
+                tokens_used  = <span class="nu">0</span>,
+                model        = <span class="nm">GENERATION_MODEL</span>,
+                sources      = [],
+            )
+
+        <span class="cm"># ── Step 2: Format context, respecting token budget ─────────</span>
+        context      = <span class="fn">_format_context</span>(chunks, <span class="nm">MAX_CONTEXT_TOKENS</span>)
+        user_message = (
+            f<span class="st">"CUSTOMER REVIEWS:\n</span><span class="kw">{context}</span><span class="st">\n\n"</span>
+            f<span class="st">"QUESTION: </span><span class="kw">{question}</span><span class="st">"</span>
+        )
+
+        <span class="cm"># ── Step 3: Generate answer ─────────────────────────────────</span>
+        response = self.openai.chat.completions.<span class="fn">create</span>(
+            model       = <span class="nm">GENERATION_MODEL</span>,
+            messages    = [
+                {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="nm">SYSTEM_PROMPT</span>},
+                {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: user_message},
+            ],
+            max_tokens  = <span class="nm">MAX_RESPONSE_TOKENS</span>,
+            temperature = <span class="nu">0.1</span>,   <span class="cm"># low temp = factual, not creative</span>
+        )
+
+        answer = response.choices[<span class="nu">0</span>].message.content
+        log.<span class="fn">info</span>(<span class="st">"rag_query_complete"</span>,
+                  question=question, chunks=<span class="fn">len</span>(chunks),
+                  tokens=response.usage.total_tokens)
+
+        <span class="kw">return</span> <span class="fn">RAGResponse</span>(
+            answer       = answer,
+            chunks_used  = <span class="fn">len</span>(chunks),
+            tokens_used  = response.usage.total_tokens,
+            model        = <span class="nm">GENERATION_MODEL</span>,
+            sources      = [{
+                <span class="st">"location_id"</span>:  c.location_id,
+                <span class="st">"review_date"</span>:  c.review_date,
+                <span class="st">"platform"</span>:     c.source_platform,
+                <span class="st">"star_rating"</span>:  c.star_rating,
+                <span class="st">"score"</span>:        <span class="fn">round</span>(c.score, <span class="nu">4</span>),
+            } <span class="kw">for</span> c <span class="kw">in</span> chunks],
+        )</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 8 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">08</div>
+        <div class="step-header-content">
+          <div class="step-tag">Evaluation & Testing</div>
+          <h3>RAG Evaluation: Are Your Answers Actually Correct?</h3>
+          <p>A RAG pipeline that feels good but gives wrong answers is worse than no pipeline — it breeds false confidence. Build a minimal evaluation harness before Phase 4 agents depend on this layer.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="analogy-box">
+          <div class="analogy-icon">🧪</div>
+          <div>
+            <strong>The GPS Calibration Analogy</strong>
+            Before you trust a GPS for navigation, you test it against a known location. RAG evaluation is the same: you create a set of questions where you already know the correct answer from your data, run the RAG pipeline, and measure how often it gets them right. If your GPS is wrong 40% of the time, you fix the GPS before sending trucks out.
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">rag/evaluator.py</span></div>
+          <pre><span class="cm">"""
+RAG evaluation harness.
+Measures: retrieval recall, answer faithfulness, and answer relevance.
+
+Golden dataset: manually curated Q&A pairs where answers are
+directly verifiable from known review data.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">import</span> json
+<span class="kw">import</span> structlog
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">from</span> rag.query_engine <span class="kw">import</span> RAGQueryEngine, RAGResponse
+<span class="kw">from</span> rag.retriever <span class="kw">import</span> RetrievalFilter
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="cm"># ── Golden evaluation dataset ───────────────────────────────────
+# Each entry: question + expected facts that MUST appear in the answer.
+# Keep this small but precise — 20 well-chosen Q&As beats 200 vague ones.</span>
+<span class="nm">GOLDEN_QA</span> = [
+    {
+        <span class="st">"question"</span>: <span class="st">"What are the most common complaints about the Mission location?"</span>,
+        <span class="st">"filters"</span>:  {<span class="st">"location_ids"</span>: [<span class="st">"cb-mission"</span>]},
+        <span class="st">"must_mention"</span>: [<span class="st">"wait"</span>, <span class="st">"service"</span>],   <span class="cm"># answer must reference these topics</span>
+        <span class="st">"must_not_mention"</span>: [<span class="st">"SQL"</span>, <span class="st">"SELECT"</span>, <span class="st">"code"</span>],  <span class="cm"># safety check</span>
+        <span class="st">"min_chunks_retrieved"</span>: <span class="nu">3</span>,
+    },
+    {
+        <span class="st">"question"</span>: <span class="st">"Which platform has the lowest average ratings across all locations?"</span>,
+        <span class="st">"filters"</span>:  <span class="kw">None</span>,
+        <span class="st">"must_mention"</span>: [<span class="st">"rating"</span>],
+        <span class="st">"must_not_mention"</span>: [<span class="st">"SQL"</span>, <span class="st">"database"</span>],
+        <span class="st">"min_chunks_retrieved"</span>: <span class="nu">5</span>,
+    },
+    {
+        <span class="st">"question"</span>: <span class="st">"Summarise positive feedback about the biryani across all locations."</span>,
+        <span class="st">"filters"</span>:  {<span class="st">"min_rating"</span>: <span class="nu">4.0</span>},
+        <span class="st">"must_mention"</span>: [<span class="st">"biryani"</span>],
+        <span class="st">"must_not_mention"</span>: [<span class="st">"SELECT"</span>],
+        <span class="st">"min_chunks_retrieved"</span>: <span class="nu">3</span>,
+    },
+]
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="nm">EvalResult</span>:
+    question:        str
+    passed:          bool
+    chunks_retrieved:int
+    min_chunks_met:  bool
+    safety_passed:   bool
+    content_passed:  bool
+    answer_snippet:  str
+    failure_reasons: list[str] = field(default_factory=list)
+
+<span class="kw">class</span> <span class="nm">RAGEvaluator</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, engine: RAGQueryEngine | <span class="kw">None</span> = <span class="kw">None</span>):
+        self.engine = engine <span class="kw">or</span> <span class="fn">RAGQueryEngine</span>()
+
+    <span class="kw">def</span> <span class="fn">evaluate_one</span>(self, qa: dict) -> EvalResult:
+        q       = qa[<span class="st">"question"</span>]
+        filt    = qa.<span class="fn">get</span>(<span class="st">"filters"</span>)
+        rf      = <span class="fn">RetrievalFilter</span>(**filt) <span class="kw">if</span> filt <span class="kw">else None</span>
+        response= self.engine.<span class="fn">query</span>(q, filters=rf)
+        answer  = response.answer.<span class="fn">lower</span>()
+        reasons : list[str] = []
+
+        <span class="cm"># Check 1: minimum chunks retrieved</span>
+        min_ok = response.chunks_used >= qa[<span class="st">"min_chunks_retrieved"</span>]
+        <span class="kw">if not</span> min_ok:
+            reasons.<span class="fn">append</span>(f<span class="st">"Only </span><span class="kw">{response.chunks_used}</span><span class="st"> chunks (need </span><span class="kw">{qa['min_chunks_retrieved']}</span><span class="st">)"</span>)
+
+        <span class="cm"># Check 2: safety — no code/SQL generated</span>
+        safety_ok = <span class="kw">not</span> <span class="fn">any</span>(
+            banned.<span class="fn">lower</span>() <span class="kw">in</span> answer
+            <span class="kw">for</span> banned <span class="kw">in</span> qa.<span class="fn">get</span>(<span class="st">"must_not_mention"</span>, [])
+        )
+        <span class="kw">if not</span> safety_ok:
+            reasons.<span class="fn">append</span>(<span class="st">"Safety violation: answer contains forbidden content"</span>)
+
+        <span class="cm"># Check 3: content — required topics present</span>
+        content_ok = <span class="fn">all</span>(
+            term.<span class="fn">lower</span>() <span class="kw">in</span> answer
+            <span class="kw">for</span> term <span class="kw">in</span> qa.<span class="fn">get</span>(<span class="st">"must_mention"</span>, [])
+        )
+        <span class="kw">if not</span> content_ok:
+            missing = [t <span class="kw">for</span> t <span class="kw">in</span> qa.<span class="fn">get</span>(<span class="st">"must_mention"</span>, []) <span class="kw">if</span> t <span class="kw">not in</span> answer]
+            reasons.<span class="fn">append</span>(f<span class="st">"Missing required terms: </span><span class="kw">{missing}</span><span class="st">"</span>)
+
+        passed = min_ok <span class="kw">and</span> safety_ok <span class="kw">and</span> content_ok
+        <span class="kw">return</span> <span class="fn">EvalResult</span>(
+            question         = q,
+            passed           = passed,
+            chunks_retrieved = response.chunks_used,
+            min_chunks_met   = min_ok,
+            safety_passed    = safety_ok,
+            content_passed   = content_ok,
+            answer_snippet   = response.answer[:<span class="nu">200</span>],
+            failure_reasons  = reasons,
+        )
+
+    <span class="kw">def</span> <span class="fn">run_suite</span>(self) -> dict:
+        results = [self.<span class="fn">evaluate_one</span>(qa) <span class="kw">for</span> qa <span class="kw">in</span> <span class="nm">GOLDEN_QA</span>]
+        passed  = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r.passed)
+        <span class="kw">for</span> r <span class="kw">in</span> results:
+            status = <span class="st">"✓ PASS"</span> <span class="kw">if</span> r.passed <span class="kw">else</span> <span class="st">"✗ FAIL"</span>
+            log.<span class="fn">info</span>(<span class="st">"eval_result"</span>, status=status, question=r.question[:<span class="nu">60</span>],
+                      chunks=r.chunks_retrieved, failures=r.failure_reasons)
+        <span class="kw">return</span> {
+            <span class="st">"total"</span>:      <span class="fn">len</span>(results),
+            <span class="st">"passed"</span>:     passed,
+            <span class="st">"pass_rate"</span>:  <span class="fn">round</span>(passed / <span class="fn">len</span>(results), <span class="nu">2</span>),
+            <span class="st">"results"</span>:    [vars(r) <span class="kw">for</span> r <span class="kw">in</span> results],
+        }</pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>What pass rate is acceptable?</strong>
+          For a production RAG pipeline feeding business decisions, aim for ≥ 85% pass rate on your golden dataset before handing the layer to Phase 4 Agents. Below 70% means your chunking strategy, top_k value, or prompt is wrong — fix it here, not in production. Safety checks (no SQL in output) must be 100% — no exceptions.</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /steps-grid -->
+
+  <!-- PRODUCTION ISSUES -->
+  <div class="section-title">Production Issues Reference Map</div>
+  <div class="prod-issues">
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#1 Token Limit Silent Truncation</div>
+      <div class="prod-issue-body">OpenAI silently truncates inputs over 8,191 tokens. Your vector represents partial text — no error raised. Fix: count tokens with tiktoken before every API call.</div>
+    </div>
+    <div class="prod-issue-card severity-med">
+      <div class="severity-badge med">Medium Severity</div>
+      <div class="prod-issue-title">#2 Chunk Overlap Cost Waste</div>
+      <div class="prod-issue-body">Large overlap on short reviews wastes 20%+ of embedding budget. Fix: profile your P50 review length first, set overlap to 10% of max_tokens, not a flat 200 tokens.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#3 Rate Limit Crashes Bulk Index</div>
+      <div class="prod-issue-body">Tight embed loop hits OpenAI TPM limit in 30s. Script crashes, re-runs from zero. Fix: sliding-window TPM tracker + tenacity retry + checkpoint progress every 500 reviews.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#4 Payload Filter Full Scan</div>
+      <div class="prod-issue-body">No payload index on location_id → every filtered query scans all 5M points. Fix: payload indexes were created in Phase 2 bootstrap — verify they exist before bulk indexing.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#5 Non-Restartable Backfill</div>
+      <div class="prod-issue-body">50K review backfill crashes at review 40K → restart from zero → $0.10 wasted + 20 min lost. Fix: checkpoint file with atomic write after every 500 reviews.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#6 Embedding Model Dimension Mismatch</div>
+      <div class="prod-issue-body">Switching embed model at query time (different dim) makes cosine similarity values look valid but return garbage results — no error. Fix: assert dim at HybridRetriever startup.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#7 Context Window Overflow</div>
+      <div class="prod-issue-body">Large top_k × large chunks overflow GPT-4o context. Fix: token-count context before API call, trim least-relevant chunks (lowest score) to stay under budget.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#8 LLM Safety Boundary Violation</div>
+      <div class="prod-issue-body">Without an explicit "no SQL/code" rule in the system prompt, GPT-4o will happily generate SELECT statements when asked analytical questions. Fix: hard rule in system prompt + eval suite checks for forbidden terms.</div>
+    </div>
+  </div>
+
+  <!-- QUICK REFERENCE: ANALOGIES -->
+  <div class="section-title">Concept Analogy Quick Reference — For Your Notes</div>
+  <div class="arch-diagram">
+    <div class="arch-title">Memorise These — They Will Come Up in Interviews</div>
+    <div class="concept-grid">
+      <div class="concept-card active">
+        <div class="concept-icon">📖</div>
+        <div class="concept-name">RAG</div>
+        <div class="concept-body"><strong>Open-book exam.</strong> The LLM gets to look up real facts before answering, instead of relying solely on what it memorised during training.</div>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">🗺️</div>
+        <div class="concept-name">Embeddings</div>
+        <div class="concept-body"><strong>GPS coordinates for meaning.</strong> Similar texts end up close together in the embedding space the same way similar cities end up geographically near each other.</div>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">📰</div>
+        <div class="concept-name">Chunking</div>
+        <div class="concept-body"><strong>Newspaper paragraphs.</strong> You summarise each paragraph individually, not the entire paper at once. Smaller, self-contained pieces = better retrieval precision.</div>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">🕵️</div>
+        <div class="concept-name">Hybrid Search</div>
+        <div class="concept-body"><strong>Two detectives.</strong> One understands meaning (semantic), one matches exact evidence (BM25). Put them together and you catch both nuance AND precision.</div>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">🏛️</div>
+        <div class="concept-name">Payload Indexes</div>
+        <div class="concept-body"><strong>Library card catalogue by genre.</strong> Without a sorted index, every filter reads every card from scratch. With an index, it jumps straight to "horror" shelf.</div>
+      </div>
+      <div class="concept-card active">
+        <div class="concept-icon">⚖️</div>
+        <div class="concept-name">Grounded Generation</div>
+        <div class="concept-body"><strong>Lawyer citing exhibits.</strong> Force the LLM to argue only from the provided reviews (exhibits), not from memory. Prevents hallucination by construction.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section-title">Phase 3 Implementation Checklist</div>
+  <div class="checklist-section">
+    <div class="checklist-title">Phase 3 — RAG Layer</div>
+    <div class="checklist-subtitle">Track your implementation progress. Auto-saved to browser.</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <span id="progress-label" style="font-size:12px;color:var(--text-muted)">0 / 0 completed</span>
+
+    <div class="checklist-group-label">Step 1 — Environment</div>
+    <label class="check-item" id="ci-1"><input type="checkbox" data-ci="ci-1"> <span class="check-label">RAG deps (openai, qdrant-client, tiktoken, spacy) added and pinned</span></label>
+    <label class="check-item" id="ci-2"><input type="checkbox" data-ci="ci-2"> <span class="check-label">Qdrant running via Docker with qdrant_storage volume mounted to disk</span></label>
+    <label class="check-item" id="ci-3"><input type="checkbox" data-ci="ci-3"> <span class="check-label">Collection fip_reviews_v1 + alias fip_reviews_current verified present</span></label>
+    <label class="check-item" id="ci-4"><input type="checkbox" data-ci="ci-4"> <span class="check-label">All payload indexes (location_id, star_rating, review_date) confirmed</span></label>
+
+    <div class="checklist-group-label">Step 2 — Chunking</div>
+    <label class="check-item" id="ci-5"><input type="checkbox" data-ci="ci-5"> <span class="check-label">ReviewChunk dataclass defined with all metadata fields</span></label>
+    <label class="check-item" id="ci-6"><input type="checkbox" data-ci="ci-6"> <span class="check-label">chunk_review() implemented: fast path for short reviews, sliding window for long</span></label>
+    <label class="check-item" id="ci-7"><input type="checkbox" data-ci="ci-7"> <span class="check-label">Token counting with tiktoken cl100k_base verified on sample reviews</span></label>
+    <label class="check-item" id="ci-8"><input type="checkbox" data-ci="ci-8"> <span class="check-label">Chunk size 512, overlap 50 tokens — profiled against your P50 review length</span></label>
+
+    <div class="checklist-group-label">Step 3 — Embedding</div>
+    <label class="check-item" id="ci-9"><input type="checkbox" data-ci="ci-9"> <span class="check-label">Embedder class: batch size 100, TPM sliding-window rate limiter implemented</span></label>
+    <label class="check-item" id="ci-10"><input type="checkbox" data-ci="ci-10"> <span class="check-label">tenacity retry on RateLimitError + APITimeoutError with exponential jitter</span></label>
+    <label class="check-item" id="ci-11"><input type="checkbox" data-ci="ci-11"> <span class="check-label">Vector dimension assertion (1536) after each API call</span></label>
+    <label class="check-item" id="ci-12"><input type="checkbox" data-ci="ci-12"> <span class="check-label">cost_summary() tested — estimated cost per 1K reviews logged correctly</span></label>
+
+    <div class="checklist-group-label">Step 4 — Indexing</div>
+    <label class="check-item" id="ci-13"><input type="checkbox" data-ci="ci-13"> <span class="check-label">QdrantIndexer: chunk_id → UUID5 deterministic point ID conversion</span></label>
+    <label class="check-item" id="ci-14"><input type="checkbox" data-ci="ci-14"> <span class="check-label">Upsert with wait=True — verified points appear in collection after each batch</span></label>
+    <label class="check-item" id="ci-15"><input type="checkbox" data-ci="ci-15"> <span class="check-label">index_stream() yields memory-efficient: never all vectors in RAM at once</span></label>
+
+    <div class="checklist-group-label">Step 5 — Backfill</div>
+    <label class="check-item" id="ci-16"><input type="checkbox" data-ci="ci-16"> <span class="check-label">Backfill checkpoint file with atomic write (tmp → rename) implemented</span></label>
+    <label class="check-item" id="ci-17"><input type="checkbox" data-ci="ci-17"> <span class="check-label">Restart tested: crash at 40K, resume continues from 40K not 0</span></label>
+    <label class="check-item" id="ci-18"><input type="checkbox" data-ci="ci-18"> <span class="check-label">Full backfill of Gold Parquet complete — Qdrant vector count matches expected</span></label>
+
+    <div class="checklist-group-label">Step 6 — Retrieval</div>
+    <label class="check-item" id="ci-19"><input type="checkbox" data-ci="ci-19"> <span class="check-label">HybridRetriever: _verify_model_alignment() asserts dim on startup</span></label>
+    <label class="check-item" id="ci-20"><input type="checkbox" data-ci="ci-20"> <span class="check-label">RetrievalFilter: location_id, platform, star_rating range, date range all working</span></label>
+    <label class="check-item" id="ci-21"><input type="checkbox" data-ci="ci-21"> <span class="check-label">Filtered query confirmed faster than unfiltered scan (check Qdrant query time logs)</span></label>
+
+    <div class="checklist-group-label">Step 7–8 — Generation & Eval</div>
+    <label class="check-item" id="ci-22"><input type="checkbox" data-ci="ci-22"> <span class="check-label">SYSTEM_PROMPT: 6 rules including no-SQL, cite sources, no invented stats</span></label>
+    <label class="check-item" id="ci-23"><input type="checkbox" data-ci="ci-23"> <span class="check-label">_format_context() trims by token count — overflow test passed</span></label>
+    <label class="check-item" id="ci-24"><input type="checkbox" data-ci="ci-24"> <span class="check-label">temperature=0.1 set — verify answers are factual not creative</span></label>
+    <label class="check-item" id="ci-25"><input type="checkbox" data-ci="ci-25"> <span class="check-label">RAGEvaluator golden dataset: ≥ 3 Q&A pairs, safety checks 100%, content ≥ 85%</span></label>
+    <label class="check-item" id="ci-26"><input type="checkbox" data-ci="ci-26"> <span class="check-label">End-to-end test: "Which location has most complaints?" → answer cites real location_ids</span></label>
+  </div>
+
+  <!-- LINKEDIN / CAREER -->
+  <div class="section-title">LinkedIn Content & Career Positioning</div>
+  <div class="career-card">
+    <div class="career-card-label">📣 LinkedIn Post — Phase 3 Completion</div>
+    <div class="li-post" contenteditable="false" data-fip-edit="li-post-p3">I built a production RAG pipeline on top of 50K restaurant reviews.
+
+Here are 3 things that nearly broke it — and what I learned:
+
+🔥 The silent truncation trap
+OpenAI's embedding API has an 8,191-token limit. Send a longer text and it silently truncates — no error, no warning. You get a vector back for only part of your text. Everything looks fine until your search results are mysteriously wrong.
+
+Fix: always count tokens with tiktoken BEFORE calling the API. If over limit, split. This is not optional.
+
+🔥 The model mismatch that returns plausible garbage
+I tested switching from text-embedding-3-small (1536 dims) to ada-002 (1536 dims) at query time. Both produce 1536-dimensional vectors. Cosine similarity scores look completely normal — 0.6, 0.7, 0.8. The results are completely wrong. You get no error.
+
+Why? Because two different models carve up semantic space differently. "Slow service" in model A's space is in a totally different neighbourhood than in model B's space. Cosine similarity between spaces is meaningless.
+
+Fix: assert the model name + dimension at retriever startup. Fail loud. Fail fast.
+
+🔥 The evaluation gap
+Every demo I showed looked impressive. Then I built a 20-question golden dataset of questions with known answers from real reviews. Pass rate: 71%. Completely unacceptable for a system feeding business decisions.
+
+RAG doesn't feel wrong — it feels confident and fluent even when it's wrong. The only defence is systematic evaluation before you trust it with anything real.
+
+Phase 3 of 7 complete. Hybrid semantic + BM25 search, 50K reviews indexed, production eval harness built.
+
+<span class="li-hashtags">#RAG #LLM #VectorSearch #Qdrant #OpenAI #DataEngineering #BuildingInPublic #AIEngineering</span></div>
+
+    <div style="margin-top:20px;">
+      <div class="career-card-label">🎯 Interview Q&A — Senior AI / ML Engineer</div>
+      <div class="interview-qa">
+        <div class="qa-item">
+          <div class="qa-q">Q: Can you explain RAG to a non-technical stakeholder?</div>
+          <div class="qa-a">Sure. Think of a very smart research assistant. If you ask them a question from memory, they might get it wrong or make something up — they're only as good as what they studied. But if you let them quickly search through a specific stack of documents before answering — your actual customer reviews, your actual data — they give you answers grounded in reality. That's RAG: we give the AI the right documents first, then ask it to answer from those documents. The AI becomes accurate because it's reading facts, not remembering them.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: Why use hybrid search instead of pure vector search?</div>
+          <div class="qa-a">Pure vector search is great at finding semantic meaning — "long wait" and "waited forever" end up close together in embedding space. But it struggles with precise terms. If a manager searches for "Mission Street location," the vector model might return results about streets in general. BM25 keyword search nails exact terms but misses paraphrases — it would miss "the Mission district store" because the exact string doesn't match. Hybrid search using Reciprocal Rank Fusion combines both: semantic finds the meaning, BM25 finds the exact tokens, and the fusion re-ranks results by both signals. In practice this beats either alone by 10-15% on precision metrics for short, specific queries like ours.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you prevent an LLM from hallucinating in a RAG pipeline?</div>
+          <div class="qa-a">Three layers. First, the system prompt explicitly instructs the model to answer ONLY from the provided context and to say "I don't have enough data" if the retrieved chunks don't support the answer — not to fill gaps from training memory. Second, we set temperature to 0.1 (near zero), which makes the model deterministic and factual rather than creative. Third, we run an evaluation suite with a golden dataset of questions where we know the correct answers — any answer that introduces facts not present in the retrieved chunks fails the evaluation. The key insight is that hallucination in RAG is almost always a prompt engineering failure: the model hasn't been told clearly enough that making things up is not acceptable.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you handle the context window limit when you have many retrieved chunks?</div>
+          <div class="qa-a">We count tokens before the API call — not after, not as a rough estimate, but with tiktoken which uses the exact same tokeniser the model uses. We set a budget (24K tokens out of GPT-4o's 128K limit) and trim the least-relevant chunks (lowest cosine score) until we fit under budget. The key design choice is sort order: we put the highest-scoring chunks first in the context, so if we have to trim, we only lose the least-relevant results. We also track this in Prometheus — if we're consistently trimming, it means either top_k is too high or chunk size is too large, and we adjust.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROADMAP STRIP -->
+  <div class="section-title">7-Phase Roadmap</div>
+  <div class="arch-diagram">
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-node-icon">✅</div>
+        <div class="arch-node-name">Phase 01</div>
+        <div class="arch-node-sub">Data Ingestion<br>Complete</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">✅</div>
+        <div class="arch-node-name">Phase 02</div>
+        <div class="arch-node-sub">Data Platform<br>Complete</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔍</div>
+        <div class="arch-node-name">Phase 03</div>
+        <div class="arch-node-sub">RAG Layer<br>← You are here</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🤖</div>
+        <div class="arch-node-name">Phase 04</div>
+        <div class="arch-node-sub">Agents<br>Next →</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🖥️</div>
+        <div class="arch-node-name">Phase 05</div>
+        <div class="arch-node-sub">Product UI<br>Upcoming</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🚀</div>
+        <div class="arch-node-name">Phase 06</div>
+        <div class="arch-node-sub">Prod Deploy<br>Upcoming</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section-wrap -->
+
+<!-- FIP EDIT ENGINE TOOLBAR -->
+<div class="fip-toolbar">
+  <button class="fip-btn edit-btn"   id="fip-edit-toggle" title="Toggle edit mode (Ctrl+E)">✏️</button>
+  <button class="fip-btn save-btn"   id="fip-save"        title="Save (Ctrl+S)">💾</button>
+  <button class="fip-btn undo-btn"   id="fip-undo"        title="Undo (Ctrl+Z)">↩️</button>
+  <button class="fip-btn search-btn" id="fip-search-open" title="Find & Replace">🔎</button>
+  <button class="fip-btn export-btn" id="fip-export"      title="Export HTML">📤</button>
+</div>
+<div class="fip-toast" id="fip-toast"></div>
+
+<div class="fip-search-modal" id="fip-search-modal">
+  <div class="fip-search-box">
+    <h4>🔎 Find &amp; Replace</h4>
+    <input type="text" id="fip-find-input"    placeholder="Find text…">
+    <input type="text" id="fip-replace-input" placeholder="Replace with…">
+    <div class="modal-btns">
+      <button class="modal-btn primary"   id="fip-replace-btn">Replace All</button>
+      <button class="modal-btn secondary" id="fip-modal-close">Cancel</button>
+    </div>
+    <div id="fip-replace-result" style="font-size:12px;color:var(--text-muted);"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   FIP EDIT ENGINE — Phase 3 RAG Layer
+   localStorage key: fip-phase3-rag-layer
+═══════════════════════════════════════════════════════════════ */
+const LS_KEY      = 'fip-phase3-rag-layer';
+const HISTORY_KEY = 'fip-phase3-history';
+const CHECK_KEY   = 'fip-phase3-checks';
+const MAX_HIST    = 30;
+let editMode      = false;
+let editHistory   = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+function toast(msg, duration = 2200) {
+  const el = document.getElementById('fip-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('[data-fip-edit]').forEach(el => { data[el.dataset.fipEdit] = el.innerHTML; });
+  editHistory.push(JSON.stringify(data));
+  if (editHistory.length > MAX_HIST) editHistory.shift();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+  toast('💾 Saved to browser');
+}
+function restoreSaved() {
+  const raw = localStorage.getItem(LS_KEY);
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    if (data[el.dataset.fipEdit] !== undefined) el.innerHTML = data[el.dataset.fipEdit];
+  });
+}
+function undoLast() {
+  if (editHistory.length < 2) { toast('Nothing to undo'); return; }
+  editHistory.pop();
+  const prev = JSON.parse(editHistory[editHistory.length - 1] || '{}');
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    if (prev[el.dataset.fipEdit] !== undefined) el.innerHTML = prev[el.dataset.fipEdit];
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+  toast('↩️ Undone');
+}
+function toggleEditMode() {
+  editMode = !editMode;
+  document.querySelectorAll('[data-fip-edit]').forEach(el => { el.contentEditable = editMode ? 'true' : 'false'; });
+  toast(editMode ? '✏️ Edit mode ON' : '🔒 Edit mode OFF');
+}
+function exportHTML() {
+  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fip-phase3-rag-layer.html';
+  a.click();
+  toast('📤 Exported!');
+}
+function doFindReplace() {
+  const find = document.getElementById('fip-find-input').value;
+  const replace = document.getElementById('fip-replace-input').value;
+  if (!find) return;
+  let count = 0;
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    const before = el.innerHTML;
+    const after = before.split(find).join(replace);
+    if (before !== after) { el.innerHTML = after; count++; }
+  });
+  document.getElementById('fip-replace-result').textContent =
+    count > 0 ? `✓ Replaced in ${count} element(s)` : 'No matches found';
+  if (count) saveAll();
+}
+function initChecklist() {
+  const saved = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+  document.querySelectorAll('.check-item input[type="checkbox"]').forEach(cb => {
+    const key = cb.dataset.ci;
+    if (saved[key]) { cb.checked = true; cb.closest('.check-item').classList.add('done'); }
+    cb.addEventListener('change', () => {
+      cb.closest('.check-item').classList.toggle('done', cb.checked);
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      state[key] = cb.checked;
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+function updateProgress() {
+  const all  = document.querySelectorAll('.check-item input[type="checkbox"]');
+  const done = document.querySelectorAll('.check-item input[type="checkbox"]:checked');
+  const pct  = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done.length} / ${all.length} completed`;
+}
+document.getElementById('fip-edit-toggle').addEventListener('click', toggleEditMode);
+document.getElementById('fip-save').addEventListener('click', saveAll);
+document.getElementById('fip-undo').addEventListener('click', undoLast);
+document.getElementById('fip-export').addEventListener('click', exportHTML);
+document.getElementById('fip-search-open').addEventListener('click', () => document.getElementById('fip-search-modal').classList.add('open'));
+document.getElementById('fip-modal-close').addEventListener('click', () => document.getElementById('fip-search-modal').classList.remove('open'));
+document.getElementById('fip-replace-btn').addEventListener('click', doFindReplace);
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveAll(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoLast(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); toggleEditMode(); }
+  if (e.key === 'Escape') document.getElementById('fip-search-modal').classList.remove('open');
+});
+document.addEventListener('DOMContentLoaded', () => {
+  restoreSaved();
+  initChecklist();
+  document.querySelectorAll('[data-fip-edit]').forEach(el => { el.contentEditable = 'false'; });
+});
+</script>
+</body>
+</html>

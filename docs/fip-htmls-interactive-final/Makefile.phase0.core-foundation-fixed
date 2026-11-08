@@ -1,0 +1,152 @@
+# Makefile — Phase 0 Core FLOCI Foundation
+# This version separates:
+#   1) Core foundation: Terraform resources that are actually created in Phase 0
+#   2) Optional runtime: Kubernetes/Helm/Kafka checks that only work if those runtimes exist
+#
+# Why this matters:
+# - Terraform currently creates S3, SQS, ECR, IAM, CloudWatch, and Secrets.
+# - It does NOT create an EKS cluster or MSK/Kafka broker yet.
+# - Therefore bootstrap should not fail or pretend success on EKS/Kafka/Helm.
+
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
+AWS_REGION ?= us-west-2
+FLOCI_ENDPOINT ?= http://localhost:4566
+TF_DIR := infra/terraform/envs/local-floci
+HELM_CHART := infra/helm/feedback-platform
+NAMESPACE := feedback
+CLUSTER_NAME := feedback-eks-local
+
+.PHONY: help doctor scaffold bootstrap floci-start tf-check tf-init tf-plan tf-apply verify-core runtime-check k8s-config topics helm-install verify-all tf-destroy clean
+
+help:
+	@echo "Phase 0 commands:"
+	@echo "  make doctor        # verify local tools"
+	@echo "  make scaffold      # create folders only"
+	@echo "  make bootstrap     # core FLOCI foundation only: S3/SQS/ECR/IAM/CloudWatch/Secrets"
+	@echo "  make runtime-check # optional: check whether Kubernetes/Kafka/Helm are available"
+	@echo "  make verify-all    # core + optional runtime checks"
+	@echo "  make tf-destroy    # destroy local Terraform resources"
+	@echo "  make clean         # stop FLOCI"
+
+doctor:
+	@command -v floci >/dev/null || (echo "❌ floci not installed"; exit 1)
+	@command -v aws >/dev/null || (echo "❌ aws cli not installed"; exit 1)
+	@command -v terraform >/dev/null || (echo "❌ terraform not installed"; exit 1)
+	@command -v kubectl >/dev/null || echo "ℹ️ kubectl not installed; optional runtime checks will be skipped"
+	@command -v helm >/dev/null || echo "ℹ️ helm not installed; optional Helm deploy will be skipped"
+	@command -v kafka-topics.sh >/dev/null || echo "ℹ️ kafka-topics.sh not found; Kafka topic creation will be skipped"
+	@echo "✅ Required local tool check complete"
+
+scaffold:
+	mkdir -p apps/{api,web,agent-service,voice-service}
+	mkdir -p services/{data-generator,ingestion-worker,cleaning-worker,nlp-worker,embedding-worker,action-worker}
+	mkdir -p shared/{schemas,config,logging,auth}
+	mkdir -p data/dummy/{google_reviews,reddit_mentions,delivery_reviews,surveys,voice_transcripts,manager_notes,qr_feedback}
+	mkdir -p data/dbt/models/{bronze,silver,gold}
+	mkdir -p data/sql/{postgres,snowflake}
+	mkdir -p infra/terraform/envs/local-floci
+	mkdir -p infra/terraform/envs/prod-aws
+	mkdir -p infra/helm/feedback-platform/templates
+	mkdir -p scripts
+	@echo "✅ Repo folders created"
+
+bootstrap: doctor floci-start tf-check tf-init tf-apply verify-core
+	@echo "✅ Phase 0 CORE foundation completed"
+	@echo "ℹ️ Next: run 'make runtime-check' to see whether Kubernetes/Kafka/Helm are available locally"
+
+floci-start:
+	floci start
+	aws --endpoint-url $(FLOCI_ENDPOINT) sts get-caller-identity
+	aws --endpoint-url $(FLOCI_ENDPOINT) s3 ls || true
+
+tf-check:
+	@test -f $(TF_DIR)/versions.tf || (echo "❌ Missing $(TF_DIR)/versions.tf"; exit 1)
+	@test -f $(TF_DIR)/provider.tf || (echo "❌ Missing $(TF_DIR)/provider.tf"; exit 1)
+	@test -f $(TF_DIR)/main.tf || (echo "❌ Missing $(TF_DIR)/main.tf"; exit 1)
+	@echo "✅ Terraform config files found"
+	@ls -la $(TF_DIR)
+
+tf-init:
+	terraform -chdir=$(TF_DIR) init -upgrade
+
+tf-plan:
+	terraform -chdir=$(TF_DIR) plan
+
+tf-apply:
+	terraform -chdir=$(TF_DIR) apply -auto-approve
+	terraform -chdir=$(TF_DIR) output || true
+
+verify-core:
+	@echo ""
+	@echo "🔎 Verifying Phase 0 CORE resources"
+	@echo "----------------------------------"
+	@echo "S3 buckets:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) s3 ls || true
+	@echo ""
+	@echo "SQS queues:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) sqs list-queues || true
+	@echo ""
+	@echo "ECR repositories:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) ecr describe-repositories --query 'repositories[].repositoryName' || true
+	@echo ""
+	@echo "CloudWatch log groups:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) logs describe-log-groups --query 'logGroups[].logGroupName' || true
+	@echo ""
+	@echo "Secrets:"
+	aws --endpoint-url $(FLOCI_ENDPOINT) secretsmanager list-secrets --query 'SecretList[].Name' || true
+	@echo ""
+	@echo "Terraform outputs:"
+	terraform -chdir=$(TF_DIR) output || true
+
+runtime-check:
+	@echo ""
+	@echo "🔎 Optional runtime checks"
+	@echo "-------------------------"
+	@echo "Kubernetes:"
+	@if command -v kubectl >/dev/null; then kubectl get nodes || true; else echo "kubectl not installed"; fi
+	@echo ""
+	@echo "Helm:"
+	@if command -v helm >/dev/null; then helm version || true; else echo "helm not installed"; fi
+	@echo ""
+	@echo "Kafka CLI:"
+	@if command -v kafka-topics.sh >/dev/null; then kafka-topics.sh --list --bootstrap-server localhost:9092 || true; else echo "kafka-topics.sh not installed"; fi
+	@echo ""
+	@echo "EKS via FLOCI:"
+	@aws --endpoint-url $(FLOCI_ENDPOINT) eks describe-cluster --region $(AWS_REGION) --name $(CLUSTER_NAME) || echo "No FLOCI EKS cluster found. This is expected unless you explicitly created one."
+
+k8s-config:
+	@if command -v kubectl >/dev/null; then \
+	  aws --endpoint-url $(FLOCI_ENDPOINT) eks update-kubeconfig --region $(AWS_REGION) --name $(CLUSTER_NAME); \
+	  kubectl get nodes; \
+	else \
+	  echo "❌ kubectl not installed"; exit 1; \
+	fi
+
+topics:
+	@if command -v kafka-topics.sh >/dev/null; then \
+	  chmod +x scripts/create_topics.sh; \
+	  ./scripts/create_topics.sh; \
+	else \
+	  echo "❌ kafka-topics.sh not found. Install Kafka CLI or create topics in Phase 1 when Kafka runtime exists."; exit 1; \
+	fi
+
+helm-install:
+	@if command -v helm >/dev/null && command -v kubectl >/dev/null; then \
+	  kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -; \
+	  helm upgrade --install feedback-platform $(HELM_CHART) \
+	    --namespace $(NAMESPACE) --create-namespace \
+	    -f $(HELM_CHART)/values-local.yaml \
+	    --wait --timeout 120s; \
+	else \
+	  echo "❌ helm/kubectl missing"; exit 1; \
+	fi
+
+verify-all: verify-core runtime-check
+
+tf-destroy:
+	terraform -chdir=$(TF_DIR) destroy -auto-approve
+
+clean:
+	floci stop

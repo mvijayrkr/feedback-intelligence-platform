@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 0 — FLOCI Foundation | Feedback Intelligence Platform</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --accent: #f78166;
+    --accent2: #79c0ff;
+    --accent3: #56d364;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #6e7681;
+    --code-bg: #0d1117;
+    --tag-bg: #1f2937;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* TOP NAV */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,17,23,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+  }
+  .topbar-brand {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .topbar-phase {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-save {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* SIDEBAR NAV */
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 52px);
+  }
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 52px;
+    height: calc(100vh - 52px);
+    overflow-y: auto;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 16px 4px;
+  }
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .sidebar a:hover, .sidebar a.active {
+    color: var(--text);
+    background: var(--surface2);
+    border-left-color: var(--accent);
+  }
+  .sidebar a .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 960px;
+  }
+
+  /* HERO */
+  .hero {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 36px 40px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent4), var(--accent2));
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(247,129,102,0.1);
+    border: 1px solid rgba(247,129,102,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 640px;
+    margin-bottom: 24px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .hero-meta-item .label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .hero-meta-item .value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent2);
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 56px;
+    scroll-margin-top: 72px;
+  }
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    background: rgba(247,129,102,0.1);
+    border: 1px solid rgba(247,129,102,0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .section-header-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .card ul { padding-left: 20px; }
+  .card li { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; line-height: 1.5; }
+  .card li strong { color: var(--text); }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* CODE */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent5);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .code-copy {
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: 0.15s;
+  }
+  .code-copy:hover { background: var(--border); color: var(--text); }
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  pre code { background: none; }
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .cm { color: #8b949e; font-style: italic; }
+  .fn { color: #d2a8ff; }
+  .num { color: #79c0ff; }
+  .prop { color: #ffa657; }
+
+  /* STEP FLOW */
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+  .step {
+    counter-increment: step;
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .step-content p { font-size: 13px; color: var(--text-muted); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--accent2);
+    font-weight: 700;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: rgba(22,27,34,0.5); }
+  td code {
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent5);
+    font-family: monospace;
+  }
+  td strong { color: var(--text); }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 2px;
+  }
+  .tag-green { background: rgba(86,211,100,0.1); color: var(--accent3); border: 1px solid rgba(86,211,100,0.3); }
+  .tag-blue { background: rgba(121,192,255,0.1); color: var(--accent2); border: 1px solid rgba(121,192,255,0.3); }
+  .tag-orange { background: rgba(255,166,87,0.1); color: var(--accent5); border: 1px solid rgba(255,166,87,0.3); }
+  .tag-purple { background: rgba(210,168,255,0.1); color: var(--accent4); border: 1px solid rgba(210,168,255,0.3); }
+  .tag-red { background: rgba(247,129,102,0.1); color: var(--accent); border: 1px solid rgba(247,129,102,0.3); }
+
+  /* ALERT */
+  .alert {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .alert-info { background: rgba(121,192,255,0.05); border: 1px solid rgba(121,192,255,0.2); color: var(--accent2); }
+  .alert-warn { background: rgba(255,166,87,0.05); border: 1px solid rgba(255,166,87,0.2); color: var(--accent5); }
+  .alert-success { background: rgba(86,211,100,0.05); border: 1px solid rgba(86,211,100,0.2); color: var(--accent3); }
+  .alert-danger { background: rgba(247,129,102,0.05); border: 1px solid rgba(247,129,102,0.2); color: var(--accent); }
+  .alert-icon { font-size: 16px; flex-shrink: 0; }
+  .alert-text p { line-height: 1.5; }
+  .alert-text strong { display: block; margin-bottom: 4px; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li.done { color: var(--text-dim); text-decoration: line-through; }
+  .checklist li .chk {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    margin-top: 1px;
+    transition: 0.15s;
+  }
+  .checklist li.done .chk {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: #000;
+  }
+
+  /* LINKEDIN POST */
+  .linkedin-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .linkedin-header {
+    background: var(--surface2);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .linkedin-header span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+  }
+  .linkedin-body {
+    padding: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-family: -apple-system, sans-serif;
+  }
+  .linkedin-copy-btn {
+    background: var(--accent2);
+    color: #000;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* INTERVIEW CARD */
+  .interview-card {
+    background: linear-gradient(135deg, rgba(210,168,255,0.05), rgba(121,192,255,0.05));
+    border: 1px solid rgba(210,168,255,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .interview-q {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent4);
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .interview-a {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    border-left: 3px solid var(--accent4);
+    padding-left: 14px;
+  }
+
+  /* ARCH DIAGRAM */
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .arch-diagram .hl { color: var(--accent2); }
+  .arch-diagram .hl2 { color: var(--accent5); }
+  .arch-diagram .hl3 { color: var(--accent3); }
+  .arch-diagram .hl4 { color: var(--accent4); }
+
+  /* PHASE ROADMAP */
+  .phase-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-row:last-child { border-bottom: none; }
+  .phase-badge {
+    width: 60px;
+    text-align: center;
+    padding: 4px 0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .phase-badge.current { background: rgba(247,129,102,0.15); color: var(--accent); border: 1px solid rgba(247,129,102,0.3); }
+  .phase-badge.upcoming { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+  .phase-info h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .phase-info p { font-size: 13px; color: var(--text-muted); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* PRINT */
+  @media print {
+    .topbar, .sidebar { display: none; }
+    .main { max-width: 100%; padding: 20px; }
+    .code-block { border: 1px solid #ccc; }
+    body { background: white; color: #000; }
+  }
+
+  /* ── EDIT MODE ─────────────────────────────────────────────── */
+  body.edit-mode [data-editable]:hover {
+    outline: 2px dashed rgba(121,192,255,0.5);
+    outline-offset: 3px;
+    cursor: text;
+    border-radius: 4px;
+  }
+  body.edit-mode [data-editable]:focus {
+    outline: 2px solid var(--accent2);
+    outline-offset: 3px;
+    border-radius: 4px;
+    background: rgba(121,192,255,0.04);
+  }
+  body.edit-mode pre[data-editable]:hover,
+  body.edit-mode pre[data-editable]:focus {
+    outline: 2px dashed rgba(255,166,87,0.5);
+    outline-offset: 2px;
+    cursor: text;
+  }
+  body.edit-mode pre[data-editable]:focus {
+    outline-color: var(--accent5);
+    background: rgba(255,166,87,0.03);
+  }
+  .edit-mode-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: rgba(86,211,100,0.12);
+    border: 1px solid rgba(86,211,100,0.35);
+    color: var(--accent3);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  body.edit-mode .edit-mode-badge { display: flex; }
+  .btn-edit {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.15s;
+  }
+  .btn-edit:hover { border-color: var(--accent2); color: var(--accent2); }
+  body.edit-mode .btn-edit {
+    background: rgba(86,211,100,0.1);
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+  /* Edit tooltip that follows cursor in edit mode */
+  .edit-tooltip {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  body.edit-mode .edit-tooltip { opacity: 1; }
+  /* Save indicator */
+  .save-indicator {
+    position: fixed;
+    top: 60px;
+    right: 16px;
+    background: rgba(86,211,100,0.15);
+    border: 1px solid rgba(86,211,100,0.4);
+    color: var(--accent3);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .save-indicator.show { opacity: 1; }
+  /* Edit history panel */
+  .edit-history-panel {
+    display: none;
+    position: fixed;
+    right: 0; top: 52px;
+    width: 320px;
+    height: calc(100vh - 52px);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 150;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .edit-history-panel.open { display: block; }
+  .edit-history-panel h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-item {
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .history-item .hi-label { color: var(--accent5); font-weight: 700; margin-bottom: 4px; }
+  .history-item .hi-time  { color: var(--text-dim); font-size: 11px; margin-bottom: 6px; }
+  .history-item .hi-preview { color: var(--text-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .hi-restore {
+    margin-top: 8px; font-size: 11px; color: var(--accent2);
+    cursor: pointer; text-decoration: underline;
+  }
+  .btn-history {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-history:hover { border-color: var(--accent4); color: var(--accent4); }
+  /* Editable highlight ring on hover in non-edit mode — subtle */
+  [data-editable] { transition: outline 0.1s; }
+
+  /* inline code */
+  code.inline {
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent5);
+    font-family: monospace;
+  }
+  h3.subsection {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  p.prose { font-size: 14px; color: var(--text-muted); line-height: 1.65; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">⚡ Feedback Intelligence Platform</div>
+  <div class="topbar-phase">Phase 0 · Foundation · Day 1 of 7 · 7-Phase Series</div>
+  <div class="topbar-actions">
+    <span class="edit-mode-badge">✏️ EDIT MODE ON</span>
+    <button class="btn-history" onclick="toggleHistory()" title="Edit history">🕓 History</button>
+    <button class="btn-history" onclick="toggleFind()" title="Find & Replace (⌘F)" style="display:none" id="findBtn">🔍 Find</button>
+    <button class="btn-edit" id="editToggleBtn" onclick="toggleEditMode()">✏️ Edit</button>
+    <button class="btn-save" onclick="saveHTML()">💾 Save HTML</button>
+  </div>
+</div>
+
+<!-- Edit history panel -->
+<div class="edit-history-panel" id="historyPanel">
+  <h3>📋 Edit History</h3>
+  <div id="historyList"><p style="color:var(--text-dim);font-size:13px;">No edits yet. Enable Edit Mode and start editing.</p></div>
+</div>
+
+<!-- Edit mode tooltip -->
+<div class="edit-tooltip" id="editTooltip">✏️ Click any text or code block to edit · Changes auto-saved</div>
+
+
+<!-- Find & Replace Panel -->
+<div id="findPanel" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:14px 18px;z-index:600;gap:10px;align-items:center;flex-wrap:wrap;min-width:440px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);">
+  <span style="font-size:12px;font-weight:700;color:var(--text-muted);white-space:nowrap;">Find &amp; Replace</span>
+  <input id="findInput" placeholder="Find…" style="background:var(--bg);border:1px solid var(--border);
+    color:var(--text);padding:6px 12px;border-radius:6px;font-size:13px;outline:none;width:160px;">
+  <input id="replaceInput" placeholder="Replace with…" style="background:var(--bg);border:1px solid var(--border);
+    color:var(--text);padding:6px 12px;border-radius:6px;font-size:13px;outline:none;width:160px;">
+  <button onclick="doFindReplace()" style="background:var(--accent5);color:#000;border:none;
+    padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Replace All</button>
+  <button onclick="toggleFind()" style="background:var(--surface);color:var(--text-muted);
+    border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕</button>
+</div>
+
+<!-- Save indicator -->
+<div class="save-indicator" id="saveIndicator">✓ Saved</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-section-label">Overview</div>
+  <a href="#hero"><span class="dot" style="background:#f78166"></span>Phase Summary</a>
+  <a href="#roadmap"><span class="dot" style="background:#79c0ff"></span>7-Phase Roadmap</a>
+
+  <div class="sidebar-section-label">Phase 0 Sections</div>
+  <a href="#s1"><span class="dot" style="background:#ffa657"></span>01 · Business Req</a>
+  <a href="#s2"><span class="dot" style="background:#56d364"></span>02 · Technical Req</a>
+  <a href="#s3"><span class="dot" style="background:#79c0ff"></span>03 · Architecture</a>
+  <a href="#s4"><span class="dot" style="background:#d2a8ff"></span>04 · Repo Structure</a>
+  <a href="#s5"><span class="dot" style="background:#f78166"></span>05 · FLOCI Setup</a>
+  <a href="#s6"><span class="dot" style="background:#ffa657"></span>06 · Terraform</a>
+  <a href="#s7"><span class="dot" style="background:#56d364"></span>07 · Event Schema</a>
+  <a href="#s8"><span class="dot" style="background:#79c0ff"></span>08 · Kafka Topics</a>
+  <a href="#s9"><span class="dot" style="background:#d2a8ff"></span>09 · Security</a>
+  <a href="#s10"><span class="dot" style="background:#f78166"></span>10 · Observability</a>
+  <a href="#s11"><span class="dot" style="background:#ffa657"></span>11 · Helm + FastAPI</a>
+  <a href="#s12"><span class="dot" style="background:#56d364"></span>12 · Capacity</a>
+  <a href="#s13"><span class="dot" style="background:#79c0ff"></span>13 · Tradeoffs</a>
+  <a href="#s14"><span class="dot" style="background:#d2a8ff"></span>14 · Checklist</a>
+  <a href="#s15"><span class="dot" style="background:#f78166"></span>15 · LinkedIn Post</a>
+  <a href="#s16"><span class="dot" style="background:#ffa657"></span>16 · Interview Q&amp;A</a>
+
+  <div class="sidebar-section-label">Document Tools</div>
+  <a href="javascript:void(0)" onclick="toggleEditMode()" style="color:var(--accent3)"><span class="dot" style="background:#56d364"></span>✏️ Toggle Edit Mode</a>
+  <a href="javascript:void(0)" onclick="toggleHistory()" style="color:var(--accent4)"><span class="dot" style="background:#d2a8ff"></span>🕓 Edit History</a>
+  <a href="javascript:void(0)" onclick="saveHTML()" style="color:var(--accent2)"><span class="dot" style="background:#79c0ff"></span>💾 Save HTML File</a>
+  <a href="javascript:void(0)" onclick="resetAllEdits()" style="color:var(--accent)"><span class="dot" style="background:#f78166"></span>↺ Reset All Edits</a>
+  <a href="javascript:void(0)" onclick="toggleFind()" style="color:var(--accent2)"><span class="dot" style="background:#79c0ff"></span>🔍 Find &amp; Replace</a>
+  <div style="padding:10px 16px;font-size:11px;color:var(--text-dim);line-height:1.6;border-top:1px solid var(--border);margin-top:8px;">
+    <strong style="color:var(--text-muted);display:block;margin-bottom:4px;">Keyboard Shortcuts</strong>
+    <kbd style="background:var(--surface2);padding:1px 5px;border-radius:3px;border:1px solid var(--border)">⌘E</kbd> Edit mode<br>
+    <kbd style="background:var(--surface2);padding:1px 5px;border-radius:3px;border:1px solid var(--border)">⌘S</kbd> Save HTML<br>
+    <kbd style="background:var(--surface2);padding:1px 5px;border-radius:3px;border:1px solid var(--border)">Esc</kbd> Exit edit
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-badge">📅 Day 1 of 7 · LinkedIn Series · Phase 0</div>
+  <h1>FLOCI-First <span>Local Foundation</span><br>for Feedback Intelligence</h1>
+  <p data-editable="hero-subtitle" contenteditable="false">Production-grade local AWS environment using FLOCI for the multi-tenant restaurant feedback platform. This phase sets up the complete foundation — every subsequent phase builds on this.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span class="label">Tenant</span><span class="value">curry_bowl_express</span></div>
+    <div class="hero-meta-item"><span class="label">Locations</span><span class="value">12 Bay Area</span></div>
+    <div class="hero-meta-item"><span class="label">Stack</span><span class="value">FLOCI + Terraform + Helm</span></div>
+    <div class="hero-meta-item"><span class="label">Target</span><span class="value">AWS-parity locally</span></div>
+    <div class="hero-meta-item"><span class="label">Career Goal</span><span class="value">EM + Senior AI/Data</span></div>
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<div class="section" id="roadmap">
+  <div class="section-header">
+    <div class="section-number">MAP</div>
+    <div class="section-header-text">
+      <h2>7-Phase LinkedIn Series Roadmap</h2>
+      <p>One phase per day. Each phase = full production code + LinkedIn post + interview Q&amp;A. 7 days, one complete AI platform.</p>
+    </div>
+  </div>
+
+  <!-- Visual phase strip -->
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;">
+    <div style="padding:12px 8px;text-align:center;background:rgba(247,129,102,.08);border-right:1px solid var(--border)"><div style="font-size:20px;font-weight:900;color:#f78166">0</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">Foundation</div><div style="font-size:9px;color:var(--text-dim)">Day 1 ←</div></div>
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:20px;font-weight:900;color:#79c0ff">1</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">Ingestion</div><div style="font-size:9px;color:var(--text-dim)">Day 2</div></div>
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:20px;font-weight:900;color:#56d364">2</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">Data Platform</div><div style="font-size:9px;color:var(--text-dim)">Day 3</div></div>
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:20px;font-weight:900;color:#d2a8ff">3</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">RAG Layer</div><div style="font-size:9px;color:var(--text-dim)">Day 4</div></div>
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:20px;font-weight:900;color:#ffa657">4</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">Agents</div><div style="font-size:9px;color:var(--text-dim)">Day 5</div></div>
+    <div style="padding:12px 8px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:20px;font-weight:900;color:#79c0ff">5</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">Product UI</div><div style="font-size:9px;color:var(--text-dim)">Day 6</div></div>
+    <div style="padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:900;color:#f78166">6</div><div style="font-size:10px;font-weight:700;color:var(--text-muted)">Production</div><div style="font-size:9px;color:var(--text-dim)">Day 7</div></div>
+  </div>
+
+  <div class="phase-row"><div class="phase-badge current">DAY 1</div><div class="phase-info"><h4>Phase 0 — Foundation (Today ← You are here)</h4><p>FLOCI + Terraform (9 modules) + Helm EKS + FeedbackEvent schema + 6 Kafka topics + Security baseline + Observability</p></div></div>
+  <div class="phase-row"><div class="phase-badge upcoming">DAY 2</div><div class="phase-info"><h4>Phase 1 — Data Ingestion Pipeline</h4><p>Dummy generator (7 sources · 13 scenarios · 25K records) + Kafka producer + Ingestion worker + S3 Bronze + DLQ pattern</p></div></div>
+  <div class="phase-row"><div class="phase-badge upcoming">DAY 3</div><div class="phase-info"><h4>Phase 2 — Data Platform (Bronze → Silver → Gold)</h4><p>Cleaning worker + PII masker (spaCy) + NLP worker (OpenAI) + Silver writer + dbt Gold marts (4 models)</p></div></div>
+  <div class="phase-row"><div class="phase-badge upcoming">DAY 4</div><div class="phase-info"><h4>Phase 3 — RAG Layer (Embeddings + Qdrant)</h4><p>Embedding worker + Qdrant per-tenant collections + Hybrid search (dense + BM25 + RRF) + RAG retriever service</p></div></div>
+  <div class="phase-row"><div class="phase-badge upcoming">DAY 5</div><div class="phase-info"><h4>Phase 4 — Agentic Intelligence (4 Agents + LangGraph)</h4><p>Data Analyst Agent + Business User RAG Agent + Business Analyst Agent + Action Agent + guardrails + audit trail</p></div></div>
+  <div class="phase-row"><div class="phase-badge upcoming">DAY 6</div><div class="phase-info"><h4>Phase 5 — Product Surface (Voice + Chat + Dashboard)</h4><p>WebRTC Voice Agent + React Chat (streaming) + Analytics Dashboard (heatmap · trends · complaint velocity)</p></div></div>
+  <div class="phase-row"><div class="phase-badge upcoming">DAY 7</div><div class="phase-info"><h4>Phase 6 — Production Deploy (CI/CD + AWS EKS)</h4><p>GitHub Actions CI/CD + AWS EKS deploy (same Terraform) + Prometheus/Grafana + k6 load tests + IAM hardening</p></div></div>
+</div>
+
+<hr class="divider">
+
+<!-- S1: BUSINESS REQ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">01</div>
+    <div class="section-header-text">
+      <h2>Business Requirement</h2>
+      <p>Why this phase exists from the business perspective</p>
+    </div>
+  </div>
+
+  <p class="prose" data-editable="prose-27" contenteditable="false">Curry Bowl Express is a 12-location Indian restaurant chain in the Bay Area. The owner is losing customers — ratings are dropping, delivery complaints are rising, and there is no unified system to understand what is going wrong across locations. Before building any intelligent analysis, they need a production-grade technical foundation that can ingest, store, and process feedback at scale.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🎯 Business Problem</div>
+      <ul>
+        <li><strong>12 locations</strong> with no unified feedback view</li>
+        <li>Ratings declining but no root cause analysis</li>
+        <li>Feedback scattered across Google, Reddit, delivery apps, surveys</li>
+        <li>Managers making decisions without data</li>
+        <li>No way to identify which location needs urgent attention</li>
+        <li>No mechanism to turn feedback into operational actions</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ What Phase 0 Delivers</div>
+      <ul>
+        <li>Foundation that all later phases build upon</li>
+        <li>AWS-parity local environment via FLOCI</li>
+        <li>Infrastructure-as-code with Terraform</li>
+        <li>Standard event contract for all feedback sources</li>
+        <li>Dummy data strategy before live integrations</li>
+        <li>Security, observability, and tenant isolation from day one</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="subsection">Business Questions This Platform Will Answer</h3>
+  <div class="grid-3">
+    <div class="card"><div class="card-title">📍 Location</div><p>Which location is failing? Which needs urgent attention today?</p></div>
+    <div class="card"><div class="card-title">📉 Root Cause</div><p>Why is rating dropping? Which issue is affecting revenue the most?</p></div>
+    <div class="card"><div class="card-title">🔁 Pattern</div><p>Which feedback is repeated across sources? What themes recur weekly?</p></div>
+    <div class="card"><div class="card-title">🍛 Menu</div><p>What are customers saying about biryani? Which item drives complaints?</p></div>
+    <div class="card"><div class="card-title">📋 Action</div><p>What should the manager do this week? What next-best action should be created?</p></div>
+    <div class="card"><div class="card-title">💰 Revenue</div><p>Which complaints are linked to repeat-customer churn and revenue drop?</p></div>
+  </div>
+</div>
+
+<!-- S2: TECHNICAL REQ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">02</div>
+    <div class="section-header-text">
+      <h2>Technical Requirement</h2>
+      <p>What Phase 0 must technically establish</p>
+    </div>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div class="alert-text">
+      <strong>Critical Direction: FLOCI-First, Not Generic Local Stack</strong>
+      <p>Do NOT use Minikube + Redpanda + MinIO as the primary local stack. Use FLOCI to emulate AWS locally so the same Terraform modules work in production with only provider config changes.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Requirement</th><th>Local (FLOCI)</th><th>Production (AWS)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Container Orchestration</strong></td><td><code>FLOCI EKS</code></td><td><code>AWS EKS</code></td></tr>
+        <tr><td><strong>Streaming / Messaging</strong></td><td><code>FLOCI MSK</code></td><td><code>AWS MSK (Kafka)</code></td></tr>
+        <tr><td><strong>Object Storage</strong></td><td><code>FLOCI S3</code></td><td><code>AWS S3</code></td></tr>
+        <tr><td><strong>Relational DB</strong></td><td><code>FLOCI RDS Postgres</code></td><td><code>AWS RDS PostgreSQL</code></td></tr>
+        <tr><td><strong>Secrets</strong></td><td><code>FLOCI Secrets Manager</code></td><td><code>AWS Secrets Manager</code></td></tr>
+        <tr><td><strong>Identity</strong></td><td><code>FLOCI IAM/STS</code></td><td><code>AWS IAM/STS</code></td></tr>
+        <tr><td><strong>Logging</strong></td><td><code>FLOCI CloudWatch</code></td><td><code>AWS CloudWatch</code></td></tr>
+        <tr><td><strong>Events</strong></td><td><code>FLOCI SQS/EventBridge</code></td><td><code>AWS SQS/EventBridge</code></td></tr>
+        <tr><td><strong>IaC</strong></td><td><code>Terraform → FLOCI endpoint</code></td><td><code>Terraform → AWS</code></td></tr>
+        <tr><td><strong>App Deploy</strong></td><td><code>Helm → FLOCI EKS</code></td><td><code>Helm → AWS EKS</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div class="alert-text"><strong>Key Principle</strong><p>Local should emulate AWS <em>contracts</em>, not just AWS <em>concepts</em>. Use <code>aws_s3_bucket</code> Terraform resources against FLOCI, not manually created MinIO buckets. Use AWS CLI commands against FLOCI endpoint.</p></div>
+  </div>
+</div>
+
+<!-- S3: ARCHITECTURE -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">03</div>
+    <div class="section-header-text">
+      <h2>Architecture</h2>
+      <p>Full system architecture and Phase 0 scope</p>
+    </div>
+  </div>
+
+  <h3 class="subsection">Full Platform Architecture (All Phases)</h3>
+  <div class="arch-diagram">
+<span class="hl">Dummy Source Data Generator</span>
+  ├── Google Reviews JSON
+  ├── Reddit Mentions JSON
+  ├── Delivery App Reviews JSON
+  ├── Survey Responses JSON
+  ├── In-store QR Feedback JSON
+  ├── Manager Notes JSON
+  └── Voice Transcripts JSON
+           │
+           ▼
+<span class="hl2">Streaming / Ingestion Layer</span>
+  FLOCI MSK → feedback.raw.events
+           │
+           ▼
+<span class="hl2">Raw Zone — FLOCI S3</span>
+  feedback-raw-local/
+           │
+           ▼
+<span class="hl">Bronze Layer</span>  ← cleaning-worker
+  S3: feedback-processed-local/bronze/
+  Schema enforcement, deduplication, timestamp normalization
+           │
+           ▼
+<span class="hl">Silver Layer</span>  ← nlp-worker
+  PII masking, sentiment, topic classification, severity
+  S3: feedback-processed-local/silver/
+           │
+           ▼
+<span class="hl">Gold Analytics Marts</span>  ← dbt + RDS
+  location_daily_metrics
+  topic_severity_index
+  complaint_velocity
+  action_recommendations
+           │
+           ▼
+<span class="hl2">Embedding Pipeline</span>  ← embedding-worker
+  Silver text → OpenAI embeddings → Qdrant
+  Tenant namespace isolation
+           │
+    ┌──────┴──────┐
+    ▼             ▼
+<span class="hl4">Vector DB        Analytics DB</span>
+Qdrant           RDS Postgres / dbt
+(RAG layer)      (structured queries)
+    └──────┬──────┘
+           ▼
+<span class="hl">Agentic Framework</span>
+  ├── Data Analyst Agent
+  ├── Business User RAG Agent
+  ├── Business Analyst Agent (structured + RAG)
+  ├── Action / Workflow Agent
+  └── Voice Agent
+           │
+           ▼
+<span class="hl3">UI Layer</span>
+  ├── React Dashboard
+  ├── Chat Interface
+  └── Voice Interface (WebRTC)
+</div>
+
+  <h3 class="subsection">Phase 0 Scope (Highlighted in ★)</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">★ Infrastructure Scope</div>
+      <ul>
+        <li>FLOCI local AWS emulator running</li>
+        <li>AWS CLI pointed to FLOCI endpoint</li>
+        <li>Terraform modules: S3, MSK, RDS, Secrets, EKS, IAM, Observability</li>
+        <li>FLOCI S3 buckets provisioned</li>
+        <li>FLOCI MSK/Kafka topic definitions</li>
+        <li>FLOCI RDS Postgres provisioned</li>
+        <li>FLOCI Secrets Manager entries created</li>
+        <li>Helm chart skeleton deployed to FLOCI EKS</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">★ Standards Scope</div>
+      <ul>
+        <li>FeedbackEvent Pydantic schema defined</li>
+        <li>6 Kafka topics designed</li>
+        <li>Dummy data strategy finalized</li>
+        <li>Security baseline: no hardcoded secrets, tenant isolation, PII rules</li>
+        <li>Observability baseline: structured logs, metrics naming</li>
+        <li>Repo structure scaffolded</li>
+        <li>Local-to-AWS migration pattern documented</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- S4: REPO STRUCTURE -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">04</div>
+    <div class="section-header-text">
+      <h2>Repository Structure</h2>
+      <p>Complete monorepo scaffolding — create this first</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — scaffold commands</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-1" contenteditable="false" spellcheck="false"><span class="cm"># Run these commands to scaffold the full repo</span>
+mkdir -p feedback-intelligence-platform
+cd feedback-intelligence-platform
+
+<span class="cm"># Apps</span>
+mkdir -p apps/{api,web,agent-service,voice-service}
+
+<span class="cm"># Services</span>
+mkdir -p services/{data-generator,ingestion-worker,cleaning-worker,nlp-worker,embedding-worker,action-worker}
+
+<span class="cm"># Data layers</span>
+mkdir -p data/dummy/{google_reviews,reddit_mentions,delivery_reviews,surveys,voice_transcripts,manager_notes,qr_feedback}
+mkdir -p data/dbt/models/{bronze,silver,gold}
+mkdir -p data/sql/{postgres,snowflake}
+
+<span class="cm"># Infrastructure</span>
+mkdir -p infra/terraform/modules/{network,eks,msk,s3,rds,secrets,iam,ecr,observability}
+mkdir -p infra/terraform/envs/{local-floci,prod-aws}
+mkdir -p infra/helm/{feedback-platform,qdrant,observability}
+mkdir -p infra/k8s/{namespaces,secrets,ingress}
+
+<span class="cm"># Shared</span>
+mkdir -p shared/{schemas,config,logging,auth}
+
+<span class="cm"># Root files</span>
+touch README.md Makefile .env.example .gitignore docker-compose.yml
+
+echo "✅ Repo structure created"</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">tree — full structure</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-2" contenteditable="false" spellcheck="false">feedback-intelligence-platform/
+  README.md
+  Makefile
+  .env.example
+  .gitignore
+  docker-compose.yml
+
+  apps/
+    api/                      <span class="cm"># FastAPI main service</span>
+    web/                      <span class="cm"># React dashboard</span>
+    agent-service/            <span class="cm"># LangChain agent orchestrator</span>
+    voice-service/            <span class="cm"># WebRTC + realtime voice agent</span>
+
+  services/
+    data-generator/           <span class="cm"># Phase 1: dummy data</span>
+    ingestion-worker/         <span class="cm"># Phase 2: Kafka consumer</span>
+    cleaning-worker/          <span class="cm"># Phase 3: bronze cleaning</span>
+    nlp-worker/               <span class="cm"># Phase 4: NLP + silver</span>
+    embedding-worker/         <span class="cm"># Phase 5: embeddings</span>
+    action-worker/            <span class="cm"># Phase 6: action generation</span>
+
+  data/
+    dummy/
+      google_reviews/
+      reddit_mentions/
+      delivery_reviews/
+      surveys/
+      voice_transcripts/
+      manager_notes/
+      qr_feedback/
+    dbt/
+      models/
+        bronze/
+        silver/
+        gold/
+    sql/
+      postgres/
+      snowflake/
+
+  infra/
+    terraform/
+      modules/
+        network/
+        eks/
+        msk/
+        s3/
+        rds/
+        secrets/
+        iam/
+        ecr/
+        observability/
+      envs/
+        local-floci/
+          backend.tf
+          provider.tf
+          variables.tf
+          terraform.tfvars
+          main.tf
+        prod-aws/
+          backend.tf
+          provider.tf
+          variables.tf
+          terraform.tfvars
+          main.tf
+
+    helm/
+      feedback-platform/
+        Chart.yaml
+        values.yaml
+        values-local.yaml
+        values-prod.yaml
+        templates/
+      qdrant/
+      observability/
+
+    k8s/
+      namespaces/
+      secrets/
+      ingress/
+
+  shared/
+    schemas/                  <span class="cm"># Pydantic + Avro schemas</span>
+    config/                   <span class="cm"># Environment config loaders</span>
+    logging/                  <span class="cm"># Structured log helpers</span>
+    auth/                     <span class="cm"># JWT + tenant validation</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">makefile</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-3" contenteditable="false" spellcheck="false"><span class="cm"># Makefile — common developer commands</span>
+.PHONY: floci-start tf-init tf-apply helm-install clean
+
+<span class="fn">floci-start</span>:
+	floci start
+	eval $$(floci env)
+	aws sts get-caller-identity
+
+<span class="fn">tf-init</span>:
+	cd infra/terraform/envs/local-floci && terraform init
+
+<span class="fn">tf-apply</span>:
+	cd infra/terraform/envs/local-floci && terraform apply -auto-approve
+
+<span class="fn">tf-destroy</span>:
+	cd infra/terraform/envs/local-floci && terraform destroy -auto-approve
+
+<span class="fn">helm-install</span>:
+	helm upgrade --install feedback-platform infra/helm/feedback-platform \
+	  --namespace feedback --create-namespace \
+	  -f infra/helm/feedback-platform/values-local.yaml
+
+<span class="fn">helm-uninstall</span>:
+	helm uninstall feedback-platform --namespace feedback
+
+<span class="fn">clean</span>:
+	floci stop</pre>
+  </div>
+</div>
+
+<!-- S5: FLOCI SETUP -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">05</div>
+    <div class="section-header-text">
+      <h2>FLOCI Setup</h2>
+      <p>Install and configure FLOCI as your local AWS emulator</p>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">ℹ️</span>
+    <div class="alert-text"><strong>What is FLOCI?</strong><p>FLOCI is an open-source local AWS stack that emulates AWS APIs locally. It lets you run the same Terraform AWS provider and AWS CLI commands locally that you'll use in production — the only change is the endpoint URL.</p></div>
+  </div>
+
+  <h3 class="subsection">Step-by-Step FLOCI Installation</h3>
+  <ol class="steps">
+    <li class="step"><div class="step-num">1</div><div class="step-content"><h4>Install Prerequisites</h4><p>Docker Desktop, AWS CLI v2, Terraform v1.6+, Helm v3, kubectl</p></div></li>
+    <li class="step"><div class="step-num">2</div><div class="step-content"><h4>Install FLOCI</h4><p>Install via the FLOCI CLI installer or Homebrew</p></div></li>
+    <li class="step"><div class="step-num">3</div><div class="step-content"><h4>Start FLOCI</h4><p>Run <code class="inline">floci start</code> — this starts the local AWS-emulation container stack</p></div></li>
+    <li class="step"><div class="step-num">4</div><div class="step-content"><h4>Set Environment Variables</h4><p>Run <code class="inline">eval $(floci env)</code> to point AWS CLI to FLOCI endpoints</p></div></li>
+    <li class="step"><div class="step-num">5</div><div class="step-content"><h4>Verify AWS CLI Works Against FLOCI</h4><p>Run <code class="inline">aws sts get-caller-identity</code> and <code class="inline">aws s3 ls</code></p></div></li>
+    <li class="step"><div class="step-num">6</div><div class="step-content"><h4>Point Terraform Provider to FLOCI</h4><p>Set <code class="inline">floci_endpoint = "http://localhost:4566"</code> in terraform.tfvars</p></div></li>
+    <li class="step"><div class="step-num">7</div><div class="step-content"><h4>Initialize Terraform</h4><p>Run <code class="inline">terraform init</code> in <code class="inline">infra/terraform/envs/local-floci/</code></p></div></li>
+    <li class="step"><div class="step-num">8</div><div class="step-content"><h4>Apply Infrastructure</h4><p>Run <code class="inline">terraform apply</code> to provision S3, MSK, RDS, Secrets, EKS locally</p></div></li>
+    <li class="step"><div class="step-num">9</div><div class="step-content"><h4>Configure kubectl for FLOCI EKS</h4><p>Run <code class="inline">aws eks update-kubeconfig --region us-west-2 --name feedback-eks-local</code></p></div></li>
+    <li class="step"><div class="step-num">10</div><div class="step-content"><h4>Deploy Helm Charts</h4><p>Run <code class="inline">helm upgrade --install feedback-platform ...</code> with local values file</p></div></li>
+  </ol>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — FLOCI install + bootstrap</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-4" contenteditable="false" spellcheck="false"><span class="cm"># ── Prerequisites ──────────────────────────────────────────────</span>
+<span class="cm"># macOS: brew install awscli terraform helm kubectl</span>
+<span class="cm"># Linux: see each tool's official install docs</span>
+
+<span class="cm"># ── Install FLOCI ──────────────────────────────────────────────</span>
+<span class="cm"># Option A: Homebrew</span>
+brew tap floci/tap
+brew install floci
+
+<span class="cm"># Option B: Direct install</span>
+curl -fsSL https://install.floci.io | bash
+
+<span class="cm"># Verify install</span>
+floci --version
+
+<span class="cm"># ── Start FLOCI ────────────────────────────────────────────────</span>
+floci start
+
+<span class="cm"># Set environment to point AWS CLI to FLOCI</span>
+eval $(floci env)
+
+<span class="cm"># ── Verify AWS CLI Against FLOCI ───────────────────────────────</span>
+aws sts get-caller-identity
+<span class="cm"># Expected: {"UserId": "AKIAIOSFODNN7EXAMPLE", "Account": "000000000000", "Arn": "..."}</span>
+
+aws s3 ls
+<span class="cm"># Expected: (empty list — no buckets yet)</span>
+
+<span class="cm"># ── Manual test: create a bucket via AWS CLI ───────────────────</span>
+aws s3 mb s3://test-bucket
+aws s3 ls
+<span class="cm"># Expected: test-bucket listed</span>
+aws s3 rb s3://test-bucket
+
+<span class="cm"># ── Secrets Manager test ───────────────────────────────────────</span>
+aws secretsmanager create-secret \
+  --name /feedback/local/test \
+  --secret-string "hello-floci"
+
+aws secretsmanager get-secret-value \
+  --secret-id /feedback/local/test
+<span class="cm"># Expected: SecretString: "hello-floci"</span>
+
+aws secretsmanager delete-secret \
+  --secret-id /feedback/local/test --force-delete-without-recovery
+
+echo "✅ FLOCI is working correctly"</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — .env.example</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-5" contenteditable="false" spellcheck="false"><span class="cm"># Copy this to .env and fill in values</span>
+<span class="cm"># NEVER commit .env to git</span>
+
+<span class="cm"># FLOCI / Local</span>
+AWS_ENDPOINT_URL=http://localhost:4566
+AWS_DEFAULT_REGION=us-west-2
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+
+<span class="cm"># Application</span>
+ENVIRONMENT=local
+TENANT_ID=curry_bowl_express
+LOG_LEVEL=INFO
+
+<span class="cm"># Database</span>
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=feedback_local
+DB_SECRET_ARN=/feedback/local/db_password
+
+<span class="cm"># Kafka</span>
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_SECURITY_PROTOCOL=PLAINTEXT
+
+<span class="cm"># OpenAI (loaded from Secrets Manager, not .env in prod)</span>
+OPENAI_SECRET_ARN=/feedback/local/openai_api_key
+
+<span class="cm"># Qdrant</span>
+QDRANT_HOST=localhost
+QDRANT_PORT=6333</pre>
+  </div>
+</div>
+
+<!-- S6: TERRAFORM -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">06</div>
+    <div class="section-header-text">
+      <h2>Terraform Modules</h2>
+      <p>Reusable IaC modules — same code, swap provider config for AWS prod</p>
+    </div>
+  </div>
+
+  <h3 class="subsection">Provider Configuration</h3>
+  <div class="grid-2">
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">hcl — provider.tf (local FLOCI)</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre data-editable="pre-6" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/envs/local-floci/provider.tf</span>
+terraform {
+  required_version = <span class="str">">= 1.6.0"</span>
+  required_providers {
+    aws = {
+      source  = <span class="str">"hashicorp/aws"</span>
+      version = <span class="str">"~> 5.0"</span>
+    }
+  }
+}
+
+provider <span class="str">"aws"</span> {
+  region     = var.aws_region
+  access_key = <span class="str">"test"</span>
+  secret_key = <span class="str">"test"</span>
+
+  s3_use_path_style           = <span class="kw">true</span>
+  skip_credentials_validation = <span class="kw">true</span>
+  skip_metadata_api_check     = <span class="kw">true</span>
+  skip_requesting_account_id  = <span class="kw">true</span>
+
+  endpoints {
+    s3             = var.floci_endpoint
+    sqs            = var.floci_endpoint
+    secretsmanager = var.floci_endpoint
+    iam            = var.floci_endpoint
+    sts            = var.floci_endpoint
+    logs           = var.floci_endpoint
+    cloudwatch     = var.floci_endpoint
+    events         = var.floci_endpoint
+    eks            = var.floci_endpoint
+    kafka          = var.floci_endpoint
+    rds            = var.floci_endpoint
+  }
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">hcl — provider.tf (prod AWS)</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+      <pre data-editable="pre-7" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/envs/prod-aws/provider.tf</span>
+<span class="cm"># ONLY change is removing FLOCI overrides</span>
+<span class="cm"># Same modules, same resources, real AWS</span>
+terraform {
+  required_version = <span class="str">">= 1.6.0"</span>
+  required_providers {
+    aws = {
+      source  = <span class="str">"hashicorp/aws"</span>
+      version = <span class="str">"~> 5.0"</span>
+    }
+  }
+}
+
+provider <span class="str">"aws"</span> {
+  region = var.aws_region
+  <span class="cm"># No endpoint overrides</span>
+  <span class="cm"># No skip_* flags</span>
+  <span class="cm"># Uses real IAM credentials</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">hcl — variables.tf + terraform.tfvars (local)</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-8" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/envs/local-floci/variables.tf</span>
+variable <span class="str">"aws_region"</span>     { <span class="kw">type</span> = string }
+variable <span class="str">"environment"</span>    { <span class="kw">type</span> = string }
+variable <span class="str">"floci_endpoint"</span> { <span class="kw">type</span> = string; default = <span class="str">""</span> }
+
+<span class="cm">---</span>
+
+<span class="cm"># infra/terraform/envs/local-floci/terraform.tfvars</span>
+aws_region     = <span class="str">"us-west-2"</span>
+environment    = <span class="str">"local"</span>
+floci_endpoint = <span class="str">"http://localhost:4566"</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">hcl — main.tf (local env)</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-9" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/envs/local-floci/main.tf</span>
+
+module <span class="str">"s3"</span> {
+  source      = <span class="str">"../../modules/s3"</span>
+  environment = var.environment
+}
+
+module <span class="str">"msk"</span> {
+  source      = <span class="str">"../../modules/msk"</span>
+  environment = var.environment
+}
+
+module <span class="str">"rds"</span> {
+  source      = <span class="str">"../../modules/rds"</span>
+  environment = var.environment
+}
+
+module <span class="str">"secrets"</span> {
+  source      = <span class="str">"../../modules/secrets"</span>
+  environment = var.environment
+}
+
+module <span class="str">"eks"</span> {
+  source       = <span class="str">"../../modules/eks"</span>
+  environment  = var.environment
+  cluster_name = <span class="str">"feedback-eks-${var.environment}"</span>
+}
+
+module <span class="str">"observability"</span> {
+  source      = <span class="str">"../../modules/observability"</span>
+  environment = var.environment
+}</pre>
+  </div>
+
+  <h3 class="subsection">Module: S3</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">hcl — modules/s3/main.tf</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-10" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/modules/s3/main.tf</span>
+
+resource <span class="str">"aws_s3_bucket"</span> <span class="str">"raw"</span> {
+  bucket = <span class="str">"feedback-raw-${var.environment}"</span>
+
+  tags = {
+    Environment = var.environment
+    Layer       = <span class="str">"bronze"</span>
+    ManagedBy   = <span class="str">"terraform"</span>
+  }
+}
+
+resource <span class="str">"aws_s3_bucket"</span> <span class="str">"processed"</span> {
+  bucket = <span class="str">"feedback-processed-${var.environment}"</span>
+
+  tags = {
+    Environment = var.environment
+    Layer       = <span class="str">"silver-gold"</span>
+    ManagedBy   = <span class="str">"terraform"</span>
+  }
+}
+
+resource <span class="str">"aws_s3_bucket"</span> <span class="str">"model_artifacts"</span> {
+  bucket = <span class="str">"feedback-model-artifacts-${var.environment}"</span>
+
+  tags = {
+    Environment = var.environment
+    Layer       = <span class="str">"models"</span>
+    ManagedBy   = <span class="str">"terraform"</span>
+  }
+}
+
+<span class="cm"># Production only: versioning + encryption + lifecycle</span>
+resource <span class="str">"aws_s3_bucket_versioning"</span> <span class="str">"raw"</span> {
+  count  = var.environment == <span class="str">"prod"</span> ? <span class="num">1</span> : <span class="num">0</span>
+  bucket = aws_s3_bucket.raw.id
+  versioning_configuration {
+    status = <span class="str">"Enabled"</span>
+  }
+}
+
+resource <span class="str">"aws_s3_bucket_server_side_encryption_configuration"</span> <span class="str">"raw"</span> {
+  count  = var.environment == <span class="str">"prod"</span> ? <span class="num">1</span> : <span class="num">0</span>
+  bucket = aws_s3_bucket.raw.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = <span class="str">"aws:kms"</span>
+    }
+  }
+}
+
+output <span class="str">"raw_bucket_name"</span>            { value = aws_s3_bucket.raw.bucket }
+output <span class="str">"processed_bucket_name"</span>      { value = aws_s3_bucket.processed.bucket }
+output <span class="str">"model_artifacts_bucket_name"</span> { value = aws_s3_bucket.model_artifacts.bucket }</pre>
+  </div>
+
+  <h3 class="subsection">Module: Secrets</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">hcl — modules/secrets/main.tf</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-11" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/modules/secrets/main.tf</span>
+<span class="cm"># Create secret containers — values injected separately</span>
+
+locals {
+  secrets = [
+    <span class="str">"/feedback/${var.environment}/openai_api_key"</span>,
+    <span class="str">"/feedback/${var.environment}/jwt_secret"</span>,
+    <span class="str">"/feedback/${var.environment}/db_password"</span>,
+    <span class="str">"/feedback/${var.environment}/kafka_password"</span>,
+  ]
+}
+
+resource <span class="str">"aws_secretsmanager_secret"</span> <span class="str">"secrets"</span> {
+  for_each = toset(local.secrets)
+  name     = each.value
+  tags = {
+    Environment = var.environment
+    ManagedBy   = <span class="str">"terraform"</span>
+  }
+}
+
+output <span class="str">"secret_arns"</span> {
+  value = { for k, v in aws_secretsmanager_secret.secrets : k => v.arn }
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — inject secret values (local)</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-12" contenteditable="false" spellcheck="false"><span class="cm"># After terraform apply, inject dummy values for local dev</span>
+<span class="cm"># In production, these come from your secrets vault / CI/CD</span>
+
+aws secretsmanager put-secret-value \
+  --secret-id /feedback/local/openai_api_key \
+  --secret-string "sk-dummy-local-key-replace-in-prod"
+
+aws secretsmanager put-secret-value \
+  --secret-id /feedback/local/jwt_secret \
+  --secret-string "local-jwt-secret-change-in-prod-$(openssl rand -hex 16)"
+
+aws secretsmanager put-secret-value \
+  --secret-id /feedback/local/db_password \
+  --secret-string "local-db-password-$(openssl rand -hex 8)"
+
+aws secretsmanager put-secret-value \
+  --secret-id /feedback/local/kafka_password \
+  --secret-string "local-kafka-password"
+
+echo "✅ Secrets injected into FLOCI Secrets Manager"
+
+<span class="cm"># Verify</span>
+aws secretsmanager get-secret-value \
+  --secret-id /feedback/local/openai_api_key \
+  --query SecretString --output text</pre>
+  </div>
+
+  <h3 class="subsection">Module: MSK (Kafka)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">hcl — modules/msk/main.tf</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-13" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/modules/msk/main.tf</span>
+<span class="cm"># If FLOCI has full MSK support, this provisions it.</span>
+<span class="cm"># If FLOCI has MSK limitations, the module interface is kept</span>
+<span class="cm"># and a local bootstrap server is output — app code never hardcodes.</span>
+
+variable <span class="str">"environment"</span>        {}
+variable <span class="str">"private_subnet_ids"</span> { default = [] }
+variable <span class="str">"security_group_ids"</span> { default = [] }
+
+resource <span class="str">"aws_msk_cluster"</span> <span class="str">"feedback"</span> {
+  cluster_name           = <span class="str">"feedback-msk-${var.environment}"</span>
+  kafka_version          = <span class="str">"3.6.0"</span>
+  number_of_broker_nodes = var.environment == <span class="str">"prod"</span> ? <span class="num">3</span> : <span class="num">1</span>
+
+  broker_node_group_info {
+    instance_type   = var.environment == <span class="str">"prod"</span> ? <span class="str">"kafka.m5.large"</span> : <span class="str">"kafka.t3.small"</span>
+    client_subnets  = var.private_subnet_ids
+    security_groups = var.security_group_ids
+
+    storage_info {
+      ebs_storage_info {
+        volume_size = var.environment == <span class="str">"prod"</span> ? <span class="num">500</span> : <span class="num">20</span>
+      }
+    }
+  }
+
+  configuration_info {
+    arn      = aws_msk_configuration.feedback.arn
+    revision = <span class="num">1</span>
+  }
+}
+
+resource <span class="str">"aws_msk_configuration"</span> <span class="str">"feedback"</span> {
+  name           = <span class="str">"feedback-msk-config-${var.environment}"</span>
+  kafka_versions = [<span class="str">"3.6.0"</span>]
+  server_properties = <span class="str">&lt;&lt;-EOF
+auto.create.topics.enable=false
+log.retention.hours=168
+num.partitions=6
+default.replication.factor=1
+EOF</span>
+}
+
+output <span class="str">"bootstrap_brokers"</span> {
+  value = try(
+    aws_msk_cluster.feedback.bootstrap_brokers,
+    <span class="str">"localhost:9092"</span>  <span class="cm"># FLOCI fallback</span>
+  )
+}</pre>
+  </div>
+
+  <h3 class="subsection">Module: RDS</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">hcl — modules/rds/main.tf</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-14" contenteditable="false" spellcheck="false"><span class="cm"># infra/terraform/modules/rds/main.tf</span>
+
+resource <span class="str">"aws_db_instance"</span> <span class="str">"feedback"</span> {
+  identifier        = <span class="str">"feedback-rds-${var.environment}"</span>
+  engine            = <span class="str">"postgres"</span>
+  engine_version    = <span class="str">"15.4"</span>
+  instance_class    = var.environment == <span class="str">"prod"</span> ? <span class="str">"db.r6g.large"</span> : <span class="str">"db.t3.micro"</span>
+  allocated_storage = var.environment == <span class="str">"prod"</span> ? <span class="num">100</span> : <span class="num">20</span>
+
+  db_name  = <span class="str">"feedback_${var.environment}"</span>
+  username = <span class="str">"feedback_admin"</span>
+
+  <span class="cm"># Password from Secrets Manager — never hardcoded</span>
+  manage_master_user_password = <span class="kw">true</span>
+
+  skip_final_snapshot = var.environment != <span class="str">"prod"</span>
+  deletion_protection = var.environment == <span class="str">"prod"</span>
+  multi_az            = var.environment == <span class="str">"prod"</span>
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = <span class="str">"terraform"</span>
+  }
+}
+
+output <span class="str">"db_endpoint"</span>    { value = aws_db_instance.feedback.endpoint }
+output <span class="str">"db_name"</span>        { value = aws_db_instance.feedback.db_name }</pre>
+  </div>
+
+  <h3 class="subsection">Python: Config Loader from Secrets Manager</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — shared/config/secrets.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-15" contenteditable="false" spellcheck="false"><span class="kw">import</span> boto3
+<span class="kw">import</span> json
+<span class="kw">import</span> os
+<span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+<span class="kw">from</span> typing <span class="kw">import</span> Optional
+
+<span class="kw">def</span> <span class="fn">get_secrets_client</span>():
+    <span class="str">"""Return boto3 client — works against FLOCI or real AWS."""</span>
+    endpoint_url = os.getenv(<span class="str">"AWS_ENDPOINT_URL"</span>)  <span class="cm"># None in prod</span>
+    <span class="kw">return</span> boto3.client(
+        <span class="str">"secretsmanager"</span>,
+        region_name=os.getenv(<span class="str">"AWS_DEFAULT_REGION"</span>, <span class="str">"us-west-2"</span>),
+        endpoint_url=endpoint_url,
+    )
+
+<span class="cm">@lru_cache(maxsize=None)</span>
+<span class="kw">def</span> <span class="fn">get_secret</span>(secret_id: str) -> str:
+    <span class="str">"""Fetch and cache a secret from Secrets Manager."""</span>
+    client = get_secrets_client()
+    response = client.get_secret_value(SecretId=secret_id)
+    <span class="kw">return</span> response[<span class="str">"SecretString"</span>]
+
+<span class="kw">def</span> <span class="fn">get_secret_json</span>(secret_id: str) -> dict:
+    <span class="str">"""Fetch and parse a JSON secret."""</span>
+    <span class="kw">return</span> json.loads(get_secret(secret_id))
+
+<span class="kw">def</span> <span class="fn">get_openai_key</span>() -> str:
+    env = os.getenv(<span class="str">"ENVIRONMENT"</span>, <span class="str">"local"</span>)
+    <span class="kw">return</span> get_secret(f<span class="str">"/feedback/{env}/openai_api_key"</span>)
+
+<span class="kw">def</span> <span class="fn">get_db_password</span>() -> str:
+    env = os.getenv(<span class="str">"ENVIRONMENT"</span>, <span class="str">"local"</span>)
+    <span class="kw">return</span> get_secret(f<span class="str">"/feedback/{env}/db_password"</span>)</pre>
+  </div>
+</div>
+
+<!-- S7: EVENT SCHEMA -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">07</div>
+    <div class="section-header-text">
+      <h2>Event Schema — FeedbackEvent</h2>
+      <p>Universal contract for all 7 sources. Validated at ingest — bad events go to DLQ.</p>
+    </div>
+  </div>
+  <div class="alert alert-info">
+    <div class="alert-icon">📋</div>
+    <div class="alert-text"><strong>Schema-First Design</strong>
+    <p>Every source — Google, Reddit, DoorDash, surveys, QR, manager notes, voice — must produce a valid FeedbackEvent before Kafka publish. Reject at the source. Never let malformed data into the pipeline.</p></div>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — shared/schemas/feedback_event.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-schema" contenteditable="false" spellcheck="false"><span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">import</span> uuid
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> enum <span class="kw">import</span> Enum
+<span class="kw">from</span> typing <span class="kw">import</span> Any
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field, field_validator, model_validator
+
+
+<span class="kw">class</span> <span class="fn">FeedbackSource</span>(str, Enum):
+    GOOGLE_REVIEWS   = <span class="str">"google_reviews"</span>
+    REDDIT_MENTIONS  = <span class="str">"reddit_mentions"</span>
+    DOORDASH         = <span class="str">"doordash_reviews"</span>
+    UBEREATS         = <span class="str">"ubereats_reviews"</span>
+    SURVEY           = <span class="str">"survey_responses"</span>
+    QR_FEEDBACK      = <span class="str">"qr_feedback"</span>
+    MANAGER_NOTES    = <span class="str">"manager_notes"</span>
+    VOICE_TRANSCRIPT = <span class="str">"voice_transcripts"</span>
+
+
+<span class="kw">class</span> <span class="fn">CustomerSegment</span>(str, Enum):
+    NEW     = <span class="str">"new"</span>
+    REPEAT  = <span class="str">"repeat_customer"</span>
+    LOYALTY = <span class="str">"loyalty_member"</span>
+    UNKNOWN = <span class="str">"unknown"</span>
+
+
+<span class="kw">class</span> <span class="fn">OrderType</span>(str, Enum):
+    DELIVERY = <span class="str">"delivery"</span>
+    PICKUP   = <span class="str">"pickup"</span>
+    DINE_IN  = <span class="str">"dine_in"</span>
+    UNKNOWN  = <span class="str">"unknown"</span>
+
+
+<span class="kw">class</span> <span class="fn">ProcessingStage</span>(str, Enum):
+    RAW      = <span class="str">"raw"</span>
+    CLEANED  = <span class="str">"cleaned"</span>
+    NLP      = <span class="str">"nlp_enriched"</span>
+    EMBEDDED = <span class="str">"embedded"</span>
+
+
+<span class="kw">class</span> <span class="fn">FeedbackEvent</span>(BaseModel):
+    <span class="str">"""
+    Universal feedback event.
+    All 7 sources normalise into this before Kafka publish.
+    Invalid events → DLQ immediately. Never corrupt the pipeline.
+    """</span>
+    <span class="cm"># Identity</span>
+    event_id:         str            = Field(default_factory=<span class="kw">lambda</span>: str(uuid.uuid4()))
+    tenant_id:        str            = Field(..., description=<span class="str">"Multi-tenant isolation key"</span>)
+    source:           FeedbackSource
+    source_review_id: str
+    location_id:      str            = Field(..., description=<span class="str">"Normalised slug: san_jose"</span>)
+
+    <span class="cm"># Content</span>
+    rating:      float | None = Field(None, ge=<span class="num">0.0</span>, le=<span class="num">5.0</span>)
+    review_text: str
+    review_ts:   datetime
+    ingested_at: datetime     = Field(default_factory=datetime.utcnow)
+
+    <span class="cm"># Segmentation</span>
+    customer_segment: CustomerSegment = CustomerSegment.UNKNOWN
+    order_type:       OrderType       = OrderType.UNKNOWN
+    language:         str             = <span class="str">"en"</span>
+
+    <span class="cm"># Business context</span>
+    business_impact_hint: str | None = None
+    upvotes:              int | None = None   <span class="cm"># Reddit</span>
+    platform:             str | None = None   <span class="cm"># doordash/ubereats</span>
+
+    <span class="cm"># Pipeline metadata</span>
+    stage:          ProcessingStage = ProcessingStage.RAW
+    schema_version: str             = <span class="str">"1.0.0"</span>
+
+    <span class="cm"># Raw passthrough for Bronze audit layer</span>
+    raw_payload: dict[str, Any] = Field(default_factory=dict)
+
+    <span class="fn">@field_validator</span>(<span class="str">"tenant_id"</span>)
+    <span class="fn">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">tenant_not_empty</span>(cls, v: str) -> str:
+        v = v.strip().lower()
+        <span class="kw">if not</span> v:
+            <span class="kw">raise</span> ValueError(<span class="str">"tenant_id must not be empty"</span>)
+        <span class="kw">return</span> v
+
+    <span class="fn">@field_validator</span>(<span class="str">"review_text"</span>)
+    <span class="fn">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">text_min_length</span>(cls, v: str) -> str:
+        v = v.strip()
+        <span class="kw">if</span> len(v) < <span class="num">3</span>:
+            <span class="kw">raise</span> ValueError(<span class="str">"review_text too short"</span>)
+        <span class="kw">return</span> v[:<span class="num">10_000</span>]
+
+    <span class="fn">@field_validator</span>(<span class="str">"location_id"</span>)
+    <span class="fn">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">location_normalise</span>(cls, v: str) -> str:
+        <span class="kw">return</span> v.strip().lower().replace(<span class="str">" "</span>, <span class="str">"_"</span>)
+
+    <span class="fn">@model_validator</span>(mode=<span class="str">"after"</span>)
+    <span class="kw">def</span> <span class="fn">cross_field_checks</span>(self) -> <span class="str">"FeedbackEvent"</span>:
+        <span class="kw">if</span> self.source <span class="kw">in</span> (FeedbackSource.DOORDASH, FeedbackSource.UBEREATS):
+            <span class="kw">if</span> self.order_type == OrderType.UNKNOWN:
+                self.order_type = OrderType.DELIVERY
+        <span class="kw">return</span> self
+
+    <span class="kw">class</span> Config:
+        use_enum_values = <span class="kw">True</span>
+
+
+<span class="kw">class</span> <span class="fn">EnrichedFeedbackEvent</span>(FeedbackEvent):
+    <span class="str">"""Phase 2+ NLP fields added after nlp-worker processes the event."""</span>
+    sentiment:       str   | None = None   <span class="cm"># positive / neutral / negative</span>
+    sentiment_score: float | None = None   <span class="cm"># -1.0 to +1.0</span>
+    topics:          list[str]    = Field(default_factory=list)
+    severity:        int   | None = None   <span class="cm"># 1 (low) to 5 (critical)</span>
+    pii_masked:      bool         = False
+    masked_text:     str   | None = None   <span class="cm"># PII-stripped for vector indexing</span>
+    embedding_id:    str   | None = None   <span class="cm"># Qdrant point ID (Phase 3)</span></pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — tests/unit/test_feedback_event.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-schema-tests" contenteditable="false" spellcheck="false"><span class="kw">import</span> pytest
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> shared.schemas.feedback_event <span class="kw">import</span> FeedbackEvent, FeedbackSource
+
+<span class="kw">def</span> <span class="fn">base</span>(**kw):
+    <span class="kw">return</span> FeedbackEvent(**{
+        <span class="str">"tenant_id"</span>:        <span class="str">"curry_bowl_express"</span>,
+        <span class="str">"source"</span>:           FeedbackSource.GOOGLE_REVIEWS,
+        <span class="str">"source_review_id"</span>: <span class="str">"g_001"</span>,
+        <span class="str">"location_id"</span>:      <span class="str">"San Jose"</span>,
+        <span class="str">"review_text"</span>:      <span class="str">"Food was cold and delivery took 45 minutes."</span>,
+        <span class="str">"review_ts"</span>:        datetime.now(timezone.utc),
+        **kw
+    })
+
+<span class="kw">def</span> <span class="fn">test_location_normalised</span>():      assert base().location_id == <span class="str">"san_jose"</span>
+<span class="kw">def</span> <span class="fn">test_tenant_lowercased</span>():        assert base(tenant_id=<span class="str">"CURRY"</span>).tenant_id == <span class="str">"curry"</span>
+<span class="kw">def</span> <span class="fn">test_empty_tenant_raises</span>():
+    <span class="kw">with</span> pytest.raises(Exception): base(tenant_id=<span class="str">"  "</span>)
+<span class="kw">def</span> <span class="fn">test_short_text_raises</span>():
+    <span class="kw">with</span> pytest.raises(Exception): base(review_text=<span class="str">"ab"</span>)
+<span class="kw">def</span> <span class="fn">test_rating_bounds</span>():
+    <span class="kw">with</span> pytest.raises(Exception): base(rating=<span class="num">6.0</span>)
+    <span class="kw">with</span> pytest.raises(Exception): base(rating=<span class="num">-1.0</span>)
+<span class="kw">def</span> <span class="fn">test_uuid_generated</span>():          assert len(base().event_id) == <span class="num">36</span>
+<span class="kw">def</span> <span class="fn">test_delivery_sets_order_type</span>():
+    e = base(source=FeedbackSource.DOORDASH)
+    assert e.order_type == <span class="str">"delivery"</span></pre>
+  </div>
+</div>
+
+<!-- S8: KAFKA TOPICS -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">08</div>
+    <div class="section-header-text">
+      <h2>Kafka Topics — Design + Provisioning</h2>
+      <p>6 topics spanning the full 7-phase pipeline lifecycle. Designed now, used across Phases 1–4.</p>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Topic</th><th>Stage</th><th>Producer</th><th>Consumer</th><th>Partitions</th><th>Retention</th></tr></thead>
+      <tbody>
+        <tr><td><code>feedback.raw.events</code></td><td>Bronze</td><td>data-generator / connectors</td><td>ingestion-worker</td><td>6</td><td>7d</td></tr>
+        <tr><td><code>feedback.cleaned.events</code></td><td>Bronze→Silver</td><td>ingestion-worker</td><td>nlp-worker</td><td>6</td><td>14d</td></tr>
+        <tr><td><code>feedback.nlp.events</code></td><td>Silver</td><td>nlp-worker</td><td>embedding-worker</td><td>6</td><td>30d</td></tr>
+        <tr><td><code>feedback.embedding.events</code></td><td>Vector</td><td>embedding-worker</td><td>vector-indexer</td><td>3</td><td>7d</td></tr>
+        <tr><td><code>feedback.action.events</code></td><td>Actions</td><td>action-worker / agents</td><td>dashboard / alerts</td><td>3</td><td>90d</td></tr>
+        <tr><td><code>feedback.dlq.events</code></td><td>Dead Letter</td><td>all workers (on failure)</td><td>dlq-monitor</td><td>3</td><td>30d</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — scripts/create_topics.sh</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-topics" contenteditable="false" spellcheck="false">#!/usr/bin/env bash
+set -e
+BOOTSTRAP=${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}
+echo "=== Creating Kafka topics on: $BOOTSTRAP ==="
+
+declare -A TOPICS=(
+  [<span class="str">"feedback.raw.events"</span>]=<span class="str">"6:1:604800000"</span>
+  [<span class="str">"feedback.cleaned.events"</span>]=<span class="str">"6:1:1209600000"</span>
+  [<span class="str">"feedback.nlp.events"</span>]=<span class="str">"6:1:2592000000"</span>
+  [<span class="str">"feedback.embedding.events"</span>]=<span class="str">"3:1:604800000"</span>
+  [<span class="str">"feedback.action.events"</span>]=<span class="str">"3:1:7776000000"</span>
+  [<span class="str">"feedback.dlq.events"</span>]=<span class="str">"3:1:2592000000"</span>
+)
+
+<span class="kw">for</span> TOPIC <span class="kw">in</span> "${!TOPICS[@]}"; <span class="kw">do</span>
+  IFS=<span class="str">':'</span> read -r PARTITIONS REPLICAS RETENTION &lt;&lt;&lt; "${TOPICS[$TOPIC]}"
+  kafka-topics.sh --create     --bootstrap-server "$BOOTSTRAP"     --topic "$TOPIC"     --partitions "$PARTITIONS"     --replication-factor "$REPLICAS"     --config retention.ms="$RETENTION"     --if-not-exists
+  echo "✅ $TOPIC (partitions=$PARTITIONS)"
+<span class="kw">done</span>
+
+echo ""
+kafka-topics.sh --list --bootstrap-server "$BOOTSTRAP"</pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — shared/config/kafka_config.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-kafka-config" contenteditable="false" spellcheck="false"><span class="kw">import</span> os
+
+<span class="kw">class</span> <span class="fn">KafkaTopics</span>:
+    <span class="str">"""Single source of truth for all topic names."""</span>
+    RAW_EVENTS       = <span class="str">"feedback.raw.events"</span>
+    CLEANED_EVENTS   = <span class="str">"feedback.cleaned.events"</span>
+    NLP_EVENTS       = <span class="str">"feedback.nlp.events"</span>
+    EMBEDDING_EVENTS = <span class="str">"feedback.embedding.events"</span>
+    ACTION_EVENTS    = <span class="str">"feedback.action.events"</span>
+    DLQ              = <span class="str">"feedback.dlq.events"</span>
+    ALL = [RAW_EVENTS, CLEANED_EVENTS, NLP_EVENTS,
+           EMBEDDING_EVENTS, ACTION_EVENTS, DLQ]
+
+
+<span class="kw">def</span> <span class="fn">get_producer_config</span>() -> dict:
+    cfg = {
+        <span class="str">"bootstrap.servers"</span>: os.getenv(<span class="str">"KAFKA_BOOTSTRAP_SERVERS"</span>, <span class="str">"localhost:9092"</span>),
+        <span class="str">"security.protocol"</span>: os.getenv(<span class="str">"KAFKA_SECURITY_PROTOCOL"</span>, <span class="str">"PLAINTEXT"</span>),
+        <span class="str">"acks"</span>:              <span class="str">"all"</span>,
+        <span class="str">"retries"</span>:           <span class="num">3</span>,
+        <span class="str">"retry.backoff.ms"</span>:  <span class="num">500</span>,
+        <span class="str">"enable.idempotence"</span>: <span class="kw">True</span>,
+        <span class="str">"compression.type"</span>:  <span class="str">"snappy"</span>,
+    }
+    <span class="kw">if</span> os.getenv(<span class="str">"KAFKA_SASL_MECHANISM"</span>):
+        cfg.update({
+            <span class="str">"sasl.mechanism"</span>: os.getenv(<span class="str">"KAFKA_SASL_MECHANISM"</span>),
+            <span class="str">"sasl.username"</span>:  os.getenv(<span class="str">"KAFKA_SASL_USERNAME"</span>),
+            <span class="str">"sasl.password"</span>:  os.getenv(<span class="str">"KAFKA_SASL_PASSWORD"</span>),
+        })
+    <span class="kw">return</span> cfg
+
+
+<span class="kw">def</span> <span class="fn">get_consumer_config</span>(group_id: str) -> dict:
+    cfg = {
+        <span class="str">"bootstrap.servers"</span>: os.getenv(<span class="str">"KAFKA_BOOTSTRAP_SERVERS"</span>, <span class="str">"localhost:9092"</span>),
+        <span class="str">"security.protocol"</span>: os.getenv(<span class="str">"KAFKA_SECURITY_PROTOCOL"</span>, <span class="str">"PLAINTEXT"</span>),
+        <span class="str">"group.id"</span>:             group_id,
+        <span class="str">"auto.offset.reset"</span>:    <span class="str">"earliest"</span>,
+        <span class="str">"enable.auto.commit"</span>:   <span class="kw">False</span>,   <span class="cm"># manual commit for exactly-once</span>
+        <span class="str">"max.poll.interval.ms"</span>: <span class="num">300_000</span>,
+        <span class="str">"session.timeout.ms"</span>:   <span class="num">45_000</span>,
+    }
+    <span class="kw">return</span> cfg</pre>
+  </div>
+</div>
+
+<!-- S9: SECURITY -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">09</div>
+    <div class="section-header-text">
+      <h2>Security Baseline</h2>
+      <p>Enforced from Phase 0. Never retrofitted. Non-negotiable across all 7 phases.</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🔐 Secrets Management</div>
+      <ul>
+        <li><strong>No hardcoded secrets — ever, anywhere</strong></li>
+        <li>All credentials through AWS Secrets Manager (FLOCI locally)</li>
+        <li>Secret rotation enabled in production</li>
+        <li>IAM least-privilege per service role</li>
+        <li>.env for local dev convenience only</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">🏢 Multi-Tenant Isolation</div>
+      <ul>
+        <li><strong>tenant_id required on every API request + Kafka event</strong></li>
+        <li>Row-level security in PostgreSQL by tenant_id</li>
+        <li>Qdrant: separate collection namespace per tenant</li>
+        <li>S3: tenant-prefixed key paths</li>
+        <li>Cross-tenant queries rejected at query layer</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">🛡️ PII Protection</div>
+      <ul>
+        <li>PII masking before vector indexing (Phase 3)</li>
+        <li>spaCy NER strips emails · phones · names</li>
+        <li>Raw PII: encrypted S3 Bronze only (audit)</li>
+        <li>Silver + Gold: masked text only</li>
+        <li>GDPR/CCPA tenant purge API designed here</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">🤖 LLM Safety Boundary</div>
+      <ul>
+        <li><strong>No LLM-generated SQL touches database directly</strong></li>
+        <li>All agent DB access via governed read-only tools</li>
+        <li>Write operations require user confirmation</li>
+        <li>Every agent session audited: prompt + tools + results</li>
+        <li>Rate limiting on all agent endpoints</li>
+      </ul>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — shared/auth/tenant_guard.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-tenant-guard" contenteditable="false" spellcheck="false"><span class="kw">from</span> fastapi <span class="kw">import</span> Header, HTTPException
+<span class="kw">from</span> typing <span class="kw">import</span> Annotated
+
+<span class="cm"># In production: load from RDS, cache with Redis</span>
+_ALLOWED_TENANTS = frozenset({<span class="str">"curry_bowl_express"</span>})
+
+
+<span class="kw">async def</span> <span class="fn">require_tenant</span>(
+    x_tenant_id: Annotated[str | None, Header()] = None
+) -> str:
+    <span class="str">"""
+    FastAPI dependency injected on every protected route.
+    Usage: @app.get("/data", dependencies=[Depends(require_tenant)])
+    """</span>
+    <span class="kw">if not</span> x_tenant_id:
+        <span class="kw">raise</span> HTTPException(<span class="num">400</span>, <span class="str">"Missing required header: X-Tenant-Id"</span>)
+    tenant = x_tenant_id.strip().lower()
+    <span class="kw">if</span> tenant <span class="kw">not in</span> _ALLOWED_TENANTS:
+        <span class="kw">raise</span> HTTPException(<span class="num">403</span>, f<span class="str">"Tenant not authorised: {tenant}"</span>)
+    <span class="kw">return</span> tenant
+
+
+<span class="kw">def</span> <span class="fn">assert_same_tenant</span>(requesting: str, target: str) -> None:
+    <span class="str">"""Guard: prevent cross-tenant data access in agent tool calls."""</span>
+    <span class="kw">if</span> requesting != target:
+        <span class="kw">raise</span> PermissionError(
+            f<span class="str">"Cross-tenant access denied: {requesting!r} → {target!r}"</span>
+        )</pre>
+  </div>
+</div>
+
+<!-- S10: OBSERVABILITY -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-header-text">
+      <h2>Observability Baseline</h2>
+      <p>Structured logging + Prometheus metrics. Every service uses these from the first line.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — shared/logging/logger.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-logger" contenteditable="false" spellcheck="false"><span class="kw">import</span> json, logging, os, time
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> typing <span class="kw">import</span> Any
+
+
+<span class="kw">class</span> <span class="fn">FIPLogger</span>:
+    <span class="str">"""
+    Structured JSON logger — all services must use this.
+    All log lines machine-parseable by CloudWatch Logs Insights.
+    """</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, service: str):
+        self.service = service
+        self._logger = logging.getLogger(service)
+        <span class="kw">if not</span> self._logger.handlers:
+            h = logging.StreamHandler()
+            h.setFormatter(logging.Formatter(<span class="str">"%(message)s"</span>))
+            self._logger.addHandler(h)
+        self._logger.setLevel(os.getenv(<span class="str">"LOG_LEVEL"</span>, <span class="str">"INFO"</span>).upper())
+
+    <span class="kw">def</span> <span class="fn">_emit</span>(self, level: str, event: str, **fields: Any):
+        entry = {
+            <span class="str">"ts"</span>:      datetime.now(timezone.utc).isoformat(),
+            <span class="str">"level"</span>:   level,
+            <span class="str">"service"</span>: self.service,
+            <span class="str">"event"</span>:   event,
+            **fields,
+        }
+        getattr(self._logger, level.lower())(json.dumps(entry))
+
+    <span class="kw">def</span> <span class="fn">info</span>(self,  e: str, **kw): self._emit(<span class="str">"INFO"</span>,    e, **kw)
+    <span class="kw">def</span> <span class="fn">warn</span>(self,  e: str, **kw): self._emit(<span class="str">"WARNING"</span>,  e, **kw)
+    <span class="kw">def</span> <span class="fn">error</span>(self, e: str, **kw): self._emit(<span class="str">"ERROR"</span>,   e, **kw)
+
+    <span class="kw">def</span> <span class="fn">timed</span>(self, event: str, **kw):
+        <span class="str">"""Context manager that auto-logs event with latency_ms."""</span>
+        <span class="kw">return</span> _TimedCtx(self, event, kw)
+
+
+<span class="kw">class</span> <span class="fn">_TimedCtx</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, log, event, fields):
+        self.log, self.event, self.fields = log, event, fields
+    <span class="kw">def</span> <span class="fn">__enter__</span>(self):
+        self._t = time.monotonic(); <span class="kw">return</span> self
+    <span class="kw">def</span> <span class="fn">__exit__</span>(self, exc_type, *_):
+        ms = round((time.monotonic() - self._t) * <span class="num">1000</span>, <span class="num">2</span>)
+        self.log.info(self.event, latency_ms=ms,
+                      status=<span class="str">"error"</span> <span class="kw">if</span> exc_type <span class="kw">else</span> <span class="str">"success"</span>,
+                      **self.fields)
+
+<span class="cm"># Usage:</span>
+<span class="cm"># log = FIPLogger("ingestion-worker")</span>
+<span class="cm"># log.info("event_processed", tenant_id="curry_bowl_express",</span>
+<span class="cm">#          source="google_reviews", latency_ms=42)</span>
+<span class="cm">#</span>
+<span class="cm"># Output (JSON, CloudWatch-ready):</span>
+<span class="cm"># {"ts":"2026-06-24T10:00Z","level":"INFO","service":"ingestion-worker",</span>
+<span class="cm">#  "event":"event_processed","tenant_id":"curry_bowl_express",</span>
+<span class="cm">#  "source":"google_reviews","latency_ms":42}</span></pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — shared/metrics/prometheus_metrics.py</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-metrics" contenteditable="false" spellcheck="false"><span class="kw">from</span> prometheus_client <span class="kw">import</span> Counter, Histogram, Gauge
+
+<span class="kw">def</span> <span class="fn">make_metrics</span>(service: str) -> dict:
+    <span class="str">"""Standard metric set — every service instantiates this."""</span>
+    labels = [<span class="str">"tenant_id"</span>, <span class="str">"source"</span>]
+    <span class="kw">return</span> {
+        <span class="str">"events_ingested"</span>: Counter(
+            f<span class="str">"fip_{service}_events_ingested_total"</span>,
+            <span class="str">"Total events ingested"</span>, labels),
+        <span class="str">"events_failed"</span>: Counter(
+            f<span class="str">"fip_{service}_events_failed_total"</span>,
+            <span class="str">"Events failed → DLQ"</span>, labels + [<span class="str">"error_type"</span>]),
+        <span class="str">"processing_latency"</span>: Histogram(
+            f<span class="str">"fip_{service}_processing_latency_ms"</span>,
+            <span class="str">"Processing latency ms"</span>, labels,
+            buckets=[<span class="num">10</span>, <span class="num">50</span>, <span class="num">100</span>, <span class="num">250</span>, <span class="num">500</span>, <span class="num">1000</span>, <span class="num">5000</span>]),
+        <span class="str">"consumer_lag"</span>: Gauge(
+            f<span class="str">"fip_{service}_kafka_consumer_lag"</span>,
+            <span class="str">"Kafka consumer lag"</span>, [<span class="str">"topic"</span>, <span class="str">"partition"</span>]),
+        <span class="str">"dlq_events"</span>: Counter(
+            f<span class="str">"fip_{service}_dlq_events_total"</span>,
+            <span class="str">"Events sent to DLQ"</span>, labels),
+    }
+
+<span class="cm"># Alert thresholds (configured in prometheus-rules.yaml Phase 6):</span>
+<span class="cm"># DLQ depth > 100          → PagerDuty</span>
+<span class="cm"># Consumer lag > 10,000    → warn</span>
+<span class="cm"># Processing latency p99 > 5s → warn</span>
+<span class="cm"># Agent tool success rate < 95% → alert</span></pre>
+  </div>
+</div>
+
+<!-- S11: HELM SKELETON -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-header-text">
+      <h2>Helm Chart Skeleton + FastAPI Service</h2>
+      <p>Deploy to FLOCI EKS now. Same Helm commands deploy to AWS EKS in Phase 6.</p>
+    </div>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">yaml — helm/feedback-platform/values-local.yaml</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-helm-values" contenteditable="false" spellcheck="false">global:
+  environment: local
+  tenantId: curry_bowl_express
+  awsRegion: us-west-2
+  awsEndpointUrl: http://floci.local:4566
+
+<span class="cm"># Services — enabled per-phase</span>
+api:
+  enabled: true
+  image: feedback-api:local
+  replicas: 1
+  port: 8000
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+dataGenerator:    { enabled: true  }  <span class="cm"># Phase 1</span>
+ingestionWorker:  { enabled: false }  <span class="cm"># Phase 1 (set true when image built)</span>
+cleaningWorker:   { enabled: false }  <span class="cm"># Phase 2</span>
+nlpWorker:        { enabled: false }  <span class="cm"># Phase 2</span>
+embeddingWorker:  { enabled: false }  <span class="cm"># Phase 3</span>
+agentService:     { enabled: false }  <span class="cm"># Phase 4</span>
+voiceService:     { enabled: false }  <span class="cm"># Phase 5</span>
+
+qdrant:
+  enabled: true
+  image: qdrant/qdrant:v1.9.0
+  port: 6333
+  resources:
+    requests: { cpu: 200m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 2Gi }
+  persistence:
+    enabled: true
+    size: 5Gi
+
+observability:
+  prometheus: { enabled: true }
+  grafana:    { enabled: true }
+  loki:       { enabled: true }</pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">yaml — helm/feedback-platform/templates/deployment.yaml</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-helm-deploy" contenteditable="false" spellcheck="false">{{- if .Values.api.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feedback-api
+  namespace: feedback
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels: { app: feedback-api }
+  template:
+    metadata:
+      labels: { app: feedback-api }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: api
+          image: {{ .Values.api.image }}
+          ports:
+            - containerPort: {{ .Values.api.port }}
+            - containerPort: 8001   <span class="cm"># metrics</span>
+          env:
+            - { name: ENVIRONMENT,      value: "{{ .Values.global.environment }}" }
+            - { name: AWS_ENDPOINT_URL, value: "{{ .Values.global.awsEndpointUrl }}" }
+            - { name: TENANT_ID,        value: "{{ .Values.global.tenantId }}" }
+          resources: {{- toYaml .Values.api.resources | nindent 12 }}
+          livenessProbe:
+            httpGet: { path: /health, port: {{ .Values.api.port }} }
+            initialDelaySeconds: 10; periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /ready, port: {{ .Values.api.port }} }
+            initialDelaySeconds: 5; periodSeconds: 10
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+{{- end }}</pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">python — apps/api/main.py (FastAPI skeleton)</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-fastapi" contenteditable="false" spellcheck="false"><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, Depends
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
+<span class="kw">from</span> prometheus_client <span class="kw">import</span> make_asgi_app
+<span class="kw">import</span> os, time
+<span class="kw">from</span> shared.logging.logger <span class="kw">import</span> FIPLogger
+<span class="kw">from</span> shared.auth.tenant_guard <span class="kw">import</span> require_tenant
+
+log = FIPLogger(<span class="str">"feedback-api"</span>)
+
+app = FastAPI(
+    title=<span class="str">"Feedback Intelligence Platform API"</span>,
+    version=<span class="str">"0.1.0"</span>,
+    description=<span class="str">"Multi-tenant restaurant feedback analytics — Phase 0 skeleton"</span>,
+)
+app.add_middleware(CORSMiddleware, allow_origins=[<span class="str">"*"</span>],
+                  allow_methods=[<span class="str">"*"</span>], allow_headers=[<span class="str">"*"</span>])
+app.mount(<span class="str">"/metrics"</span>, make_asgi_app())
+
+<span class="fn">@app.middleware</span>(<span class="str">"http"</span>)
+<span class="kw">async def</span> <span class="fn">log_requests</span>(request, call_next):
+    start = time.monotonic()
+    resp = <span class="kw">await</span> call_next(request)
+    log.info(<span class="str">"http_request"</span>, method=request.method,
+             path=request.url.path, status=resp.status_code,
+             latency_ms=round((time.monotonic()-start)*<span class="num">1000</span>,<span class="num">2</span>))
+    <span class="kw">return</span> resp
+
+<span class="fn">@app.get</span>(<span class="str">"/health"</span>, tags=[<span class="str">"ops"</span>])
+<span class="kw">def</span> <span class="fn">health</span>(): <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"alive"</span>, <span class="str">"service"</span>: <span class="str">"feedback-api"</span>}
+
+<span class="fn">@app.get</span>(<span class="str">"/ready"</span>, tags=[<span class="str">"ops"</span>])
+<span class="kw">def</span> <span class="fn">ready</span>(): <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"ready"</span>, <span class="str">"checks"</span>: {<span class="str">"kafka"</span>: <span class="str">"ok"</span>, <span class="str">"db"</span>: <span class="str">"ok"</span>}}
+
+<span class="fn">@app.get</span>(<span class="str">"/info"</span>, tags=[<span class="str">"ops"</span>])
+<span class="kw">def</span> <span class="fn">info</span>():
+    <span class="kw">return</span> {<span class="str">"service"</span>: <span class="str">"feedback-api"</span>, <span class="str">"version"</span>: <span class="str">"0.1.0"</span>,
+            <span class="str">"environment"</span>: os.getenv(<span class="str">"ENVIRONMENT"</span>, <span class="str">"local"</span>), <span class="str">"phase"</span>: <span class="str">"0"</span>}
+
+<span class="fn">@app.get</span>(<span class="str">"/api/v1/status"</span>, tags=[<span class="str">"platform"</span>])
+<span class="kw">async def</span> <span class="fn">platform_status</span>(tenant: str = Depends(require_tenant)):
+    <span class="str">"""Protected — requires X-Tenant-Id header."""</span>
+    <span class="kw">return</span> {<span class="str">"tenant"</span>: tenant, <span class="str">"status"</span>: <span class="str">"Phase 0 foundation ready"</span>}</pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — deploy to FLOCI EKS</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+    <pre data-editable="pre-helm-deploy-cmd" contenteditable="false" spellcheck="false"><span class="cm"># Configure kubectl to point at FLOCI EKS</span>
+aws eks update-kubeconfig   --region us-west-2   --name feedback-eks-local   --endpoint http://localhost:4566
+
+kubectl get nodes
+
+<span class="cm"># Create namespace</span>
+kubectl create namespace feedback --dry-run=client -o yaml | kubectl apply -f -
+
+<span class="cm"># Deploy</span>
+helm upgrade --install feedback-platform   infra/helm/feedback-platform   --namespace feedback --create-namespace   -f infra/helm/feedback-platform/values-local.yaml   --wait --timeout 120s
+
+<span class="cm"># Verify</span>
+kubectl get pods -n feedback
+kubectl get services -n feedback
+
+<span class="cm"># Test API health</span>
+kubectl port-forward svc/feedback-api 8000:8000 -n feedback &amp;
+curl http://localhost:8000/health
+<span class="cm"># Expected: {"status": "alive", "service": "feedback-api"}</span>
+
+curl -H "X-Tenant-Id: curry_bowl_express" http://localhost:8000/api/v1/status
+<span class="cm"># Expected: {"tenant": "curry_bowl_express", "status": "Phase 0 foundation ready"}</span></pre>
+  </div>
+</div>
+
+<!-- S12: CAPACITY -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-header-text">
+      <h2>Capacity Assumptions</h2>
+      <p>Local baseline vs AWS production targets — designed now, scaled in Phase 6</p>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>Local (FLOCI) — Phase 0</th><th>AWS Production — Phase 6</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tenants</strong></td><td>1 (curry_bowl_express)</td><td>5,000</td></tr>
+        <tr><td><strong>Locations per tenant</strong></td><td>12</td><td>up to 100</td></tr>
+        <tr><td><strong>Feedback records</strong></td><td>25,000 dummy (Phase 1)</td><td>5M+ / day</td></tr>
+        <tr><td><strong>Peak events/sec</strong></td><td>100–500</td><td>10,000</td></tr>
+        <tr><td><strong>Vector documents (Qdrant)</strong></td><td>25,000</td><td>1B+</td></tr>
+        <tr><td><strong>Agent queries/day</strong></td><td>1,000</td><td>1M</td></tr>
+        <tr><td><strong>Voice sessions/day</strong></td><td>100</td><td>100K</td></tr>
+        <tr><td><strong>Data freshness</strong></td><td>&lt;5 min</td><td>&lt;15 min SLA</td></tr>
+        <tr><td><strong>MSK brokers</strong></td><td>1 (FLOCI)</td><td>3 (Multi-AZ)</td></tr>
+        <tr><td><strong>RDS instance</strong></td><td>db.t3.micro</td><td>db.r6g.large (Multi-AZ)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- S13: TRADEOFFS -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-header-text">
+      <h2>Tradeoffs &amp; Design Decisions</h2>
+      <p>Conscious choices made at Phase 0 — and what they cost</p>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Decision</th><th>Why</th><th>Tradeoff</th></tr></thead>
+      <tbody>
+        <tr><td><strong>FLOCI over Minikube + MinIO</strong></td><td>AWS API parity locally; same Terraform reused in prod</td><td>FLOCI less mature; some MSK features need fallback</td></tr>
+        <tr><td><strong>Terraform-first IaC</strong></td><td>Reproducible infra; local-to-prod parity; version-controlled</td><td>Higher Phase 0 setup time vs manual</td></tr>
+        <tr><td><strong>Pydantic schema enforcement</strong></td><td>Catches malformed events at ingest; typed contracts</td><td>Extra validation CPU; schema evolution needs care</td></tr>
+        <tr><td><strong>6 Kafka topics (staged)</strong></td><td>Decouples processing stages; enables replay from any point</td><td>More consumer groups to manage</td></tr>
+        <tr><td><strong>Manual Kafka commit</strong></td><td>Exactly-once guarantee; control retry before DLQ</td><td>More complex consumer code</td></tr>
+        <tr><td><strong>LangGraph over bare LangChain</strong></td><td>Stateful multi-agent flows with explicit routing</td><td>More complex setup; steeper learning curve</td></tr>
+        <tr><td><strong>Qdrant over pgvector</strong></td><td>Hybrid search natively; per-tenant isolation; horizontal scale</td><td>Not AWS-managed; needs operational runbook</td></tr>
+        <tr><td><strong>secrets.py with @cache</strong></td><td>One Secrets Manager call per process lifetime</td><td>Process restart required to pick up rotated secrets</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- S14: CHECKLIST -->
+<div class="section" id="s14">
+  <div class="section-header">
+    <div class="section-number">14</div>
+    <div class="section-header-text">
+      <h2>Phase 0 Completion Checklist</h2>
+      <p>Click to check off. Progress saved in browser. Must be 100% before Phase 1.</p>
+    </div>
+  </div>
+  <div class="card">
+    <ul class="checklist" id="checklist">
+      <li onclick="toggleCheck(this)" data-id="c1"><div class="chk"></div>GitHub repo created and initial commit pushed</li>
+      <li onclick="toggleCheck(this)" data-id="c2"><div class="chk"></div>FLOCI installed — <code class="inline">floci --version</code> works</li>
+      <li onclick="toggleCheck(this)" data-id="c3"><div class="chk"></div>FLOCI started — <code class="inline">floci start</code> + <code class="inline">eval $(floci env)</code></li>
+      <li onclick="toggleCheck(this)" data-id="c4"><div class="chk"></div>AWS CLI verified — <code class="inline">aws sts get-caller-identity</code> returns account 000000000000</li>
+      <li onclick="toggleCheck(this)" data-id="c5"><div class="chk"></div>All 9 Terraform modules created (s3, msk, rds, secrets, iam, eks, ecr, network, observability)</li>
+      <li onclick="toggleCheck(this)" data-id="c6"><div class="chk"></div><code class="inline">terraform init</code> succeeds in envs/local-floci/</li>
+      <li onclick="toggleCheck(this)" data-id="c7"><div class="chk"></div><code class="inline">terraform apply</code> — 3 S3 buckets provisioned</li>
+      <li onclick="toggleCheck(this)" data-id="c8"><div class="chk"></div><code class="inline">terraform apply</code> — 5 Secrets Manager entries created</li>
+      <li onclick="toggleCheck(this)" data-id="c9"><div class="chk"></div><code class="inline">terraform apply</code> — MSK cluster provisioned</li>
+      <li onclick="toggleCheck(this)" data-id="c10"><div class="chk"></div><code class="inline">terraform apply</code> — RDS PostgreSQL provisioned</li>
+      <li onclick="toggleCheck(this)" data-id="c11"><div class="chk"></div>Secrets injected — <code class="inline">./scripts/inject_secrets.sh local</code></li>
+      <li onclick="toggleCheck(this)" data-id="c12"><div class="chk"></div>All 6 Kafka topics created — <code class="inline">./scripts/create_topics.sh</code></li>
+      <li onclick="toggleCheck(this)" data-id="c13"><div class="chk"></div>kubectl configured for FLOCI EKS</li>
+      <li onclick="toggleCheck(this)" data-id="c14"><div class="chk"></div>Helm skeleton deployed — <code class="inline">kubectl get pods -n feedback</code> shows running</li>
+      <li onclick="toggleCheck(this)" data-id="c15"><div class="chk"></div>FastAPI health endpoint returns 200 — <code class="inline">curl localhost:8000/health</code></li>
+      <li onclick="toggleCheck(this)" data-id="c16"><div class="chk"></div>FeedbackEvent schema implemented + all 8 unit tests pass</li>
+      <li onclick="toggleCheck(this)" data-id="c17"><div class="chk"></div>FIPLogger outputs valid JSON — manually tested</li>
+      <li onclick="toggleCheck(this)" data-id="c18"><div class="chk"></div>Prometheus /metrics endpoint returns valid response</li>
+      <li onclick="toggleCheck(this)" data-id="c19"><div class="chk"></div>Tenant guard rejects requests without X-Tenant-Id header</li>
+      <li onclick="toggleCheck(this)" data-id="c20"><div class="chk"></div>Secrets Manager loader returns correct value in test</li>
+      <li onclick="toggleCheck(this)" data-id="c21"><div class="chk"></div>.env.example documented, .env in .gitignore, no secrets committed</li>
+      <li onclick="toggleCheck(this)" data-id="c22"><div class="chk"></div><code class="inline">make bootstrap</code> runs end-to-end without errors</li>
+      <li onclick="toggleCheck(this)" data-id="c23"><div class="chk"></div>README.md written with setup steps for a new team member</li>
+      <li onclick="toggleCheck(this)" data-id="c24"><div class="chk"></div>LinkedIn Day 1 of 7 post published ✅</li>
+    </ul>
+    <div id="progress-bar" style="margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--text-muted)">Phase 0 Progress</span>
+        <span id="progress-pct" style="font-size:13px;font-weight:700;color:var(--accent3)">0%</span>
+      </div>
+      <div style="background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;">
+        <div id="progress-fill" style="height:100%;background:var(--accent3);width:0%;transition:width 0.3s;border-radius:4px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S15: LINKEDIN POST -->
+<div class="section" id="s15">
+  <div class="section-header">
+    <div class="section-number">15</div>
+    <div class="section-header-text">
+      <h2>LinkedIn Post — Day 1 of 7</h2>
+      <p>Copy, personalise in Edit Mode, then publish. Targets EM + Senior AI/Data roles.</p>
+    </div>
+  </div>
+  <div class="linkedin-card">
+    <div class="linkedin-header">
+      <span>📅 LinkedIn · Day 1 of 7 · Engineering Manager + Senior AI/Data positioning</span>
+      <button class="linkedin-copy-btn" onclick="copyLinkedIn()">Copy Post</button>
+    </div>
+    <div class="linkedin-body" id="linkedin-post" data-editable="linkedin-post" contenteditable="false">🚀 Day 1 of 7: I'm building a production AI Feedback Platform from scratch — live on LinkedIn.
+
+Not a tutorial. Not slides. A real system, built in public.
+
+──────────────────────────
+
+🎯 The Problem I'm Solving
+
+Curry Bowl Express — 12 Bay Area restaurant locations — has ratings dropping and no idea why. Feedback is scattered across Google, Reddit, DoorDash, surveys, QR forms, and voice calls. No unified view. Managers guessing.
+
+I'm building the AI platform that changes that. In 7 days. On LinkedIn.
+
+──────────────────────────
+
+🏗️ Day 1: The Foundation
+
+Before writing a single line of product code, I built the infrastructure that everything else depends on.
+
+Here's what's running locally right now:
+
+✅ FLOCI local AWS emulator (EKS · MSK · S3 · RDS · Secrets Manager · IAM)
+✅ 9 Terraform modules provisioning real AWS-shaped resources locally
+✅ Same modules deploy to real AWS in Day 7 — zero code changes
+✅ Helm chart skeleton running in FLOCI EKS
+✅ FeedbackEvent Pydantic schema — the contract all 7 data sources normalise into
+✅ 6 Kafka topics designed and provisioned for the full pipeline
+✅ Security baseline: no hardcoded secrets · tenant isolation · LLM safety boundary
+✅ Structured JSON logging + Prometheus metrics from the very first service
+
+──────────────────────────
+
+🔑 The Architecture Decision That Matters Most
+
+I chose FLOCI over a generic Minikube + MinIO local stack.
+
+Why? AWS-parity.
+
+The same Terraform AWS provider resources that provision S3 buckets, MSK clusters, RDS instances, and Secrets Manager entries locally today will provision real AWS resources in Day 7. I'm not maintaining two architectures — I'm maintaining one, with a provider endpoint swap.
+
+This is what local development looks like when you're thinking about a production system at scale.
+
+──────────────────────────
+
+📐 The 7-Phase Roadmap
+
+Day 1 → Phase 0: Foundation (today ✅)
+Day 2 → Phase 1: Data Ingestion (25K events through Kafka)
+Day 3 → Phase 2: Data Platform (Bronze → Silver → Gold + NLP + dbt)
+Day 4 → Phase 3: RAG Layer (Qdrant + hybrid search + embeddings)
+Day 5 → Phase 4: Agentic Intelligence (4 agents + LangGraph + guardrails)
+Day 6 → Phase 5: Product Surface (Voice + Chat + Dashboard)
+Day 7 → Phase 6: Production Deploy (CI/CD → real AWS EKS)
+
+──────────────────────────
+
+💡 Why I'm Building This in Public
+
+I want to show — not tell — what it looks like when an Engineering Manager takes AI, data engineering, platform design, and production standards seriously as one integrated system.
+
+Data is not a feature. It's the foundation every AI system depends on.
+
+Follow along if you care about:
+→ AI/ML platform engineering at production scale
+→ Data-first architecture thinking
+→ Engineering leadership through building, not just managing
+
+7 days. Full production code. Real architecture. Let's go. 🔥
+
+#AIEngineering #DataPlatform #EngineeringManager #MLPlatform #Kafka #Terraform #Kubernetes #BuildInPublic #RestaurantTech #SeniorEngineer</div>
+  </div>
+</div>
+
+<!-- S16: INTERVIEW -->
+<div class="section" id="s16">
+  <div class="section-header">
+    <div class="section-number">16</div>
+    <div class="section-header-text">
+      <h2>Interview Q&amp;A</h2>
+      <p>Phase 0 talking points for Engineering Manager and Senior AI/Data interviews. Edit in Edit Mode.</p>
+    </div>
+  </div>
+
+  <div class="interview-card">
+    <div class="interview-q">💬 "How do you approach local development for cloud-native AI systems?"</div>
+    <div class="interview-a" data-editable="interview-a1" contenteditable="false">I insist on AWS-parity in local development using FLOCI — not just "something that runs locally." The same Terraform AWS provider modules that create S3 buckets, MSK Kafka clusters, RDS instances, and Secrets Manager entries locally are the exact modules that run in production. The only change is a provider endpoint config. This means developers run real <code class="inline">terraform apply</code> commands from day one against local infrastructure. By Phase 6 when we deploy to real AWS, the team has executed the same workflow dozens of times. No cloud shock, no drift, no "it works on my machine."</div>
+  </div>
+
+  <div class="interview-card">
+    <div class="interview-q">💬 "How do you enforce multi-tenancy and security from day one, not as an afterthought?"</div>
+    <div class="interview-a" data-editable="interview-a2" contenteditable="false">Multi-tenancy is enforced at every layer as a schema constraint, not just an API check. Every Kafka event carries a tenant_id field — validated by Pydantic before publish. Every FastAPI route uses a tenant dependency that validates the X-Tenant-Id header. PostgreSQL uses row-level security by tenant_id. Qdrant uses per-tenant collection namespaces. For LLM agents specifically, no agent generates raw SQL that touches the database — all DB access goes through typed, read-only tool functions I define and control. This prevents prompt injection from a malicious review text turning into a DROP TABLE. Defense in depth across every layer.</div>
+  </div>
+
+  <div class="interview-card">
+    <div class="interview-q">💬 "Why did you choose LangGraph over just LangChain for the agent framework?"</div>
+    <div class="interview-a" data-editable="interview-a3" contenteditable="false">The Business Analyst Agent needs to call both the Data Analyst Agent and the RAG Agent in parallel, wait for both results, and then reason over the combined output to generate root cause and recommendations. LangGraph models this as an explicit stateful graph with nodes, edges, and conditional routing — LangChain alone doesn't give you this structure cleanly. LangGraph also handles retries and partial failures at the graph level, not just the individual call level. For production multi-agent systems where the orchestration logic is as important as the individual agent logic, LangGraph is the right choice.</div>
+  </div>
+
+  <div class="interview-card">
+    <div class="interview-q">💬 "What makes this production-grade versus a proof of concept?"</div>
+    <div class="interview-a" data-editable="interview-a4" contenteditable="false">Five specific decisions from Phase 0. First: no hardcoded secrets anywhere — everything through Secrets Manager from the first line. Second: manual Kafka offset commits — we control exactly when a message is acknowledged, enabling proper retry-then-DLQ patterns. Third: structured JSON logging from every service — machine-parseable by CloudWatch Logs Insights in production. Fourth: readiness and liveness probes on every pod, non-root security context, read-only filesystem. Fifth: DLQ from day one — not added later when events start failing in production. Systems that lack any of these spend months retrofitting them while debugging incidents. I'd rather spend the time now.</div>
+  </div>
+
+  <div class="interview-card">
+    <div class="interview-q">💬 "As an Engineering Manager, how does this project demonstrate your technical depth?"</div>
+    <div class="interview-a" data-editable="interview-a5" contenteditable="false">The foundation phase is where I invest technical depth upfront so the team moves fast in every phase after. The Makefile with a single <code class="inline">make bootstrap</code> command, the shared logging and auth libraries, the standard Helm values template, the FeedbackEvent schema as a typed contract — these are all force multipliers. A new engineer can run <code class="inline">make bootstrap</code> on day one and have a running local stack. Infrastructure decisions made here — FLOCI, Terraform module structure, Kafka topic naming, S3 bucket layout — persist across all 7 phases without revisiting them. That's how you build a team that ships features fast without accumulating technical debt on the foundation.</div>
+  </div>
+</div>
+
+</main>
+</div><!-- /layout -->
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  FEEDBACK INTELLIGENCE PLATFORM — Phase Document Engine
+//  Features: Edit Mode · Auto-save · Edit History · Export HTML
+// ═══════════════════════════════════════════════════════════════
+
+const STORAGE_KEY   = 'fip_phase0_edits';
+const HISTORY_KEY   = 'fip_phase0_history';
+const CHECKLIST_KEY = 'phase0_checklist';
+const MAX_HISTORY   = 50;
+
+// ── Checklist ──────────────────────────────────────────────────
+function saveChecklistState() {
+  const state = {};
+  document.querySelectorAll('#checklist li').forEach(li => {
+    state[li.dataset.id] = li.classList.contains('done');
+  });
+  localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+  updateProgress();
+}
+
+function loadChecklistState() {
+  const saved = localStorage.getItem(CHECKLIST_KEY);
+  if (!saved) return;
+  const state = JSON.parse(saved);
+  document.querySelectorAll('#checklist li').forEach(li => {
+    if (state[li.dataset.id]) {
+      li.classList.add('done');
+      li.querySelector('.chk').textContent = '✓';
+    }
+  });
+  updateProgress();
+}
+
+function toggleCheck(li) {
+  const isDone = li.classList.toggle('done');
+  li.querySelector('.chk').textContent = isDone ? '✓' : '';
+  saveChecklistState();
+}
+
+function updateProgress() {
+  const items = document.querySelectorAll('#checklist li');
+  const done  = document.querySelectorAll('#checklist li.done').length;
+  const pct   = Math.round((done / items.length) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ── Edit Storage ───────────────────────────────────────────────
+function loadEdits() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveEdits(edits) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(edits));
+}
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveHistory(hist) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, MAX_HISTORY)));
+}
+
+// ── Apply saved edits on page load ────────────────────────────
+function applyStoredEdits() {
+  const edits = loadEdits();
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    const key = el.dataset.editable;
+    if (edits[key] !== undefined) {
+      // Use innerHTML for rich content, innerText for code
+      if (el.tagName === 'PRE') {
+        el.textContent = edits[key];
+      } else {
+        el.innerHTML = edits[key];
+      }
+    }
+  });
+}
+
+// ── Debounced auto-save on content change ─────────────────────
+let saveTimer = null;
+
+function onContentChange(el) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const key   = el.dataset.editable;
+    const edits = loadEdits();
+    const prev  = edits[key];
+    const curr  = el.tagName === 'PRE' ? el.textContent : el.innerHTML;
+
+    if (prev === curr) return; // no change
+
+    // Push to history
+    const hist = loadHistory();
+    hist.unshift({
+      key,
+      label: getElementLabel(el),
+      prev:  prev || '',
+      curr,
+      ts:    new Date().toISOString()
+    });
+    saveHistory(hist);
+
+    // Save edit
+    edits[key] = curr;
+    saveEdits(edits);
+
+    // Show save indicator
+    showSaveIndicator();
+    renderHistory();
+  }, 600);
+}
+
+function getElementLabel(el) {
+  // Try to find a human-readable label from context
+  const section = el.closest('.section');
+  if (section) {
+    const h2 = section.querySelector('h2');
+    if (h2) return h2.textContent.trim().substring(0, 40);
+  }
+  if (el.id === 'linkedin-post') return 'LinkedIn Post';
+  if (el.tagName === 'PRE') return 'Code Block';
+  if (el.classList.contains('interview-a')) return 'Interview Answer';
+  if (el.classList.contains('prose')) return 'Prose Paragraph';
+  return el.dataset.editable;
+}
+
+function showSaveIndicator() {
+  const ind = document.getElementById('saveIndicator');
+  ind.classList.add('show');
+  clearTimeout(ind._timer);
+  ind._timer = setTimeout(() => ind.classList.remove('show'), 2000);
+}
+
+
+// ── Find & Replace ────────────────────────────────────────────
+let findOpen = false;
+function toggleFind() {
+  findOpen = !findOpen;
+  const p = document.getElementById('findPanel');
+  p.style.display = findOpen ? 'flex' : 'none';
+  if (findOpen) document.getElementById('findInput').focus();
+}
+function doFindReplace() {
+  const find    = document.getElementById('findInput').value;
+  const replace = document.getElementById('replaceInput').value;
+  if (!find) return;
+  let count = 0;
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    const content = el.tagName === 'PRE' ? el.textContent : el.innerHTML;
+    if (!content.includes(find)) return;
+    const updated = content.split(find).join(replace);
+    el.tagName === 'PRE' ? (el.textContent = updated) : (el.innerHTML = updated);
+    onContentChange(el);
+    count++;
+  });
+  showSaveIndicator();
+  alert(count ? `✓ Replaced in ${count} element(s)` : 'Not found');
+}
+
+// ── Toggle edit mode ──────────────────────────────────────────
+let editModeOn = false;
+
+function toggleEditMode() {
+  editModeOn = !editModeOn;
+  document.body.classList.toggle('edit-mode', editModeOn);
+  const btn = document.getElementById('editToggleBtn');
+
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    el.contentEditable = editModeOn ? 'true' : 'false';
+
+    if (editModeOn) {
+      // For code blocks, preserve spacing
+      if (el.tagName === 'PRE') {
+        el.style.whiteSpace = 'pre';
+        el.setAttribute('spellcheck', 'false');
+      }
+      el.addEventListener('input', () => onContentChange(el));
+      el.addEventListener('blur',  () => onContentChange(el));
+    } else {
+      // Clone to remove event listeners
+      const clone = el.cloneNode(true);
+      el.parentNode.replaceChild(clone, el);
+    }
+  });
+
+  if (editModeOn) {
+    btn.textContent = '✅ Done Editing';
+    // Re-attach listeners after DOM refresh
+    setTimeout(() => {
+      document.querySelectorAll('[data-editable]').forEach(el => {
+        el.addEventListener('input', () => onContentChange(el));
+        el.addEventListener('blur',  () => onContentChange(el));
+      });
+    }, 50);
+  } else {
+    btn.textContent = '✏️ Edit';
+  }
+}
+
+// ── Edit History Panel ────────────────────────────────────────
+let historyOpen = false;
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('historyPanel').classList.toggle('open', historyOpen);
+  if (historyOpen) renderHistory();
+}
+
+function renderHistory() {
+  const hist = loadHistory();
+  const container = document.getElementById('historyList');
+  if (!hist.length) {
+    container.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">No edits recorded yet.</p>';
+    return;
+  }
+  container.innerHTML = hist.map((item, i) => `
+    <div class="history-item">
+      <div class="hi-label">${escapeHTML(item.label)}</div>
+      <div class="hi-time">${formatTime(item.ts)}</div>
+      <div class="hi-preview">${escapeHTML(stripHTML(item.curr).substring(0, 80))}…</div>
+      <div class="hi-restore" onclick="restoreEdit(${i})">↩ Restore this version</div>
+    </div>
+  `).join('');
+}
+
+function restoreEdit(index) {
+  const hist = loadHistory();
+  const item = hist[index];
+  if (!item) return;
+  const el = document.querySelector(`[data-editable="${item.key}"]`);
+  if (!el) return;
+  if (el.tagName === 'PRE') {
+    el.textContent = item.curr;
+  } else {
+    el.innerHTML = item.curr;
+  }
+  // Save the restore as a new edit
+  const edits = loadEdits();
+  edits[item.key] = item.curr;
+  saveEdits(edits);
+  showSaveIndicator();
+  alert(`Restored: "${item.label}"`);
+}
+
+// ── Reset all edits ───────────────────────────────────────────
+function resetAllEdits() {
+  if (!confirm('Reset ALL edits to original? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ── Copy code blocks ──────────────────────────────────────────
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+// ── Copy LinkedIn post ────────────────────────────────────────
+function copyLinkedIn() {
+  const text = document.getElementById('linkedin-post').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.linkedin-copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy Post', 2000);
+  });
+}
+
+// ── Save HTML (with all edits baked in) ──────────────────────
+function saveHTML() {
+  // Ensure all current content is serialised into the HTML
+  // First disable contenteditable so it saves as static HTML
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    el.removeAttribute('contenteditable');
+  });
+
+  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  // Restore contenteditable
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    el.contentEditable = editModeOn ? 'true' : 'false';
+  });
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'phase0_floci_foundation_feedback_intelligence_platform.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Sidebar active nav ────────────────────────────────────────
+const sections = document.querySelectorAll('.section[id], .hero[id], #roadmap');
+const navLinks  = document.querySelectorAll('.sidebar a');
+
+function updateActiveNav() {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+
+// ── Utilities ─────────────────────────────────────────────────
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function stripHTML(str) {
+  return String(str).replace(/<[^>]*>/g, '');
+}
+function formatTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+// ── Init ──────────────────────────────────────────────────────
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+document.addEventListener('DOMContentLoaded', () => {
+  loadChecklistState();
+  updateActiveNav();
+  applyStoredEdits();
+  renderHistory();
+
+  // Keyboard shortcut: Ctrl/Cmd+E = toggle edit mode
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+      e.preventDefault();
+      toggleEditMode();
+    }
+    // Ctrl/Cmd+S = save HTML
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveHTML();
+    }
+    // Escape = exit edit mode or find panel
+    if (e.key === 'Escape') {
+      if (editModeOn) toggleEditMode();
+      if (findOpen) toggleFind();
+    }
+    // Cmd+F = find
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      toggleFind();
+    }
+  });
+});
+</script>
+</body>
+</html>

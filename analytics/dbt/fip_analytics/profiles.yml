@@ -1,0 +1,12 @@
+fip_analytics:
+  target: local
+  outputs:
+    local:
+      type: postgres
+      host: "{{ env_var('RDS_HOST', 'localhost') }}"
+      port: "{{ env_var('RDS_PORT', '5432') | int }}"
+      user: "{{ env_var('RDS_USERNAME', 'fip_user') }}"
+      password: "{{ env_var('RDS_PASSWORD', 'fip_password') }}"
+      dbname: "{{ env_var('RDS_DB_NAME', 'fip') }}"
+      schema: analytics
+      threads: 4

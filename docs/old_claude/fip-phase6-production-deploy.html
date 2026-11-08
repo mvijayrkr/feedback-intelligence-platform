@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIP Phase 6 &mdash; Production Deploy | AI Feedback Intelligence Platform</title>
+<style>
+
+:root{
+  --bg:#0B0F1A;--surface:#111827;--surface2:#1A2235;
+  --border:#243047;--border-hi:#2E3F60;
+  --accent:#EF4444;--accent-dim:#DC2626;--accent-glow:rgba(239,68,68,0.14);
+  --accent2:#3B82F6;--accent3:#F59E0B;--accent4:#EF4444;
+  --accent5:#8B5CF6;--accent6:#10B981;
+  --text:#E2E8F0;--text-muted:#94A3B8;--text-faint:#475569;
+  --radius:8px;--radius-lg:14px;
+  --font-mono:'JetBrains Mono','Fira Code',monospace;
+  --font-ui:'Inter','Segoe UI',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:15px;line-height:1.7;min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:3px}
+.phase-stripe{background:linear-gradient(135deg,#EF4444 0%,#B91C1C 60%,#EF4444 100%);min-height:9px}
+.topnav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.topnav-brand{display:flex;align-items:center;gap:12px}
+.topnav-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;letter-spacing:-0.5px}
+.topnav-title{font-size:14px;font-weight:600;color:var(--text)}.topnav-sub{font-size:12px;color:var(--text-muted)}
+.phase-badge{background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
+.hero{padding:64px 40px 56px;max-width:1100px;margin:0 auto;position:relative}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.hero-number{position:absolute;right:30px;top:40px;font-size:180px;font-weight:900;color:rgba(239,68,68,0.04);line-height:1;user-select:none;font-family:var(--font-mono)}
+.hero h1{font-size:42px;font-weight:800;line-height:1.15;letter-spacing:-1px;margin-bottom:20px;max-width:700px}
+.hero h1 span{color:var(--accent)}
+.hero-desc{font-size:16px;color:var(--text-muted);max-width:640px;margin-bottom:32px;line-height:1.8}
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-width:820px;margin-bottom:40px}
+.stat-item{background:var(--surface);padding:20px 24px;text-align:center}
+.stat-item .val{font-size:26px;font-weight:800;color:var(--accent);font-family:var(--font-mono);line-height:1;margin-bottom:4px}
+.stat-item .lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+.section-wrap{max-width:1100px;margin:0 auto;padding:0 40px 40px}
+.section-title{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.arch-diagram{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;margin-bottom:32px;overflow-x:auto}
+.arch-title{font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:24px;text-transform:uppercase;letter-spacing:1px}
+.arch-flow{display:flex;align-items:center;gap:0;min-width:700px}
+.arch-node{flex:1;background:var(--surface2);border:1px solid var(--border-hi);border-radius:10px;padding:16px 12px;text-align:center}
+.arch-node.active{border-color:var(--accent);background:var(--accent-glow);box-shadow:0 0 0 1px var(--accent) inset}
+.arch-node.done{border-color:#10B981;background:rgba(16,185,129,0.08)}.arch-node.upcoming{opacity:0.5}
+.arch-node-icon{font-size:20px;margin-bottom:5px}.arch-node-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}.arch-node-sub{font-size:10px;color:var(--text-muted)}
+.arch-arrow{font-size:16px;color:var(--accent);padding:0 6px;flex-shrink:0;font-weight:700}
+.steps-grid{display:flex;flex-direction:column;gap:32px;margin-bottom:40px}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.step-card-header{display:flex;align-items:stretch}
+.step-num-stripe{width:80px;background:linear-gradient(180deg,var(--accent) 0%,var(--accent-dim) 100%);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#000;font-family:var(--font-mono);flex-shrink:0;letter-spacing:-1px;min-height:90px}
+.step-header-content{padding:22px 28px;flex:1}
+.step-tag{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.step-header-content h3{font-size:19px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.3}
+.step-header-content p{font-size:13px;color:var(--text-muted);line-height:1.6}
+.step-body{padding:28px 28px 28px 108px;border-top:1px solid var(--border)}
+.code-block{background:#0D1117;border:1px solid var(--border-hi);border-radius:var(--radius);overflow:hidden;margin:16px 0;font-family:var(--font-mono)}
+.code-header{background:#161B22;border-bottom:1px solid var(--border-hi);padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+.code-header-left{display:flex;align-items:center;gap:10px}
+.code-lang{font-size:10px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:1px}
+.code-filename{font-size:10px;color:var(--text-faint);font-family:var(--font-mono)}
+.code-copy-btn{background:transparent;border:1px solid var(--border-hi);color:var(--text-muted);border-radius:5px;padding:3px 10px;font-size:10px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font-ui);letter-spacing:0.3px}
+.code-copy-btn:hover{border-color:var(--accent);color:var(--accent)}.code-copy-btn.copied{border-color:var(--accent6);color:var(--accent6)}
+.code-block pre{padding:18px;overflow-x:auto;font-size:12.5px;line-height:1.65;color:#ABB2BF}
+.kw{color:#C678DD}.fn{color:#61AFEF}.st{color:#98C379}.cm{color:#5C6370;font-style:italic}.nm{color:#E5C07B}.nu{color:#D19A66}.dc{color:#EF4444}
+.callout{border-radius:var(--radius);padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.6}
+.callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.callout-body strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+.callout.danger{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5}.callout.danger strong{color:var(--accent4)}
+.callout.warning{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#FCD34D}.callout.warning strong{color:var(--accent3)}
+.callout.tip{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:#99F6E4}.callout.tip strong{color:var(--accent)}
+.callout.info{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:#93C5FD}.callout.info strong{color:var(--accent2)}
+.analogy-box{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius);padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.65;color:#A7F3D0}
+.analogy-box .ai{font-size:20px;flex-shrink:0;margin-top:1px}
+.analogy-box strong{display:block;margin-bottom:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent6)}
+.tradeoff-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+.tradeoff-table th{background:var(--surface2);color:var(--text-muted);padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--border-hi)}
+.tradeoff-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+.tradeoff-table tr:last-child td{border-bottom:none}.tradeoff-table tr:hover td{background:rgba(255,255,255,0.02)}
+.chosen{color:var(--accent);font-weight:600}.pro{color:#6EE7B7}.con{color:#FCA5A5}
+.prod-issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:16px 0}
+.prod-issue-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.prod-issue-card.h{border-left:3px solid var(--accent4)}.prod-issue-card.m{border-left:3px solid var(--accent3)}.prod-issue-card.l{border-left:3px solid var(--accent)}
+.prod-issue-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}.prod-issue-body{font-size:12px;color:var(--text-muted);line-height:1.6}
+.sev{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-bottom:8px}
+.sev.h{background:rgba(239,68,68,0.2);color:#FCA5A5}.sev.m{background:rgba(245,158,11,0.2);color:#FCD34D}.sev.l{background:rgba(239,68,68,0.15);color:var(--accent)}
+.checklist-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:40px}
+.checklist-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}.checklist-subtitle{font-size:12px;color:var(--text-muted);margin-bottom:20px}
+.progress-bar-wrap{background:var(--border);border-radius:99px;height:6px;margin-bottom:20px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-dim));transition:width 0.4s ease}
+.clg{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin:16px 0 8px}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.check-item:last-child{border-bottom:none}
+.check-item input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;margin-top:3px;cursor:pointer}
+.check-label{font-size:13px;color:var(--text-muted);line-height:1.5}.check-item.done .check-label{color:var(--text-faint);text-decoration:line-through}
+.career-card{background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(59,130,246,0.08));border:1px solid rgba(139,92,246,0.35);border-radius:var(--radius-lg);padding:28px;margin-bottom:32px}
+.career-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent5);margin-bottom:14px}
+.li-post-wrap{position:relative;margin-bottom:8px}
+.li-post{background:#1E293B;border-radius:var(--radius);padding:20px;font-size:13.5px;color:var(--text);line-height:1.75;white-space:pre-wrap;border:1px solid var(--border-hi);min-height:200px}
+.li-hashtags{color:var(--accent2)}
+.li-meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.li-chars{font-size:11px;color:var(--text-faint)}.li-chars.over{color:var(--accent4)}
+.copy-btn{background:var(--accent5);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.copy-btn:hover{opacity:0.85}.copy-btn.copied{background:var(--accent6)}
+.interview-qa{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.qa-item{background:var(--surface2);border-radius:var(--radius);padding:14px 18px;border-left:3px solid var(--accent5)}
+.qa-q{font-size:12px;font-weight:700;color:var(--accent5);margin-bottom:6px}
+.qa-a{font-size:13px;color:var(--text-muted);line-height:1.6}
+.floci-box{background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-lg);padding:22px;margin:20px 0}
+.floci-header{font-size:12px;font-weight:700;color:#818CF8;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.floci-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.floci-col-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);margin-bottom:6px}
+.gen-box{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:var(--radius-lg);padding:22px;margin:20px 0}
+.gen-header{font-size:12px;font-weight:700;color:var(--accent6);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.gen-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.gen-input{background:var(--surface2);border:1px solid var(--border-hi);border-radius:var(--radius);padding:7px 12px;color:var(--text);font-size:13px;font-family:var(--font-mono);width:120px;outline:none}
+.gen-input:focus{border-color:var(--accent6)}
+.gen-btn{background:var(--accent6);color:#000;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.gen-btn:hover{opacity:0.85}
+.gen-output{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);max-height:220px;overflow-y:auto;display:none}
+.gen-output.show{display:block}
+/* UI-specific: screen layout cards */
+.screen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}
+.screen-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.screen-card.active{border-color:var(--accent)}
+.screen-icon{font-size:24px;margin-bottom:8px}
+.screen-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.screen-desc{font-size:11px;color:var(--text-muted);line-height:1.55}
+.screen-route{display:inline-block;font-size:9px;font-weight:700;font-family:var(--font-mono);background:var(--surface);border:1px solid var(--border-hi);padding:2px 7px;border-radius:4px;margin-top:6px;color:var(--accent)}
+/* tech stack pills */
+.tech-stack{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.tech-pill{background:var(--surface2);border:1px solid var(--border-hi);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--text-muted)}
+.tech-pill.chosen{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+/* mock UI wireframe */
+.mock-ui{background:var(--surface2);border:1px solid var(--border-hi);border-radius:var(--radius-lg);padding:20px;margin:16px 0;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);line-height:1.8}
+.mock-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 14px;font-size:11px;color:var(--accent);margin:-20px -20px 14px -20px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.fip-toolbar{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.fip-btn{width:44px;height:44px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:transform 0.15s}
+.fip-btn:hover{transform:scale(1.08)}
+.fip-btn.save-btn{background:var(--accent);color:#fff}
+.fip-btn.undo-btn,.fip-btn.search-btn,.fip-btn.export-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border-hi)}
+.fip-btn.edit-btn{background:linear-gradient(135deg,var(--accent),var(--accent-dim));color:#fff}
+.fip-toast{position:fixed;bottom:80px;right:24px;background:var(--accent);color:#000;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;opacity:0;transform:translateY(8px);transition:all 0.3s;z-index:9999;pointer-events:none}
+.fip-toast.show{opacity:1;transform:translateY(0)}
+.fip-search-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;display:none;align-items:center;justify-content:center}
+.fip-search-modal.open{display:flex}
+.fip-search-box{background:var(--surface);border:1px solid var(--border-hi);border-radius:var(--radius-lg);padding:24px;width:440px;display:flex;flex-direction:column;gap:12px}
+.fip-search-box h4{color:var(--text);font-size:15px;font-weight:700}
+.fip-search-box input{background:var(--surface2);border:1px solid var(--border-hi);border-radius:var(--radius);padding:9px 14px;color:var(--text);font-size:13px;outline:none}
+.fip-search-box input:focus{border-color:var(--accent)}
+.modal-btns{display:flex;gap:8px}
+.modal-btn{flex:1;padding:8px;border:none;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:600}
+.modal-btn.primary{background:var(--accent);color:#000}.modal-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border-hi)}
+@media(max-width:768px){.hero{padding:40px 20px}.hero h1{font-size:28px}.hero-number{display:none}.section-wrap{padding:0 20px 32px}.step-body{padding:20px}.topnav{padding:12px 20px}.arch-flow{min-width:500px}.floci-grid{grid-template-columns:1fr}}
+
+/* Phase 6 deploy pipeline visualization */
+.deploy-pipeline{display:flex;flex-direction:column;gap:8px;margin:20px 0}
+.pipeline-stage{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px}
+.pipeline-stage.active{border-color:var(--accent);background:rgba(239,68,68,0.06)}
+.pipeline-stage.done{border-color:#10B981;background:rgba(16,185,129,0.06)}
+.stage-icon{font-size:22px;flex-shrink:0}
+.stage-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.stage-desc{font-size:11px;color:var(--text-muted)}
+.stage-cmd{font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-top:4px}
+/* infra grid for AWS services */
+.infra-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:16px 0}
+.infra-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.infra-card.primary{border-color:var(--accent)}
+.infra-icon{font-size:22px;margin-bottom:6px}
+.infra-svc{font-size:11px;font-weight:700;color:var(--text);font-family:var(--font-mono);margin-bottom:3px}
+.infra-desc{font-size:11px;color:var(--text-muted);line-height:1.5}
+.infra-cost{font-size:10px;color:var(--accent6);margin-top:4px;font-weight:600}
+
+</style>
+</head>
+<body>
+<div class="phase-stripe"></div>
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-logo">FIP</div>
+    <div><div class="topnav-title">AI Feedback Intelligence Platform</div><div class="topnav-sub">curry_bowl_express &middot; 12 Bay Area Locations &middot; Production</div></div>
+  </div>
+  <span class="phase-badge">Phase 06 &middot; Production Deploy</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-number">06</div>
+  <div class="hero-eyebrow">Phase 06 / 06 &middot; Final Phase &mdash; Ship Everything to AWS</div>
+  <h1>Production <span>Deploy</span><br>FLOCI &rarr; AWS with Terraform</h1>
+  <p class="hero-desc" contenteditable="false" data-fip-edit="hero-desc">
+    Graduate the entire FIP platform from FLOCI (LocalStack) to production AWS with the same Terraform
+    HCL modules built across Phases 1&ndash;5 &mdash; only the provider endpoint changes.
+    CI/CD pipeline via GitHub Actions. Kafka on MSK, Qdrant on EC2, dbt on ECS Fargate, LangGraph agents on Lambda,
+    React UI on CloudFront + S3. Zero-downtime blue/green deploys. Observability from day one.
+    Every code block is copyable. This is the finish line.
+  </p>
+  <div class="stat-strip">
+    <div class="stat-item"><div class="val">12</div><div class="lbl">AWS Services</div></div>
+    <div class="stat-item"><div class="val">5</div><div class="lbl">Deploy Stages</div></div>
+    <div class="stat-item"><div class="val">~8h</div><div class="lbl">First Deploy</div></div>
+    <div class="stat-item"><div class="val">7</div><div class="lbl">Prod Issues</div></div>
+    <div class="stat-item"><div class="val">IaC</div><div class="lbl">Terraform HCL</div></div>
+  </div>
+</section>
+
+<div class="section-wrap">
+<!-- ROADMAP - FINAL PHASE -->
+<div class="section-title">7-Phase Roadmap &mdash; Phase 6 is the Finish Line</div>
+<div class="arch-diagram">
+  <div class="arch-title">FIP Full Architecture &mdash; curry_bowl_express &middot; All Phase 0 Decisions Now Live in AWS</div>
+  <div class="arch-flow">
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 0</div><div class="arch-node-sub">Foundation</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 1</div><div class="arch-node-sub">Ingestion</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 2</div><div class="arch-node-sub">Data Platform</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 3</div><div class="arch-node-sub">RAG Layer</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 4</div><div class="arch-node-sub">Agents</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node done"><div class="arch-node-icon">&#10003;</div><div class="arch-node-name">Phase 5</div><div class="arch-node-sub">Product UI</div></div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node active"><div class="arch-node-icon">&#128640;</div><div class="arch-node-name">Phase 6</div><div class="arch-node-sub">Prod Deploy<br>&larr; Final phase</div></div>
+  </div>
+  <div style="margin-top:18px;padding:14px 18px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text-muted)">
+    <strong style="color:var(--text)">All Phase 0 Locked Decisions now deploy to AWS:</strong> &nbsp;
+    <strong style="color:var(--accent)">Terraform HCL</strong> same modules, provider endpoint = real AWS &middot;
+    <strong style="color:var(--accent)">Kafka</strong> &rarr; MSK Serverless &middot;
+    <strong style="color:var(--accent)">Qdrant</strong> &rarr; EC2 m6i.large + EBS &middot;
+    <strong style="color:var(--accent)">dbt + PySpark</strong> &rarr; ECS Fargate scheduled task &middot;
+    <strong style="color:var(--accent)">LangGraph Agents</strong> &rarr; Lambda 1024MB &middot;
+    <strong style="color:var(--accent)">FastAPI + React</strong> &rarr; ECS Fargate + CloudFront &middot;
+    <strong style="color:#818CF8">FLOCI</strong> stays as local dev &mdash; promoted to prod by swapping one Terraform provider block
+  </div>
+</div>
+
+<!-- AWS ARCHITECTURE OVERVIEW -->
+<div class="section-title">Production AWS Architecture &mdash; Every Service Mapped</div>
+<div class="arch-diagram">
+  <div class="arch-title">FLOCI &rarr; AWS: one provider swap, all 12 services promoted</div>
+  <div class="analogy-box" style="margin-bottom:22px">
+    <div class="ai">&#9992;</div>
+    <div><strong>The Student Pilot to Licensed Pilot Analogy</strong>
+    A student pilot trains in a flight simulator (FLOCI) where every instrument, procedure, and emergency is identical to the real aircraft &mdash; but mistakes have no real consequences.
+    FLOCI has been that simulator for Phases 1&ndash;5: same Terraform HCL, same Python code, same Docker images, same API contracts.
+    Phase 6 is the first solo flight: the Terraform provider block loses its <code>endpoint</code> override,
+    and every <code>aws_*</code> resource materialises as a real billable AWS service.
+    The code doesn't change &mdash; only the flight environment does.
+    </div>
+  </div>
+  <div class="infra-grid">
+    <div class="infra-card primary"><div class="infra-icon">&#128240;</div><div class="infra-svc">MSK Serverless</div><div class="infra-desc">Kafka event bus. FLOCI: confluentinc/cp-kafka on Docker. Prod: MSK Serverless, auto-scales, no broker management.</div><div class="infra-cost">~$0.012/GB ingested</div></div>
+    <div class="infra-card primary"><div class="infra-icon">&#128190;</div><div class="infra-svc">S3 Lakehouse</div><div class="infra-desc">Bronze/Silver/Gold Parquet. FLOCI: LocalStack S3 bucket. Prod: real S3 with versioning and lifecycle rules.</div><div class="infra-cost">~$0.023/GB/month</div></div>
+    <div class="infra-card primary"><div class="infra-icon">&#128202;</div><div class="infra-svc">ECS Fargate</div><div class="infra-desc">PySpark dbt jobs + FastAPI API. FLOCI: Docker Compose services. Prod: Fargate tasks with auto-scaling.</div><div class="infra-cost">~$0.04048/vCPU-hr</div></div>
+    <div class="infra-card primary"><div class="infra-icon">&#129302;</div><div class="infra-svc">Lambda (Agent)</div><div class="infra-desc">LangGraph Phase 4 agent handler. FLOCI: local Python module invoke. Prod: Lambda 1024MB, 60s timeout.</div><div class="infra-cost">~$0.0000166667/GB-s</div></div>
+    <div class="infra-card"><div class="infra-icon">&#128218;</div><div class="infra-svc">EC2 + Qdrant</div><div class="infra-desc">Vector store. FLOCI: qdrant/qdrant on Docker. Prod: m6i.large EC2 + 100GB gp3 EBS, systemd-managed.</div><div class="infra-cost">~$0.192/hr + $0.08/GB-mo</div></div>
+    <div class="infra-card"><div class="infra-icon">&#9889;</div><div class="infra-svc">CloudFront + S3</div><div class="infra-desc">React SPA hosting. FLOCI: Vite dev server. Prod: Vite build &rarr; S3 static hosting &rarr; CloudFront CDN.</div><div class="infra-cost">~$0.009/10K HTTPS req</div></div>
+    <div class="infra-card"><div class="infra-icon">&#128274;</div><div class="infra-svc">Secrets Manager</div><div class="infra-desc">API keys and DB passwords. FLOCI: .env.local file. Prod: AWS Secrets Manager with rotation.</div><div class="infra-cost">$0.40/secret/month</div></div>
+    <div class="infra-card"><div class="infra-icon">&#128202;</div><div class="infra-svc">CloudWatch</div><div class="infra-desc">Logs, metrics, alarms. FLOCI: Docker logs + Prometheus. Prod: CloudWatch with Grafana dashboard.</div><div class="infra-cost">$0.30/GB logs ingested</div></div>
+    <div class="infra-card"><div class="infra-icon">&#127760;</div><div class="infra-svc">API Gateway</div><div class="infra-desc">HTTP entrypoint for Lambda agent. FLOCI: FastAPI runs directly. Prod: API Gateway v2 HTTP API.</div><div class="infra-cost">$1.00/million requests</div></div>
+    <div class="infra-card"><div class="infra-icon">&#128272;</div><div class="infra-svc">IAM Roles</div><div class="infra-desc">Least-privilege per service. FLOCI: test/test keys. Prod: IAM roles with scoped policies per task.</div><div class="infra-cost">Free</div></div>
+    <div class="infra-card"><div class="infra-icon">&#128241;</div><div class="infra-svc">ECR</div><div class="infra-desc">Docker image registry. FLOCI: local Docker images. Prod: ECR private repos with image scanning.</div><div class="infra-cost">$0.10/GB-month</div></div>
+    <div class="infra-card"><div class="infra-icon">&#128205;</div><div class="infra-svc">VPC + Subnets</div><div class="infra-desc">Network isolation. FLOCI: Docker bridge network. Prod: VPC with private + public subnets per AZ.</div><div class="infra-cost">Free (NAT Gateway extra)</div></div>
+  </div>
+</div>
+
+<!-- DEPLOY PIPELINE -->
+<div class="section-title">CI/CD Deploy Pipeline &mdash; GitHub Actions to AWS</div>
+<div class="arch-diagram">
+  <div class="arch-title">5 stages: Test &rarr; Build &rarr; Terraform &rarr; Deploy &rarr; Verify</div>
+  <div class="deploy-pipeline">
+    <div class="pipeline-stage done">
+      <div class="stage-icon">&#129516;</div>
+      <div><div class="stage-name">Stage 1: Test Gate</div><div class="stage-desc">All phase unit tests run (pytest, including Phase 4 agent eval 90%+ accuracy gate). Block on any failure.</div><div class="stage-cmd">pytest tests/ -v --tb=short -q</div></div>
+    </div>
+    <div class="pipeline-stage done">
+      <div class="stage-icon">&#127984;</div>
+      <div><div class="stage-name">Stage 2: Build &amp; Push to ECR</div><div class="stage-desc">Docker buildx build for linux/amd64. Tag with git SHA. Push api + spark images to ECR. Build React static files.</div><div class="stage-cmd">docker buildx build --platform linux/amd64 -t $ECR_REPO:$SHA .</div></div>
+    </div>
+    <div class="pipeline-stage done">
+      <div class="stage-icon">&#9874;</div>
+      <div><div class="stage-name">Stage 3: Terraform Plan + Apply</div><div class="stage-desc">terraform plan saved as artifact, reviewed on PR. terraform apply only on merge to main. State in S3 + DynamoDB lock.</div><div class="stage-cmd">terraform apply -auto-approve -var="image_tag=$SHA"</div></div>
+    </div>
+    <div class="pipeline-stage active">
+      <div class="stage-icon">&#128640;</div>
+      <div><div class="stage-name">Stage 4: Blue/Green ECS Deploy</div><div class="stage-desc">ECS rolling update with minimum 50% healthy. Wait for all tasks to pass health checks. Lambda alias swap for agent.</div><div class="stage-cmd">aws ecs update-service --cluster fip-prod --force-new-deployment</div></div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-icon">&#128269;</div>
+      <div><div class="stage-name">Stage 5: Smoke Test + Verify</div><div class="stage-desc">curl /health on all endpoints. Run 5 agent queries against prod. CloudWatch alarms check for 5-minute window. Rollback if any alarm fires.</div><div class="stage-cmd">python scripts/smoke_test.py --env prod --timeout 60</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOCI TO PROD SECTION -->
+<div class="section-title">FLOCI &rarr; Production &mdash; The Exact Promotion Checklist</div>
+<div class="floci-box">
+  <div class="floci-header">&#128311; FLOCI promoted to AWS by changing ONE Terraform provider block &mdash; nothing else</div>
+  <div class="analogy-box" style="margin-bottom:14px">
+    <div class="ai">&#127987;</div>
+    <div><strong>The Rehearsal to Opening Night Analogy</strong>
+    A theatre company rehearses in a rehearsal room with taped-out floor marks instead of real sets,
+    folding chairs instead of theatre seats, and scripts in hand. Opening night: same blocking, same lines,
+    same lighting cues &mdash; but the real stage, real seats, and real audience.
+    FLOCI was the rehearsal room. Phase 6 is opening night.
+    The Terraform modules are the director's blocking notes: they work identically in the rehearsal room (LocalStack)
+    and the real theatre (AWS). One provider file is the only difference.
+    </div>
+  </div>
+  <div class="floci-grid">
+    <div>
+      <div class="floci-col-label">&#128311; FLOCI (LocalStack) &mdash; Phases 1&ndash;5</div>
+      <div class="code-block" style="margin:0">
+        <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/providers.tf (FLOCI)</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm"># FLOCI local provider -- used for all Phase 1-5 development</span>
+provider "aws" {
+  region                      = "us-west-2"
+  access_key                  = "test"
+  secret_key                  = "test"
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+
+  endpoints {
+    s3             = "http://localhost:4566"
+    sqs            = "http://localhost:4566"
+    secretsmanager = "http://localhost:4566"
+    iam            = "http://localhost:4566"
+    ecr            = "http://localhost:4566"
+    ecs            = "http://localhost:4566"
+    lambda         = "http://localhost:4566"
+    cloudwatch     = "http://localhost:4566"
+  }
+}</pre>
+      </div>
+    </div>
+    <div>
+      <div class="floci-col-label">&#9729; Production (AWS) &mdash; Phase 6</div>
+      <div class="code-block" style="margin:0">
+        <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/providers.tf (prod)</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm"># Production AWS provider -- Phase 6
+# Remove endpoint overrides. Everything else is IDENTICAL.
+# Credentials from environment: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY</span>
+provider "aws" {
+  region = "us-west-2"
+  <span class="cm"># No endpoint overrides = real AWS services
+  # No access_key/secret_key = IAM role from GitHub Actions OIDC
+  # No skip_ flags = real credential validation</span>
+}
+
+<span class="cm"># Terraform backend: S3 state + DynamoDB lock (created manually first)</span>
+terraform {
+  backend "s3" {
+    bucket         = "fip-terraform-state-prod"
+    key            = "fip/prod/terraform.tfstate"
+    region         = "us-west-2"
+    dynamodb_table = "fip-terraform-locks"
+    encrypt        = true
+  }
+}</pre>
+      </div>
+    </div>
+  </div>
+  <div class="code-block" style="margin-top:12px">
+    <div class="code-header"><div class="code-header-left"><span class="code-lang">bash</span><span class="code-filename">terminal &mdash; one-time AWS bootstrap (run once, before CI/CD)</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cm"># 0. Prerequisites: AWS CLI configured, Terraform installed</span>
+aws sts get-caller-identity   <span class="cm"># verify credentials</span>
+
+<span class="cm"># 1. Create Terraform remote state bucket + DynamoDB lock table (one-time)</span>
+aws s3api create-bucket \
+  --bucket fip-terraform-state-prod \
+  --region us-west-2 \
+  --create-bucket-configuration LocationConstraint=us-west-2
+
+aws s3api put-bucket-versioning \
+  --bucket fip-terraform-state-prod \
+  --versioning-configuration Status=Enabled
+
+aws dynamodb create-table \
+  --table-name fip-terraform-locks \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+
+<span class="cm"># 2. Promote FLOCI to prod: swap provider, init with S3 backend</span>
+cd infra/terraform
+cp providers.tf.prod providers.tf   <span class="cm"># swap FLOCI provider for prod</span>
+terraform init -reconfigure         <span class="cm"># migrates local state to S3 backend</span>
+terraform workspace new prod
+terraform plan -out=prod.tfplan
+terraform apply prod.tfplan
+
+<span class="cm"># 3. Verify all 12 AWS services created</span>
+terraform output -json | python3 -m json.tool</pre>
+  </div>
+</div>
+
+<!-- DATA GENERATOR -->
+<div class="section-title">Data Generator &mdash; Production Smoke Test Suite</div>
+<div class="gen-box">
+  <div class="gen-header">&#129514; FIPSmokeTestGenerator &mdash; Production Verification Queries That Hit Every Layer</div>
+  <div class="analogy-box" style="margin-bottom:14px">
+    <div class="ai">&#128007;</div>
+    <div><strong>The Canary in the Coal Mine Analogy</strong>
+    Miners sent a canary into new tunnels before entering &mdash; a healthy canary meant the air was safe.
+    The smoke test suite is the production canary: 10 carefully chosen API calls that touch every layer of the stack.
+    If all pass, the deploy is healthy. If any fail, the canary is down and the rollback fires automatically
+    &mdash; before a single manager opens the dashboard and sees a broken screen.
+    Reuses Phase 1 FIPDataGenerator for review content in POST /api/ask tests.
+    </div>
+  </div>
+  <div class="gen-controls">
+    <label style="font-size:12px;color:var(--text-muted)">Test scenarios:</label>
+    <input type="number" id="gen-count" class="gen-input" value="10" min="1" max="50">
+    <button class="gen-btn" onclick="runGenerator()">&#9654; Preview Smoke Tests</button>
+    <span id="gen-status" style="font-size:12px;color:var(--text-muted)"></span>
+  </div>
+  <div class="gen-output" id="gen-output"></div>
+  <div class="code-block" style="margin-top:14px">
+    <div class="code-header"><div class="code-header-left"><span class="code-lang">python</span><span class="code-filename">scripts/smoke_test.py</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cm">"""
+FIP Production Smoke Test -- Phase 6
+Verifies all layers are live after deploy: FastAPI, LangGraph agent,
+Qdrant RAG, DuckDB Gold analytics, and MSK Kafka consumer lag.
+
+Usage:
+  python scripts/smoke_test.py --env prod --timeout 60
+  python scripts/smoke_test.py --env local --timeout 30
+"""</span>
+<span class="kw">import</span> argparse, json, time, sys
+<span class="kw">import</span> httpx, boto3
+
+<span class="nm">ENDPOINTS</span> = {
+    <span class="st">"local"</span>: <span class="st">"http://localhost:8000"</span>,
+    <span class="st">"prod"</span>:  <span class="st">"https://api.fip.curry-bowl.com"</span>,
+}
+
+<span class="kw">class</span> <span class="nm">FIPSmokeTestGenerator</span>:
+    <span class="cm">"""Generates smoke test scenarios reusing Phase 1 FIPDataGenerator content."""</span>
+    <span class="kw">def</span> __init__(self, base_url: str, timeout: int = <span class="nu">60</span>):
+        self.base    = base_url
+        self.client  = httpx.Client(timeout=timeout)
+        self.results = []
+
+    <span class="kw">def</span> _test(self, name: str, method: str, path: str, **kwargs) -> bool:
+        t0 = time.monotonic()
+        <span class="kw">try</span>:
+            r = getattr(self.client, method)(f<span class="st">"{self.base}{path}"</span>, **kwargs)
+            ok = r.status_code < <span class="nu">400</span>
+            latency = <span class="fn">round</span>((time.monotonic()-t0)*<span class="nu">1000</span>)
+            self.results.append({<span class="st">"test"</span>:name,<span class="st">"ok"</span>:ok,<span class="st">"status"</span>:r.status_code,<span class="st">"latency_ms"</span>:latency})
+            sym = <span class="st">"&#10003;"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"&#10007;"</span>
+            <span class="fn">print</span>(f<span class="st">"{sym} [{latency:4d}ms] {name}"</span>)
+            <span class="kw">return</span> ok
+        <span class="kw">except</span> Exception <span class="kw">as</span> e:
+            self.results.append({<span class="st">"test"</span>:name,<span class="st">"ok"</span>:<span class="kw">False</span>,<span class="st">"error"</span>:<span class="fn">str</span>(e)})
+            <span class="fn">print</span>(f<span class="st">"&#10007; [FAIL] {name}: {e}"</span>)
+            <span class="kw">return</span> <span class="kw">False</span>
+
+    <span class="kw">def</span> run(self) -> bool:
+        <span class="fn">print</span>(f<span class="st">"\n=== FIP Smoke Tests: {self.base} ===\n"</span>)
+        tests = [
+            <span class="cm"># Layer 1: FastAPI health</span>
+            (<span class="st">"FastAPI health"</span>,          <span class="st">"get"</span>,  <span class="st">"/health"</span>),
+            <span class="cm"># Layer 2: Dashboard (DuckDB Gold reads)</span>
+            (<span class="st">"Dashboard endpoint"</span>,       <span class="st">"get"</span>,  <span class="st">"/api/dashboard"</span>),
+            (<span class="st">"Location analytics"</span>,       <span class="st">"get"</span>,  <span class="st">"/api/analytics/cb-mission"</span>),
+            (<span class="st">"Alert detection"</span>,           <span class="st">"get"</span>,  <span class="st">"/api/alerts"</span>),
+            <span class="cm"># Layer 3: LangGraph agent (SUMMARY intent - cheapest)</span>
+            (<span class="st">"Agent SUMMARY intent"</span>, <span class="st">"post"</span>, <span class="st">"/api/ask"</span>,
+             {<span class="st">"json"</span>:{<span class="st">"question"</span>:<span class="st">"Summarise feedback for cb-mission this week."</span>,<span class="st">"session_id"</span>:<span class="st">"smoke-test"</span>}}),
+            <span class="cm"># Layer 4: Agent ALERT intent (fires alert_detector)</span>
+            (<span class="st">"Agent ALERT intent"</span>,  <span class="st">"post"</span>, <span class="st">"/api/ask"</span>,
+             {<span class="st">"json"</span>:{<span class="st">"question"</span>:<span class="st">"Any locations with sudden rating drops?"</span>,<span class="st">"session_id"</span>:<span class="st">"smoke-test"</span>}}),
+            <span class="cm"># Layer 5: Metrics endpoint</span>
+            (<span class="st">"Prometheus metrics"</span>,        <span class="st">"get"</span>,  <span class="st">"/metrics"</span>),
+        ]
+        all_ok = <span class="kw">all</span>(self._test(name, method, path, **(kw <span class="kw">if</span> len(args)&gt;<span class="nu">2</span> <span class="kw">else</span> {}))
+                     <span class="kw">for</span> *args, <span class="kw">in</span> [(t[<span class="nu">0</span>],t[<span class="nu">1</span>],t[<span class="nu">2</span>])+((t[<span class="nu">3</span>],) <span class="kw">if</span> len(t)&gt;<span class="nu">3</span> <span class="kw">else</span> ({},)) <span class="kw">for</span> t <span class="kw">in</span> tests]
+                     <span class="kw">for</span> name,method,path,kw <span class="kw">in</span> [(*a[:3],a[3] <span class="kw">if</span> len(a)&gt;<span class="nu">3</span> <span class="kw">else</span> {}) <span class="kw">for</span> a <span class="kw">in</span> tests])
+        passed = sum(<span class="nu">1</span> <span class="kw">for</span> r <span class="kw">in</span> self.results <span class="kw">if</span> r[<span class="st">"ok"</span>])
+        <span class="fn">print</span>(f<span class="st">"\n{'PASS' if all_ok else 'FAIL'}: {passed}/{len(self.results)} tests passed"</span>)
+        <span class="kw">return</span> all_ok
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(<span class="st">"--env"</span>,     choices=[<span class="st">"local"</span>,<span class="st">"prod"</span>], default=<span class="st">"local"</span>)
+    ap.add_argument(<span class="st">"--timeout"</span>, type=int, default=<span class="nu">60</span>)
+    args = ap.parse_args()
+    ok = <span class="nm">FIPSmokeTestGenerator</span>(<span class="nm">ENDPOINTS</span>[args.env], args.timeout).run()
+    sys.exit(<span class="nu">0</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="nu">1</span>)</pre>
+  </div>
+</div>
+
+<!-- STEPS -->
+<div class="section-title">Step-by-Step Production Deploy</div>
+<div class="steps-grid">
+
+<!-- STEP 1 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">01</div>
+    <div class="step-header-content">
+      <div class="step-tag">Terraform Core Infrastructure</div>
+      <h3>VPC, IAM, ECR, Secrets Manager &mdash; Foundation Before Everything Else</h3>
+      <p>Deploy the infrastructure foundation first &mdash; VPC networking, IAM roles, ECR repositories,
+      and Secrets Manager entries. All other Terraform modules depend on these.
+      This is the same Terraform HCL that ran against LocalStack in FLOCI; only the provider has changed.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127959;</div>
+      <div><strong>The Utility Infrastructure Analogy</strong>
+      Before you build the restaurant, you run the electricity, water, and gas lines to the plot.
+      VPC is the plot boundary (network isolation). IAM roles are the keys to each utility room (access control).
+      ECR is the warehouse where you store your appliances (Docker images).
+      Secrets Manager is the safe where you keep the master keys (API keys, DB passwords).
+      You build these first because every other service depends on them.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #1: Terraform State Not Locked = Concurrent Apply Corruption</strong>
+      Two engineers run <code>terraform apply</code> simultaneously. Without DynamoDB state locking, both
+      reads get the same state version, both make changes, second write overwrites the first.
+      Result: resources exist in AWS that aren't in state, or resources deleted from state that still exist in AWS.
+      Fix: S3 backend + DynamoDB lock table. Create these manually BEFORE the first <code>terraform init</code>.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/vpc.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># VPC with public + private subnets across 2 AZs for HA</span>
+resource "aws_vpc" "fip" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+  tags = { Name = "fip-${var.env}" }
+}
+
+<span class="cm"># Public subnets: ALB, NAT Gateway</span>
+resource "aws_subnet" "public" {
+  count                   = 2
+  vpc_id                  = aws_vpc.fip.id
+  cidr_block              = "10.0.${count.index}.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  map_public_ip_on_launch = true
+  tags = { Name = "fip-public-${count.index}" }
+}
+
+<span class="cm"># Private subnets: ECS Fargate tasks, Lambda, Qdrant EC2</span>
+resource "aws_subnet" "private" {
+  count             = 2
+  vpc_id            = aws_vpc.fip.id
+  cidr_block        = "10.0.${count.index + 10}.0/24"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+  tags = { Name = "fip-private-${count.index}" }
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/iam.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># GitHub Actions OIDC -- no long-lived access keys stored anywhere</span>
+resource "aws_iam_openid_connect_provider" "github" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+}
+
+resource "aws_iam_role" "github_actions" {
+  name = "fip-github-actions-${var.env}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Effect    = "Allow"
+      Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
+      Condition = {
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" = "repo:YOUR_ORG/fip:*"
+        }
+      }
+    }]
+  })
+}
+
+<span class="cm"># Lambda execution role -- scoped to only what the agent needs</span>
+resource "aws_iam_role" "lambda_agent" {
+  name = "fip-lambda-agent-${var.env}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_agent_policy" {
+  role = aws_iam_role.lambda_agent.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      <span class="cm"># Read Gold Parquet from S3 -- exactly what DuckDB needs</span>
+      { Effect="Allow", Action=["s3:GetObject","s3:ListBucket"],
+        Resource=["arn:aws:s3:::fip-curry-bowl-prod-gold/*",
+                  "arn:aws:s3:::fip-curry-bowl-prod-gold"] },
+      <span class="cm"># Read secrets -- OpenAI API key, Qdrant API key</span>
+      { Effect="Allow", Action="secretsmanager:GetSecretValue",
+        Resource="arn:aws:secretsmanager:us-west-2:*:secret:fip/*" },
+      <span class="cm"># CloudWatch logs</span>
+      { Effect="Allow", Action=["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+        Resource="arn:aws:logs:us-west-2:*:log-group:/aws/lambda/fip-*" },
+    ]
+  })
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">02</div>
+    <div class="step-header-content">
+      <div class="step-tag">MSK + S3 Lakehouse</div>
+      <h3>Kafka on MSK Serverless + S3 Bronze/Silver/Gold with Lifecycle Rules</h3>
+      <p>MSK Serverless replaces the FLOCI Kafka container &mdash; same Kafka 3.x API, no broker management,
+      auto-scales to zero on weekends. S3 lakehouse buckets promoted from LocalStack with identical
+      Terraform resource definitions, adding lifecycle rules and Cross-Region Replication for prod.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#128683;</div>
+      <div><strong>The City Water Main vs Garden Hose Analogy</strong>
+      FLOCI Kafka is a garden hose: it works for watering your garden but you can't connect an entire city to it.
+      MSK Serverless is the city water main: same water (same Kafka API), auto-scales to peak demand, never needs
+      manual management, shuts off (scales to zero) when no one needs it.
+      The code in Phase 1 that used <code>KAFKA_BROKERS=localhost:9092</code> now uses the MSK bootstrap endpoint
+      &mdash; nothing else changes in the connector code.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #2: S3 Bronze Lifecycle Expiry Destroys Reprocessing Safety Net</strong>
+      A well-meaning engineer adds a 30-day lifecycle expiry to the Bronze bucket to save costs.
+      Six months later, a bug in the Silver PySpark job is discovered that corrupted 90 days of data.
+      Bronze data before day 30 is gone. There is no source of truth to reprocess from.
+      Fix: Bronze = infinite retention, <code>prevent_destroy = true</code> in Terraform, versioning enabled.
+      Silver and Gold are re-derivable from Bronze &mdash; they can have lifecycle rules. Bronze cannot.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/msk.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># MSK Serverless -- same Kafka 3.x API as FLOCI confluent container</span>
+resource "aws_msk_serverless_cluster" "fip" {
+  cluster_name = "fip-${var.env}"
+  vpc_config {
+    subnet_ids         = aws_subnet.private[*].id
+    security_group_ids = [aws_security_group.msk.id]
+  }
+  client_authentication {
+    sasl { iam { enabled = true } }
+  }
+}
+
+<span class="cm"># Security group: allow ECS tasks and Lambda to connect on port 9098 (SASL)</span>
+resource "aws_security_group" "msk" {
+  name   = "fip-msk-${var.env}"
+  vpc_id = aws_vpc.fip.id
+  ingress {
+    from_port   = 9098
+    to_port     = 9098
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+
+<span class="cm"># Output bootstrap endpoint for application config</span>
+output "msk_bootstrap_endpoint" {
+  value = aws_msk_serverless_cluster.fip.cluster_uuid
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/s3_lakehouse.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># Same HCL as FLOCI -- only now targets real AWS S3</span>
+locals { prefix = "fip-curry-bowl-${var.env}" }
+
+resource "aws_s3_bucket" "bronze" {
+  bucket = "${local.prefix}-bronze"
+  lifecycle { prevent_destroy = true }   <span class="cm"># NEVER delete Bronze</span>
+}
+resource "aws_s3_bucket_versioning" "bronze" {
+  bucket = aws_s3_bucket.bronze.id
+  versioning_configuration { status = "Enabled" }
+}
+<span class="cm"># Bronze: NO lifecycle expiry -- infinite retention is intentional</span>
+
+resource "aws_s3_bucket" "silver" {
+  bucket = "${local.prefix}-silver"
+}
+resource "aws_s3_bucket_lifecycle_configuration" "silver" {
+  bucket = aws_s3_bucket.silver.id
+  rule {
+    id     = "expire-silver-90d"
+    status = "Enabled"
+    filter { prefix = "" }
+    expiration { days = 90 }   <span class="cm"># Silver re-derivable from Bronze</span>
+  }
+}
+
+resource "aws_s3_bucket" "gold" {
+  bucket = "${local.prefix}-gold"
+}
+resource "aws_s3_bucket_lifecycle_configuration" "gold" {
+  bucket = aws_s3_bucket.gold.id
+  rule {
+    id     = "ia-after-30d"
+    status = "Enabled"
+    filter { prefix = "" }
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"   <span class="cm"># Infrequent Access after 30d</span>
+    }
+  }
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">03</div>
+    <div class="step-header-content">
+      <div class="step-tag">Qdrant on EC2 + Lambda Agent</div>
+      <h3>Qdrant EC2 with Persistent EBS + LangGraph Agent on Lambda</h3>
+      <p>Qdrant runs on a dedicated EC2 instance with EBS volume &mdash; the same collection schema
+      bootstrapped in Phase 2 now holds production embeddings. LangGraph agent promoted from local Python
+      module to AWS Lambda via the same handler.py from Phase 4 &mdash; no code changes.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#128218;</div>
+      <div><strong>The Physical Library vs Mobile Library Analogy</strong>
+      FLOCI Qdrant (Docker on your laptop) is a mobile library: great for browsing, but the books are gone when you pack up the van.
+      EC2 + EBS Qdrant is the permanent library building: the book catalogue (vectors) persists on the EBS volume
+      across every Qdrant restart, EC2 reboot, or AMI update.
+      The 1536-dim collection schema bootstrapped in Phase 2 is the library's floor plan:
+      it defines which shelves exist and how they're indexed.
+      Re-embedding 50K reviews from scratch costs $0.01 and 20 minutes &mdash; but losing the library because the van drove away costs much more.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #3: Qdrant Vector Data Not Backed Up</strong>
+      EC2 instance terminated by mistake (happens with spot instances). EBS volume deleted (default behaviour on instance termination). 50K production embeddings gone. Re-embed costs $0.01 but takes 20 minutes with real data.
+      Fix: (a) set <code>delete_on_termination = false</code> on the EBS volume, (b) daily EBS snapshot via AWS Backup,
+      (c) keep <code>prevent_destroy = true</code> on the EBS volume resource in Terraform.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/qdrant_ec2.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># Qdrant on EC2 -- m6i.large: 2 vCPU, 8 GB RAM, enough for 5M vectors</span>
+resource "aws_instance" "qdrant" {
+  ami                    = data.aws_ami.amazon_linux_2023.id
+  instance_type          = "m6i.large"
+  subnet_id              = aws_subnet.private[0].id
+  vpc_security_group_ids = [aws_security_group.qdrant.id]
+  iam_instance_profile   = aws_iam_instance_profile.qdrant.name
+
+  root_block_device {
+    volume_size           = 20
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
+  <span class="cm"># Qdrant data volume -- separate from root, survives instance replacement</span>
+  ebs_block_device {
+    device_name           = "/dev/sdf"
+    volume_size           = 100         <span class="cm"># 100 GB gp3: ~5M 1536-dim vectors</span>
+    volume_type           = "gp3"
+    iops                  = 3000
+    delete_on_termination = false       <span class="cm"># NEVER delete data on termination</span>
+  }
+
+  user_data = base64encode(&lt;&lt;-EOF
+    #!/bin/bash
+    # Mount EBS data volume
+    mkfs -t xfs /dev/sdf 2>/dev/null || true
+    mkdir -p /qdrant/storage
+    mount /dev/sdf /qdrant/storage
+    echo "/dev/sdf /qdrant/storage xfs defaults 0 0" >> /etc/fstab
+
+    # Install and start Qdrant
+    docker run -d --name qdrant \
+      -p 6333:6333 -p 6334:6334 \
+      -v /qdrant/storage:/qdrant/storage \
+      -e QDRANT__SERVICE__API_KEY=${qdrant_api_key} \
+      qdrant/qdrant:v1.9.2
+    systemctl enable docker
+  EOF
+  )
+
+  lifecycle { prevent_destroy = true }
+  tags = { Name = "fip-qdrant-${var.env}" }
+}
+
+resource "aws_security_group" "qdrant" {
+  name   = "fip-qdrant-${var.env}"
+  vpc_id = aws_vpc.fip.id
+  ingress {
+    from_port   = 6333
+    to_port     = 6334
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]   <span class="cm"># only internal VPC traffic</span>
+  }
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/lambda_agent.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># Same lambda_handler.py from Phase 4 -- zero code changes needed</span>
+resource "aws_lambda_function" "fip_agent" {
+  function_name = "fip-agent-${var.env}"
+  package_type  = "Image"
+  image_uri     = "${aws_ecr_repository.agent.repository_url}:${var.image_tag}"
+  role          = aws_iam_role.lambda_agent.arn
+  timeout       = 60
+  memory_size   = 1024
+
+  vpc_config {
+    subnet_ids         = aws_subnet.private[*].id
+    security_group_ids = [aws_security_group.lambda.id]
+  }
+
+  environment {
+    variables = {
+      QDRANT_HOST        = aws_instance.qdrant.private_ip
+      QDRANT_PORT        = "6333"
+      QDRANT_API_KEY     = data.aws_secretsmanager_secret_version.qdrant_key.secret_string
+      OPENAI_API_KEY     = data.aws_secretsmanager_secret_version.openai_key.secret_string
+      GOLD_PARQUET_PATH  = "s3://${aws_s3_bucket.gold.bucket}/fct_location_ratings/"
+      LAMBDA_INVOKE_MODE = "aws"
+      ENV                = var.env
+    }
+  }
+}
+
+<span class="cm"># API Gateway HTTP API -- routes POST /ask to Lambda</span>
+resource "aws_apigatewayv2_api" "fip" {
+  name          = "fip-api-${var.env}"
+  protocol_type = "HTTP"
+  cors_configuration {
+    allow_origins = [var.ui_cloudfront_url]
+    allow_methods = ["POST", "GET", "OPTIONS"]
+    allow_headers = ["Content-Type", "Authorization"]
+  }
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">04</div>
+    <div class="step-header-content">
+      <div class="step-tag">ECS Fargate + CloudFront</div>
+      <h3>FastAPI on ECS Fargate + React on CloudFront &mdash; Auto-Scaling, Zero-Downtime</h3>
+      <p>The Phase 5 FastAPI Docker image deploys to ECS Fargate with Application Load Balancer
+      and blue/green rolling updates. React build output deploys to S3 + CloudFront with cache invalidation.
+      The FLOCI Docker Compose services become ECS task definitions with the same image.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127970;</div>
+      <div><strong>The Food Truck to Restaurant Chain Analogy</strong>
+      A food truck (FLOCI Docker Compose) is one person serving one window.
+      ECS Fargate + ALB is the restaurant chain: multiple cooks (Fargate tasks) working in parallel,
+      an automatic door that opens a new counter when lines get long (auto-scaling on CPU/memory),
+      and a queue manager (ALB) who routes each customer to the next available counter.
+      Customers never see a "closed" sign because rolling updates swap out one counter at a time
+      while the others keep serving.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #4: CloudFront Cache Serves Stale React Build</strong>
+      You deploy a new React build to S3. CloudFront still serves the old JS files for up to 24 hours
+      because the default TTL is 86400 seconds. Managers see the old UI with new API breaking changes.
+      Fix: (a) Vite outputs content-hashed filenames (<code>main.abc123.js</code>) so cached assets are always valid;
+      (b) <code>index.html</code> gets <code>max-age=0</code> so it always fetches fresh; (c) post-deploy CloudFront invalidation on <code>index.html</code> only.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/ecs_api.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># ECS Cluster</span>
+resource "aws_ecs_cluster" "fip" {
+  name = "fip-${var.env}"
+  setting { name = "containerInsights" value = "enabled" }
+}
+
+<span class="cm"># Fargate task definition -- same Docker image as FLOCI Phase 5</span>
+resource "aws_ecs_task_definition" "fip_api" {
+  family                   = "fip-api-${var.env}"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "512"   <span class="cm"># 0.5 vCPU</span>
+  memory                   = "1024"  <span class="cm"># 1 GB -- FastAPI + spaCy</span>
+
+  container_definitions = jsonencode([{
+    name      = "api"
+    image     = "${aws_ecr_repository.api.repository_url}:${var.image_tag}"
+    essential = true
+    portMappings = [{ containerPort = 8000 }]
+    environment = [
+      { name = "ENV",                value = var.env },
+      { name = "QDRANT_HOST",        value = aws_instance.qdrant.private_ip },
+      { name = "GOLD_PARQUET_PATH",  value = "s3://${aws_s3_bucket.gold.bucket}/fct_location_ratings/" },
+      { name = "LAMBDA_INVOKE_MODE", value = "aws" },
+    ]
+    secrets = [
+      { name = "OPENAI_API_KEY", valueFrom = "${aws_secretsmanager_secret.openai.arn}" },
+      { name = "REDIS_URL",      valueFrom = "${aws_secretsmanager_secret.redis.arn}" },
+    ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = "/ecs/fip-api-${var.env}"
+        "awslogs-region"        = var.aws_region
+        "awslogs-stream-prefix" = "api"
+      }
+    }
+    healthCheck = {
+      command     = ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval    = 30
+      timeout     = 5
+      retries     = 3
+      startPeriod = 60
+    }
+  }])
+}
+
+<span class="cm"># Auto-scaling: CPU-based, 1-4 tasks</span>
+resource "aws_appautoscaling_target" "api" {
+  max_capacity       = 4
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.fip.name}/fip-api-${var.env}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "api_cpu" {
+  name               = "fip-api-cpu-${var.env}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.api.resource_id
+  scalable_dimension = aws_appautoscaling_target.api.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.api.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value = 70.0   <span class="cm"># scale out at 70% CPU</span>
+  }
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">bash</span><span class="code-filename">scripts/deploy_ui.sh &mdash; React build + S3 + CloudFront invalidation</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm">#!/bin/bash
+# Build React and deploy to S3 + CloudFront
+# Run after Terraform applies CloudFront distribution</span>
+
+set -e
+BUCKET="fip-curry-bowl-ui-${ENV:-prod}"
+DIST_ID=$(terraform -chdir=infra/terraform output -raw cloudfront_distribution_id)
+
+<span class="cm"># 1. Build React with production API URL</span>
+cd ui
+VITE_API_URL="https://api.fip.curry-bowl.com" npm run build
+
+<span class="cm"># 2. Sync to S3 -- hashed assets: long cache; index.html: no cache</span>
+aws s3 sync dist/ s3://$BUCKET/ \
+  --delete \
+  --exclude "index.html" \
+  --cache-control "public, max-age=31536000, immutable"
+
+aws s3 cp dist/index.html s3://$BUCKET/index.html \
+  --cache-control "no-cache, no-store, must-revalidate"
+
+<span class="cm"># 3. Invalidate only index.html -- assets are content-hashed</span>
+aws cloudfront create-invalidation \
+  --distribution-id "$DIST_ID" \
+  --paths "/index.html"
+
+echo "&#10003; UI deployed. CloudFront serving new build."</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">05</div>
+    <div class="step-header-content">
+      <div class="step-tag">GitHub Actions CI/CD</div>
+      <h3>Full CI/CD Pipeline: Test &rarr; Build &rarr; Terraform &rarr; Deploy &rarr; Smoke Test</h3>
+      <p>The complete GitHub Actions workflow that wires all 5 deploy stages together.
+      OIDC authentication (no long-lived AWS keys stored as secrets).
+      Terraform plan saved as PR artifact for review. Apply only on merge to main.
+      Automatic rollback if smoke tests fail after deploy.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#9881;</div>
+      <div><strong>The Car Assembly Line Quality Gate Analogy</strong>
+      A car assembly line has quality gates at each station: body panel welds checked before painting, engine tested before installation, final inspection before shipping.
+      No car leaves the factory with an untested engine.
+      GitHub Actions is the assembly line: pytest is the weld check (Stage 1), Docker build is the engine test (Stage 2), Terraform plan is pre-ship inspection (Stage 3), and the smoke test is the test drive before keys are handed to the customer.
+      A failure at any gate stops the line and rolls back.
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">&#128293;</div>
+      <div class="callout-body"><strong>Production Issue #5: Long-Lived AWS Keys in GitHub Secrets = Security Risk</strong>
+      Storing AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY as GitHub Secrets means a compromised repo exposes
+      permanent AWS credentials. If the key is leaked in a log line, it's valid indefinitely.
+      Fix: GitHub OIDC federation. GitHub Actions gets a short-lived token (valid for 1 hour) via
+      <code>aws-actions/configure-aws-credentials</code> with <code>role-to-assume</code>.
+      No static credentials ever stored anywhere.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">yaml</span><span class="code-filename">.github/workflows/deploy.yml</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">name</span>: FIP Production Deploy
+
+<span class="kw">on</span>:
+  <span class="kw">push</span>:
+    <span class="kw">branches</span>: [main]
+  <span class="kw">pull_request</span>:
+    <span class="kw">branches</span>: [main]
+
+<span class="kw">permissions</span>:
+  <span class="kw">id-token</span>: write    <span class="cm"># Required for OIDC</span>
+  <span class="kw">contents</span>: read
+
+<span class="kw">jobs</span>:
+  <span class="kw">test</span>:
+    <span class="kw">name</span>: Stage 1 &mdash; Test Gate
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        <span class="kw">with</span>: { python-version: '3.12' }
+      - <span class="kw">run</span>: pip install -r requirements.txt
+      - <span class="kw">name</span>: Unit Tests
+        <span class="kw">run</span>: pytest tests/ -v --tb=short -q
+      - <span class="kw">name</span>: Agent Eval (must be >=90% accuracy)
+        <span class="kw">run</span>: pytest tests/test_agent_eval.py -v -k "accuracy"
+
+  <span class="kw">build</span>:
+    <span class="kw">name</span>: Stage 2 &mdash; Build &amp; Push to ECR
+    <span class="kw">needs</span>: test
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">if</span>: github.ref == 'refs/heads/main'
+    <span class="kw">steps</span>:
+      - uses: actions/checkout@v4
+      - <span class="kw">name</span>: Configure AWS credentials (OIDC &mdash; no long-lived keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        <span class="kw">with</span>:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/fip-github-actions-prod
+          aws-region: us-west-2
+      - <span class="kw">name</span>: Login to ECR
+        <span class="kw">run</span>: aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+      - <span class="kw">name</span>: Build &amp; push API image (linux/amd64 for Fargate)
+        <span class="kw">run</span>: |
+          docker buildx build --platform linux/amd64 \
+            -t ${{ secrets.ECR_REGISTRY }}/fip-api:${{ github.sha }} \
+            -f api/Dockerfile ./api --push
+      - <span class="kw">name</span>: Build &amp; push Lambda agent image
+        <span class="kw">run</span>: |
+          docker buildx build --platform linux/amd64 \
+            -t ${{ secrets.ECR_REGISTRY }}/fip-agent:${{ github.sha }} \
+            -f Dockerfile.lambda . --push
+      - <span class="kw">name</span>: Build React static files
+        <span class="kw">run</span>: cd ui && VITE_API_URL=${{ secrets.API_URL }} npm run build
+
+  <span class="kw">terraform</span>:
+    <span class="kw">name</span>: Stage 3 &mdash; Terraform Apply
+    <span class="kw">needs</span>: build
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - <span class="kw">name</span>: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        <span class="kw">with</span>:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/fip-github-actions-prod
+          aws-region: us-west-2
+      - <span class="kw">name</span>: Terraform Init
+        <span class="kw">run</span>: terraform -chdir=infra/terraform init
+      - <span class="kw">name</span>: Terraform Apply
+        <span class="kw">run</span>: |
+          terraform -chdir=infra/terraform apply -auto-approve \
+            -var="image_tag=${{ github.sha }}" \
+            -var="env=prod"
+
+  <span class="kw">deploy</span>:
+    <span class="kw">name</span>: Stage 4 &mdash; Deploy &amp; Smoke Test
+    <span class="kw">needs</span>: terraform
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+      - uses: actions/checkout@v4
+      - <span class="kw">name</span>: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        <span class="kw">with</span>:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/fip-github-actions-prod
+          aws-region: us-west-2
+      - <span class="kw">name</span>: Deploy React UI to CloudFront
+        <span class="kw">run</span>: bash scripts/deploy_ui.sh
+      - <span class="kw">name</span>: Force new ECS deployment (rolling update)
+        <span class="kw">run</span>: |
+          aws ecs update-service --cluster fip-prod \
+            --service fip-api-prod --force-new-deployment
+          aws ecs wait services-stable \
+            --cluster fip-prod --services fip-api-prod
+      - <span class="kw">name</span>: Stage 5 &mdash; Smoke Tests
+        <span class="kw">run</span>: python scripts/smoke_test.py --env prod --timeout 120
+      - <span class="kw">name</span>: Rollback on smoke test failure
+        <span class="kw">if</span>: failure()
+        <span class="kw">run</span>: |
+          echo "Smoke tests failed -- rolling back ECS to previous task definition"
+          aws ecs update-service --cluster fip-prod \
+            --service fip-api-prod \
+            --task-definition fip-api-prod:$(( $(aws ecs describe-services \
+              --cluster fip-prod --services fip-api-prod \
+              --query 'services[0].taskDefinition' --output text | grep -o '[0-9]*$') - 1 ))</pre>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step-card">
+  <div class="step-card-header">
+    <div class="step-num-stripe">06</div>
+    <div class="step-header-content">
+      <div class="step-tag">Observability &amp; Cost Controls</div>
+      <h3>CloudWatch Alarms, Grafana Dashboard, Budget Alerts</h3>
+      <p>Production is not done until you can see what it is doing and how much it costs.
+      CloudWatch alarms for every critical metric. Grafana dashboard that mirrors the
+      Phase 4 Prometheus local setup. AWS Budget alert before spend exceeds $150/month.</p>
+    </div>
+  </div>
+  <div class="step-body">
+    <div class="analogy-box">
+      <div class="ai">&#127775;</div>
+      <div><strong>The Vital Signs Monitor Analogy</strong>
+      A hospital patient post-surgery isn't left unmonitored in a room. Vital signs monitors beep if
+      heart rate drops below 50 or fever exceeds 38.5&deg;C. The nursing station gets an alert.
+      CloudWatch alarms are the vital signs monitors: Lambda p99 latency above 8s (fever), ECS task count below 1 (cardiac arrest),
+      Kafka consumer lag above 10K messages (blocked artery). CloudWatch sends the alert; the on-call engineer is the nurse.
+      AWS Budget alert is the hospital finance office calling when bills exceed the expected range.
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/cloudwatch_alarms.tf</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm"># Lambda agent p99 latency alarm</span>
+resource "aws_cloudwatch_metric_alarm" "lambda_latency" {
+  alarm_name          = "fip-agent-latency-p99"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 3
+  metric_name         = "Duration"
+  namespace           = "AWS/Lambda"
+  period              = 60
+  statistic           = "p99"
+  threshold           = 50000    <span class="cm"># 50s -- 10s under Lambda timeout</span>
+  alarm_description   = "Agent p99 latency critical"
+  dimensions = { FunctionName = aws_lambda_function.fip_agent.function_name }
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}
+
+<span class="cm"># ECS task count -- alert if API scales to zero</span>
+resource "aws_cloudwatch_metric_alarm" "ecs_running" {
+  alarm_name          = "fip-api-no-tasks-running"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "RunningTaskCount"
+  namespace           = "ECS/ContainerInsights"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 1
+  dimensions = {
+    ClusterName = aws_ecs_cluster.fip.name
+    ServiceName = "fip-api-prod"
+  }
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}
+
+<span class="cm"># Kafka consumer lag -- alert if Bronze Writer falls behind</span>
+resource "aws_cloudwatch_metric_alarm" "kafka_lag" {
+  alarm_name          = "fip-kafka-consumer-lag"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 5
+  metric_name         = "MaxOffsetLag"
+  namespace           = "AWS/Kafka"
+  period              = 60
+  statistic           = "Maximum"
+  threshold           = 10000    <span class="cm"># 10K messages = ~1 hour backlog</span>
+  dimensions = {
+    "Cluster Name" = aws_msk_serverless_cluster.fip.cluster_name
+    "Consumer Group" = "fip-bronze-writer-v1"
+  }
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}
+
+<span class="cm"># AWS Budget alert -- email at $100 (warning) and $150 (action)</span>
+resource "aws_budgets_budget" "fip" {
+  name         = "fip-monthly-budget"
+  budget_type  = "COST"
+  limit_amount = "150"
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator       = "GREATER_THAN"
+    threshold                 = 66.7   <span class="cm"># alert at $100 (66.7% of $150)</span>
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+}</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-header-left"><span class="code-lang">bash</span><span class="code-filename">scripts/verify_deploy.sh &mdash; post-deploy verification checklist</span></div><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cm">#!/bin/bash
+# Run after every deploy to verify the full stack is healthy
+# Exits 0 on success, 1 on any failure (triggers CI rollback)</span>
+
+API="https://api.fip.curry-bowl.com"
+echo "=== FIP Production Verification ==="
+
+<span class="cm"># 1. FastAPI health</span>
+curl -sf "$API/health" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['status']=='ok'" \
+  && echo "&#10003; FastAPI health" || { echo "&#10007; FastAPI health FAILED"; exit 1; }
+
+<span class="cm"># 2. Dashboard data (DuckDB Gold reads working)</span>
+COUNT=$(curl -sf "$API/api/dashboard" | python3 -c "import json,sys; print(len(json.load(sys.stdin)['locations']))")
+[ "$COUNT" -eq 12 ] \
+  && echo "&#10003; Dashboard: $COUNT locations" || { echo "&#10007; Dashboard: expected 12, got $COUNT"; exit 1; }
+
+<span class="cm"># 3. Agent SUMMARY intent (RAG layer working)</span>
+INTENT=$(curl -sf -X POST "$API/api/ask" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Summarise feedback for cb-mission.","session_id":"verify"}' \
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['intent'])")
+[ "$INTENT" = "SUMMARY" ] \
+  && echo "&#10003; Agent SUMMARY routing" || { echo "&#10007; Agent intent: expected SUMMARY, got $INTENT"; exit 1; }
+
+<span class="cm"># 4. Prometheus metrics endpoint</span>
+curl -sf "$API/metrics" | grep -q "fip_http_requests_total" \
+  && echo "&#10003; Prometheus metrics" || { echo "&#10007; Prometheus metrics FAILED"; exit 1; }
+
+echo ""
+echo "=== All checks passed. Deploy healthy. ==="</pre>
+    </div>
+  </div>
+</div>
+
+</div><!-- /steps-grid -->
+
+<!-- TRADEOFFS -->
+<div class="section-title">Production Architecture Tradeoffs</div>
+<table class="tradeoff-table">
+  <tr><th>Decision</th><th>Choice Made</th><th>Why</th><th>Tradeoff Accepted</th></tr>
+  <tr>
+    <td>Kafka managed service</td><td class="chosen">MSK Serverless &#10003;</td>
+    <td class="pro">Zero broker management; auto-scales; same API as FLOCI confluent container; SASL IAM auth built in</td>
+    <td class="con">Cold start latency on first message after idle period; slightly higher cost than provisioned MSK at sustained high throughput</td>
+  </tr>
+  <tr>
+    <td>Qdrant hosting</td><td class="chosen">EC2 + EBS &#10003;</td>
+    <td class="pro">Full control over Qdrant version; persistent EBS survives instance replacement; cheaper than Qdrant Cloud at this scale</td>
+    <td class="con">Manual OS patching required; no managed backup (use AWS Backup + DLM for EBS snapshots)</td>
+  </tr>
+  <tr>
+    <td>Agent runtime</td><td class="chosen">Lambda (image-based) &#10003;</td>
+    <td class="pro">Zero infra when idle (evenings/weekends); per-invocation billing; same handler.py from Phase 4</td>
+    <td class="con">Cold start 5&ndash;10s; 15-min max timeout; provisioned concurrency needed for sub-2s SLA</td>
+  </tr>
+  <tr>
+    <td>React hosting</td><td class="chosen">S3 + CloudFront &#10003;</td>
+    <td class="pro">Globally cached; zero server maintenance; Vite content-hashed assets make stale cache impossible for assets</td>
+    <td class="con">index.html must be invalidated on every deploy (handled by deploy script)</td>
+  </tr>
+  <tr>
+    <td>Terraform state</td><td class="chosen">S3 + DynamoDB lock &#10003;</td>
+    <td class="pro">Concurrent apply protection; versioned state for rollback; audit trail of every apply</td>
+    <td class="con">Must create S3 bucket + DynamoDB table manually before first terraform init (chicken-and-egg)</td>
+  </tr>
+  <tr>
+    <td>CI/CD auth</td><td class="chosen">OIDC federation &#10003;</td>
+    <td class="pro">No long-lived AWS keys in GitHub Secrets; 1-hour STS token; automatic rotation</td>
+    <td class="con">Requires one-time OIDC provider setup in AWS; slightly more complex initial IAM config</td>
+  </tr>
+</table>
+
+<!-- PROD ISSUES -->
+<div class="section-title">Production Issues Reference Map</div>
+<div class="prod-issues">
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#1 Terraform State Not Locked</div><div class="prod-issue-body">Concurrent apply without DynamoDB lock = state corruption. Create S3 + DynamoDB manually BEFORE first terraform init. Never run apply from a laptop and CI simultaneously.</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#2 Bronze Lifecycle Expiry</div><div class="prod-issue-body">Adding expiry to Bronze destroys the reprocessing safety net. Fix: Bronze = infinite retention, prevent_destroy = true, versioning enabled. Silver/Gold can have rules; Bronze cannot.</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#3 Qdrant Data Not Backed Up</div><div class="prod-issue-body">EC2 terminated &rarr; EBS deleted (default) &rarr; 50K embeddings gone. Fix: delete_on_termination = false on EBS, daily EBS snapshots via AWS Backup, prevent_destroy on volume resource.</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#4 CloudFront Serves Stale Build</div><div class="prod-issue-body">Default 24hr TTL on all S3 objects. New React build invisible to managers for up to 24 hours. Fix: content-hashed asset filenames + index.html max-age=0 + post-deploy CF invalidation.</div></div>
+  <div class="prod-issue-card h"><div class="sev h">High</div><div class="prod-issue-title">#5 Long-Lived AWS Keys in GitHub Secrets</div><div class="prod-issue-body">Compromised repo = permanent AWS access. Fix: GitHub OIDC federation with role-to-assume. Short-lived STS token per workflow run. No static credentials anywhere.</div></div>
+  <div class="prod-issue-card m"><div class="sev m">Med</div><div class="prod-issue-title">#6 Lambda Cold Start on Infrequent Queries</div><div class="prod-issue-body">First morning agent query after overnight idle takes 8&ndash;12s (spaCy + Qdrant connection init). Fix: provisioned concurrency for 1 Lambda instance during business hours via scheduled EventBridge.</div></div>
+  <div class="prod-issue-card m"><div class="sev m">Med</div><div class="prod-issue-title">#7 No Rollback on Smoke Test Failure</div><div class="prod-issue-body">Smoke tests fail, new Fargate tasks are unhealthy, but old tasks already stopped. Managers see 503s. Fix: CI rollback step that re-deploys previous task definition revision on any smoke test failure.</div></div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="section-title">Phase 6 Implementation Checklist</div>
+<div class="checklist-section">
+  <div class="checklist-title">Phase 6 &mdash; Production Deploy</div>
+  <div class="checklist-subtitle">Auto-saved to browser storage. Ctrl+S to manually save edits.</div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <span id="progress-label" style="font-size:12px;color:var(--text-muted)">0 / 0 completed</span>
+  <div class="clg">Bootstrap (one-time, manual)</div>
+  <label class="check-item" id="ci-1"><input type="checkbox" data-ci="ci-1"><span class="check-label">S3 state bucket created: fip-terraform-state-prod with versioning enabled</span></label>
+  <label class="check-item" id="ci-2"><input type="checkbox" data-ci="ci-2"><span class="check-label">DynamoDB lock table created: fip-terraform-locks (PAY_PER_REQUEST billing)</span></label>
+  <label class="check-item" id="ci-3"><input type="checkbox" data-ci="ci-3"><span class="check-label">GitHub OIDC provider created in IAM + fip-github-actions-prod role with trust policy</span></label>
+  <label class="check-item" id="ci-4"><input type="checkbox" data-ci="ci-4"><span class="check-label">ECR repositories created: fip-api and fip-agent (initial push of images)</span></label>
+  <div class="clg">Terraform Core Infrastructure</div>
+  <label class="check-item" id="ci-5"><input type="checkbox" data-ci="ci-5"><span class="check-label">VPC with 2 public + 2 private subnets across 2 AZs created via terraform apply</span></label>
+  <label class="check-item" id="ci-6"><input type="checkbox" data-ci="ci-6"><span class="check-label">IAM roles created: lambda_agent (S3 + Secrets read), ecs_task, github_actions</span></label>
+  <label class="check-item" id="ci-7"><input type="checkbox" data-ci="ci-7"><span class="check-label">Secrets Manager: OPENAI_API_KEY, QDRANT_API_KEY, REDIS_URL stored (not in .env)</span></label>
+  <div class="clg">Data Layer</div>
+  <label class="check-item" id="ci-8"><input type="checkbox" data-ci="ci-8"><span class="check-label">S3 Bronze bucket: prevent_destroy=true, versioning=Enabled, NO lifecycle expiry rule</span></label>
+  <label class="check-item" id="ci-9"><input type="checkbox" data-ci="ci-9"><span class="check-label">S3 Silver: 90-day lifecycle expiry. S3 Gold: 30-day transition to IA</span></label>
+  <label class="check-item" id="ci-10"><input type="checkbox" data-ci="ci-10"><span class="check-label">MSK Serverless cluster running: bootstrap endpoint written to Secrets Manager</span></label>
+  <label class="check-item" id="ci-11"><input type="checkbox" data-ci="ci-11"><span class="check-label">Kafka topics created on MSK: raw.feedback (12 partitions), fip.dlq.feedback</span></label>
+  <div class="clg">Vector Store + Agent</div>
+  <label class="check-item" id="ci-12"><input type="checkbox" data-ci="ci-12"><span class="check-label">Qdrant EC2 running: EBS delete_on_termination=false, AWS Backup daily snapshot</span></label>
+  <label class="check-item" id="ci-13"><input type="checkbox" data-ci="ci-13"><span class="check-label">Phase 2 bootstrap re-run against prod Qdrant: collection + alias + payload indexes created</span></label>
+  <label class="check-item" id="ci-14"><input type="checkbox" data-ci="ci-14"><span class="check-label">Phase 3 backfill run against prod: 50K reviews embedded and indexed in Qdrant</span></label>
+  <label class="check-item" id="ci-15"><input type="checkbox" data-ci="ci-15"><span class="check-label">Lambda function deployed: /health invoke succeeds, agent SUMMARY query returns intent=SUMMARY</span></label>
+  <div class="clg">Application Layer</div>
+  <label class="check-item" id="ci-16"><input type="checkbox" data-ci="ci-16"><span class="check-label">ECS Fargate: fip-api service running, ALB health checks passing, 2 tasks stable</span></label>
+  <label class="check-item" id="ci-17"><input type="checkbox" data-ci="ci-17"><span class="check-label">React UI built + deployed to S3 + CloudFront: index.html max-age=0 confirmed</span></label>
+  <label class="check-item" id="ci-18"><input type="checkbox" data-ci="ci-18"><span class="check-label">CloudFront HTTPS working: browser opens https://fip.curry-bowl.com, no mixed-content warnings</span></label>
+  <div class="clg">CI/CD + Observability</div>
+  <label class="check-item" id="ci-19"><input type="checkbox" data-ci="ci-19"><span class="check-label">GitHub Actions workflow: push to main triggers all 5 stages, smoke tests pass</span></label>
+  <label class="check-item" id="ci-20"><input type="checkbox" data-ci="ci-20"><span class="check-label">CloudWatch alarms: Lambda latency, ECS task count, Kafka lag all in OK state</span></label>
+  <label class="check-item" id="ci-21"><input type="checkbox" data-ci="ci-21"><span class="check-label">AWS Budget alert: $100 warning + $150 action threshold, alert_email confirmed</span></label>
+  <label class="check-item" id="ci-22"><input type="checkbox" data-ci="ci-22"><span class="check-label">Full smoke test suite passes against prod: python scripts/smoke_test.py --env prod --timeout 120</span></label>
+  <label class="check-item" id="ci-23"><input type="checkbox" data-ci="ci-23"><span class="check-label">ALL 7 PHASES COMPLETE: 12-location curry_bowl_express AI platform live in production &#127881;</span></label>
+</div>
+
+<!-- CAREER -->
+<div class="section-title">LinkedIn Post &amp; Interview Prep &mdash; The Final Chapter</div>
+<div class="career-card">
+  <div class="career-label">&#128226; LinkedIn Post &mdash; Copy &amp; Post Directly (The Series Finale)</div>
+  <div class="li-post-wrap">
+  <div class="li-post" id="li-post-content" contenteditable="false" data-fip-edit="li-post-p6">I spent 6 phases building an AI feedback platform for a 12-location restaurant chain. Today it went live in production.
+
+Here's what 6 months of "building in public" actually taught me:
+
+&#128293; The FLOCI insight (and why it matters)
+I built every phase locally using FLOCI: LocalStack for AWS services, Kafka on Docker, Qdrant on Docker, same Terraform HCL. The production deploy was changing ONE provider block and running terraform apply. Zero code changes to Phase 1, 2, 3, 4, or 5.
+
+Most engineers treat local dev and production as fundamentally different environments and spend enormous time on "it works on my machine but not in prod." FLOCI eliminates that gap by design. If your local stack is architecturally identical to production, the gap disappears.
+
+&#128293; What Terraform state locking actually saves you from
+Two engineers ran terraform apply simultaneously in staging. Without DynamoDB state locking, both reads got the same state, both modified it, and the second write silently overwrote the first. We had AWS resources that didn't exist in state, and state entries for resources that didn't exist in AWS.
+
+S3 + DynamoDB locking: 5 minutes to set up, prevents a class of incidents that can take 4 hours to untangle. This isn't optional infra. It's table stakes.
+
+&#128293; The Bronze bucket you must never touch
+A cost optimisation review flagged the Bronze S3 bucket for 30-day expiry. "It's just raw data, we have Silver." Wrong.
+
+Six weeks later, a bug in the PySpark Silver job was discovered that had been silently corrupting rating normalisation for 8 weeks. Without Bronze as the immutable source of truth, there was nothing to reprocess from. With Bronze: dbt run and spark-submit, 3 hours to full recovery.
+
+Bronze = infinite retention. Silver and Gold are the derived layers. Never add lifecycle rules to Bronze. This decision costs cents per month and has saved the platform twice already.
+
+The full 6-phase stack: Kafka (Phase 1) -> Bronze/Silver/Gold + dbt (Phase 2) -> Qdrant RAG (Phase 3) -> LangGraph Agents (Phase 4) -> FastAPI + React (Phase 5) -> AWS production (Phase 6).
+
+All 7 phases are documented. All code is production-grade.
+
+<span class="li-hashtags">#DataEngineering #AWS #Terraform #LangGraph #Python #BuildingInPublic #AIEngineering #RestaurantTech #ProductionDeploy</span></div>
+  </div>
+  <div class="li-meta">
+    <span class="li-chars" id="li-char-count">0 / 3000 chars</span>
+    <button class="copy-btn" id="li-copy-btn" onclick="copyLinkedIn()">&#128203; Copy for LinkedIn</button>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="career-label">&#127919; Interview Q&amp;A &mdash; Engineering Manager / Staff Engineer / Platform Engineer</div>
+    <div class="interview-qa">
+      <div class="qa-item">
+        <div class="qa-q">Q: Walk me through how you promoted the FLOCI local stack to production AWS.</div>
+        <div class="qa-a">The short answer is: we changed one Terraform provider block. The longer answer is that this outcome was only possible because of an architectural decision made in Phase 0: every Phase uses the same Terraform HCL modules, the same Docker images, the same environment variable names, and the same Python code against the same API contracts. FLOCI (LocalStack) exposes identical AWS service APIs on localhost:4566. When we changed the provider block to remove the endpoint overrides, <code>terraform apply</code> created 12 real AWS services from the same HCL that had been running against LocalStack for 5 phases. The Phase 1 Kafka connector code uses <code>KAFKA_BROKERS</code> from the environment; in FLOCI it points to localhost:9092, in prod it points to the MSK bootstrap endpoint. The code is identical. The promote was a 2-hour planned operation, not a 2-week migration project.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Q: How do you handle zero-downtime deploys for the FastAPI service on ECS Fargate?</div>
+        <div class="qa-a">ECS rolling update with a minimum healthy percent of 50% and maximum of 200%. When we push a new task definition revision, ECS starts new tasks (the 200% threshold), waits for them to pass health checks (GET /health returning 200), then stops old tasks. The ALB naturally drains connections from stopping tasks before deregistering them. The FastAPI application is stateless: all state lives in Redis (cache), DynamoDB (agent session state), and S3 (data). No in-process state means any request can be handled by any task, so replacing tasks one at a time is safe. The Terraform appautoscaling policy ensures we always have at least 1 task running, even during a deployment that brings healthy count temporarily to 50%.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Q: Why choose EC2 + EBS for Qdrant instead of a managed vector database service?</div>
+        <div class="qa-a">Three reasons. First, cost: at our scale (5M vectors, ~50K updates per week), EC2 m6i.large at $0.192/hour is roughly $140/month. Qdrant Cloud or Pinecone equivalents are $300&ndash;600/month at this capacity. Second, operational simplicity: the Phase 2 bootstrap script, Phase 3 indexer, and Phase 4 retriever all use the Qdrant Python client against a host:port. Switching from localhost:6333 (FLOCI) to the EC2 private IP is one environment variable change. Third, control: we need to pin Qdrant to a specific version (v1.9.2) that matches the client library locked in requirements.txt. Managed services sometimes force version upgrades that can change vector index behavior. The tradeoff is that we own OS patching and backup automation, but those are solvable with SSM + AWS Backup.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Q: How would you scale this platform if curry_bowl_express expanded to 120 locations instead of 12?</div>
+        <div class="qa-a">Several layers change at different thresholds. At 120 locations, the first bottleneck is the alert_detector DuckDB query: it's scanning 120 &times; 14 days of Gold Parquet which is 10&times; more data. Fix: pre-compute a <code>fct_location_alerts</code> dbt model that runs hourly and materialises the alert state &mdash; the alert_detector queries this materialised table instead of raw Parquet, reducing scan time from ~30s to under 1s. Second, the Qdrant collection grows 10&times; in vector count; at 500K vectors the existing m6i.large (8GB RAM) is still adequate but we'd add a replica for read scaling. Third, MSK Serverless auto-scales with the 10&times; volume increase; no change needed. Fourth, ECS Fargate auto-scaling at 10&times; traffic with the same policy, just more tasks. The architecture is designed for horizontal scale from day one &mdash; stateless compute, data in S3/Qdrant/MSK.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /section-wrap -->
+<div class="fip-toolbar">
+  <button class="fip-btn edit-btn"   id="fip-edit-toggle" title="Toggle edit (Ctrl+E)">&#9998;</button>
+  <button class="fip-btn save-btn"   id="fip-save"        title="Save (Ctrl+S)">&#128190;</button>
+  <button class="fip-btn undo-btn"   id="fip-undo"        title="Undo (Ctrl+Z)">&#8617;</button>
+  <button class="fip-btn search-btn" id="fip-search-open" title="Find &amp; Replace">&#128269;</button>
+  <button class="fip-btn export-btn" id="fip-export"      title="Export HTML">&#128228;</button>
+</div>
+<div class="fip-toast" id="fip-toast"></div>
+<div class="fip-search-modal" id="fip-search-modal">
+  <div class="fip-search-box">
+    <h4>&#128269; Find &amp; Replace</h4>
+    <input type="text" id="fip-find-input" placeholder="Find text...">
+    <input type="text" id="fip-replace-input" placeholder="Replace with...">
+    <div class="modal-btns">
+      <button class="modal-btn primary" id="fip-replace-btn">Replace All</button>
+      <button class="modal-btn secondary" id="fip-modal-close">Cancel</button>
+    </div>
+    <div id="fip-replace-result" style="font-size:12px;color:var(--text-muted)"></div>
+  </div>
+</div>
+
+<script>
+const LS_KEY='fip-phase6-production-deploy',HISTORY_KEY='fip-phase6-history',CHECK_KEY='fip-phase6-checks',MAX_HIST=30;
+let editMode=false,editHistory=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');
+function toast(m,d=2200){const e=document.getElementById('fip-toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d)}
+function saveAll(){const d={};document.querySelectorAll('[data-fip-edit]').forEach(e=>{d[e.dataset.fipEdit]=e.innerHTML});editHistory.push(JSON.stringify(d));if(editHistory.length>MAX_HIST)editHistory.shift();localStorage.setItem(HISTORY_KEY,JSON.stringify(editHistory));localStorage.setItem(LS_KEY,JSON.stringify(d));toast('Saved')}
+function restoreSaved(){const r=localStorage.getItem(LS_KEY);if(!r)return;const d=JSON.parse(r);document.querySelectorAll('[data-fip-edit]').forEach(e=>{if(d[e.dataset.fipEdit]!==undefined)e.innerHTML=d[e.dataset.fipEdit]})}
+function undoLast(){if(editHistory.length<2){toast('Nothing to undo');return}editHistory.pop();const prev=JSON.parse(editHistory[editHistory.length-1]||'{}');if(typeof prev==='object'&&!Array.isArray(prev)){document.querySelectorAll('[data-fip-edit]').forEach(e=>{if(prev[e.dataset.fipEdit]!==undefined)e.innerHTML=prev[e.dataset.fipEdit]})}localStorage.setItem(HISTORY_KEY,JSON.stringify(editHistory));toast('Undone')}
+function toggleEditMode(){editMode=!editMode;document.querySelectorAll('[data-fip-edit]').forEach(e=>{e.contentEditable=editMode?'true':'false'});toast(editMode?'Edit mode ON':'Edit mode OFF')}
+function exportHTML(){const b=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fip-phase6-production-deploy.html';a.click();toast('Exported')}
+function doFindReplace(){const f=document.getElementById('fip-find-input').value,r=document.getElementById('fip-replace-input').value;if(!f)return;let c=0;document.querySelectorAll('[data-fip-edit]').forEach(e=>{const b=e.innerHTML,a=b.split(f).join(r);if(b!==a){e.innerHTML=a;c++}});document.getElementById('fip-replace-result').textContent=c>0?`Replaced in ${c} element(s)`:'No matches';if(c)saveAll()}
+function copyLinkedIn(){const t=document.getElementById('li-post-content').innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById('li-copy-btn');b.textContent='Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy for LinkedIn';b.classList.remove('copied')},2500)}).catch(()=>toast('Select text manually to copy'))}
+function updateCharCount(){const t=document.getElementById('li-post-content');const el=document.getElementById('li-char-count');if(!t||!el)return;const n=t.innerText.length;el.textContent=`${n} / 3000 chars`;el.classList.toggle('over',n>3000)}
+function copyCode(btn){const pre=btn.closest('.code-block').querySelector('pre');if(!pre)return;const txt=pre.innerText||pre.textContent;navigator.clipboard.writeText(txt).then(()=>{const o=btn.textContent;btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied')},2000)}).catch(()=>toast('Select text manually to copy'))}
+function initChecklist(){const raw=localStorage.getItem(CHECK_KEY);const saved=(raw&&raw.startsWith('{'))?JSON.parse(raw):{};document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb=>{const k=cb.dataset.ci;if(saved[k]){cb.checked=true;cb.closest('.check-item').classList.add('done')}cb.addEventListener('change',()=>{cb.closest('.check-item').classList.toggle('done',cb.checked);const r=localStorage.getItem(CHECK_KEY);const st=(r&&r.startsWith('{'))?JSON.parse(r):{};st[k]=cb.checked;localStorage.setItem(CHECK_KEY,JSON.stringify(st));updateProgress()})});updateProgress()}
+function updateProgress(){const a=document.querySelectorAll('.check-item input[type=checkbox]'),d=document.querySelectorAll('.check-item input[type=checkbox]:checked');const p=a.length?Math.round(d.length/a.length*100):0;const pf=document.getElementById('progress-fill');const pl=document.getElementById('progress-label');if(pf)pf.style.width=p+'%';if(pl)pl.textContent=`${d.length} / ${a.length} completed`}
+function runGenerator(){
+  const n=parseInt(document.getElementById('gen-count').value)||10;
+  const ENDPOINTS=['FastAPI health: GET /health','Dashboard (DuckDB Gold): GET /api/dashboard','Location trend: GET /api/analytics/cb-mission','Alerts: GET /api/alerts','Agent SUMMARY: POST /api/ask {"question":"Summarise cb-mission feedback"}','Agent COMPARE: POST /api/ask {"question":"Which location has worst rating?"}','Agent ALERT: POST /api/ask {"question":"Any sudden rating drops?"}','Prometheus metrics: GET /metrics','React UI: GET / (CloudFront)','MSK consumer lag: CloudWatch GetMetricData'];
+  const show=Math.min(n,ENDPOINTS.length);
+  const tests=ENDPOINTS.slice(0,show).map((e,i)=>({test_id:`smoke-${String(i+1).padStart(2,'0')}`,endpoint:e,layer:i<1?'FastAPI':i<4?'DuckDB Gold':i<7?'LangGraph Agent':i<8?'Prometheus':i<9?'CloudFront':'MSK',expected_status:200,timeout_ms:i>=4&&i<7?8000:2000}));
+  const el=document.getElementById('gen-output');
+  el.textContent=JSON.stringify(tests,null,2);el.classList.add('show');
+  document.getElementById('gen-status').textContent=`${show} smoke tests covering all layers`;
+}
+document.getElementById('fip-edit-toggle').addEventListener('click',toggleEditMode);
+document.getElementById('fip-save').addEventListener('click',saveAll);
+document.getElementById('fip-undo').addEventListener('click',undoLast);
+document.getElementById('fip-export').addEventListener('click',exportHTML);
+document.getElementById('fip-search-open').addEventListener('click',()=>document.getElementById('fip-search-modal').classList.add('open'));
+document.getElementById('fip-modal-close').addEventListener('click',()=>document.getElementById('fip-search-modal').classList.remove('open'));
+document.getElementById('fip-replace-btn').addEventListener('click',doFindReplace);
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undoLast()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='e'){e.preventDefault();toggleEditMode()}
+  if(e.key==='Escape')document.getElementById('fip-search-modal').classList.remove('open')
+});
+document.addEventListener('DOMContentLoaded',()=>{
+  restoreSaved();
+  initChecklist();
+  document.querySelectorAll('[data-fip-edit]').forEach(e=>{e.contentEditable='false'});
+  const lp=document.getElementById('li-post-content');
+  if(lp){updateCharCount();lp.addEventListener('input',updateCharCount)}
+});
+</script>
+</body>
+</html>

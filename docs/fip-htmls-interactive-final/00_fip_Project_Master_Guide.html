@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIP Master Guide V2 — Incremental Execution Roadmap</title>
+<style>
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--surface3:#202a3d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--dim:#6e7681;
+  --r:#f78166;--b:#79c0ff;--g:#56d364;--p:#d2a8ff;--o:#ffa657;--cyan:#39d0d8;
+  --shadow:0 12px 40px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;}
+code,pre{font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}.mono{font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.topbar{position:sticky;top:0;z-index:300;background:rgba(13,17,23,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);height:54px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topbar-brand{font-size:13px;font-weight:900;color:var(--r);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}.topbar-sub{font-size:12px;color:var(--muted);background:var(--surface2);padding:4px 14px;border-radius:20px;border:1px solid var(--border)}
+.layout{display:flex;min-height:calc(100vh - 54px)}
+.sidebar{width:270px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;padding:20px 0}
+.sidebar .label{font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;padding:12px 18px 5px}.sidebar a{display:flex;align-items:center;gap:9px;padding:8px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:2px solid transparent;transition:.15s}.sidebar a:hover,.sidebar a.active{background:var(--surface2);color:var(--text);border-left-color:var(--r)}.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.sidebar .phase-links a{font-size:12px;padding-top:6px;padding-bottom:6px}
+.main{flex:1;max-width:1180px;padding:42px 52px 90px}.hero{position:relative;background:linear-gradient(135deg,rgba(247,129,102,.09),rgba(121,192,255,.04));border:1px solid var(--border);border-radius:16px;padding:38px 42px;margin-bottom:42px;overflow:hidden;box-shadow:var(--shadow)}.hero:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--r),var(--p),var(--b),var(--g))}.hero-badge{display:inline-flex;gap:8px;align-items:center;background:rgba(247,129,102,.12);border:1px solid rgba(247,129,102,.32);color:var(--r);font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:18px}.hero h1{font-size:34px;line-height:1.14;font-weight:950;letter-spacing:-.03em;margin-bottom:14px}.hero h1 span{color:var(--b)}.hero p{color:var(--muted);max-width:760px;font-size:15px;margin-bottom:24px}.stat-strip{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border)}.stat{background:rgba(22,27,34,.92);padding:18px 14px;text-align:center}.stat .n{font-size:24px;font-weight:950;line-height:1;margin-bottom:5px}.stat .l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}.section{margin-bottom:54px;scroll-margin-top:74px}.section-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}.section-num{font-size:11px;font-weight:950;color:var(--r);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.25);padding:4px 10px;border-radius:7px;letter-spacing:.05em;flex-shrink:0}.section h2{font-size:21px;font-weight:850}.section-head p{font-size:13px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px}.card-title{font-size:13px;font-weight:900;color:var(--b);margin-bottom:10px;display:flex;gap:8px;align-items:center}.card p,.card li{font-size:13.5px;color:var(--muted)}.card ul{padding-left:18px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.alert{border-radius:10px;padding:14px 18px;font-size:13px;margin:16px 0;display:flex;gap:10px;align-items:flex-start}.alert strong{display:block;color:var(--text);margin-bottom:4px}.alert-info{background:rgba(121,192,255,.07);border:1px solid rgba(121,192,255,.22);color:#afd7ff}.alert-success{background:rgba(86,211,100,.07);border:1px solid rgba(86,211,100,.22);color:#b8f0bd}.alert-warn{background:rgba(255,166,87,.07);border:1px solid rgba(255,166,87,.22);color:#ffd2a1}.alert-danger{background:rgba(247,129,102,.07);border:1px solid rgba(247,129,102,.22);color:#ffc0b5}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.04em;border:1px solid transparent}.tag.inf{background:rgba(255,166,87,.12);color:var(--o);border-color:rgba(255,166,87,.3)}.tag.dat{background:rgba(86,211,100,.12);color:var(--g);border-color:rgba(86,211,100,.3)}.tag.ai{background:rgba(210,168,255,.12);color:var(--p);border-color:rgba(210,168,255,.3)}.tag.ui{background:rgba(121,192,255,.12);color:var(--b);border-color:rgba(121,192,255,.3)}.tag.ops{background:rgba(247,129,102,.12);color:var(--r);border-color:rgba(247,129,102,.3)}
+.arch-wrap{background:var(--surface);border:1px solid var(--border);border-radius:15px;overflow:hidden;box-shadow:var(--shadow)}.arch-header{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(90deg,var(--surface2),rgba(28,35,51,.55));border-bottom:1px solid var(--border);padding:15px 22px}.arch-header-title{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:950}.arch-header-sub{font-size:11px;color:var(--dim);font-weight:700}.legend{display:flex;gap:8px;flex-wrap:wrap;padding:13px 22px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.15)}.legend span{display:flex;gap:6px;align-items:center;font-size:11px;font-weight:800;color:var(--muted)}.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}.phase-stack{padding:22px}.phase-line{position:relative;border:1px solid var(--border);background:var(--surface2);border-radius:12px;margin-bottom:12px;overflow:hidden}.phase-line:last-child{margin-bottom:0}.phase-line-head{display:flex;align-items:center;gap:14px;padding:13px 16px;background:rgba(0,0,0,.15);border-bottom:1px solid var(--border)}.phase-chip{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:21px;flex-shrink:0}.phase-meta h3{font-size:15px;line-height:1.25}.phase-meta p{font-size:11px;color:var(--dim);font-weight:750}.phase-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;padding:13px 16px}.phase-item{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:rgba(13,17,23,.35)}.p0{border-left:4px solid var(--r)}.p0 .phase-chip{color:var(--r);background:rgba(247,129,102,.13);border:1px solid rgba(247,129,102,.3)}.p1{border-left:4px solid var(--o)}.p1 .phase-chip{color:var(--o);background:rgba(255,166,87,.13);border:1px solid rgba(255,166,87,.3)}.p2{border-left:4px solid var(--g)}.p2 .phase-chip{color:var(--g);background:rgba(86,211,100,.13);border:1px solid rgba(86,211,100,.3)}.p3{border-left:4px solid var(--p)}.p3 .phase-chip{color:var(--p);background:rgba(210,168,255,.13);border:1px solid rgba(210,168,255,.3)}.p4{border-left:4px solid #ec4899}.p4 .phase-chip{color:#ec4899;background:rgba(236,72,153,.13);border:1px solid rgba(236,72,153,.3)}.p5{border-left:4px solid var(--b)}.p5 .phase-chip{color:var(--b);background:rgba(121,192,255,.13);border:1px solid rgba(121,192,255,.3)}.p6{border-left:4px solid var(--r)}.p6 .phase-chip{color:var(--r);background:rgba(247,129,102,.13);border:1px solid rgba(247,129,102,.3)}
+.exec{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:13px}.exec-step{min-width:135px;text-align:center;border:1px solid var(--border);background:var(--surface2);border-radius:10px;padding:12px 10px}.exec-step code{display:block;color:var(--text);font-size:12px;margin-bottom:4px}.exec-step span{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800}.arrow{font-weight:950;color:var(--dim)}
+.table-wrap{overflow-x:auto}.matrix{width:100%;border-collapse:collapse;font-size:13px}.matrix th{background:var(--surface2);color:var(--b);font-size:11px;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:10px 13px;border:1px solid var(--border)}.matrix td{padding:10px 13px;border:1px solid var(--border);vertical-align:top;color:var(--muted)}.matrix td strong{color:var(--text)}.matrix tr:nth-child(even) td{background:rgba(28,35,51,.38)}
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:14px 0}.code-header{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#161b22;border-bottom:1px solid var(--border);padding:8px 12px}.code-title{font-size:11px;color:var(--o);text-transform:uppercase;font-weight:950;letter-spacing:.06em}.code-actions{display:flex;gap:6px}.code-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer}.code-btn:hover{border-color:var(--b);color:var(--b)}pre{padding:15px 16px;overflow-x:auto;font-size:12.5px;line-height:1.6;color:var(--text)}.code-block.collapsed pre{max-height:120px;overflow:hidden;position:relative}.code-block.collapsed pre:after{content:"";position:absolute;left:0;right:0;bottom:0;height:45px;background:linear-gradient(transparent,#0d1117)}
+.phase-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);margin-bottom:22px}.phase-card-head{display:flex;align-items:stretch;border-bottom:1px solid var(--border)}.stripe{width:90px;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(255,255,255,.03);border-right:1px solid var(--border);flex-shrink:0}.stripe .num{font-size:36px;font-weight:950;line-height:1}.stripe small{font-size:10px;color:var(--dim);text-transform:uppercase;font-weight:900;letter-spacing:.08em}.phase-card-body{padding:18px 20px;flex:1}.phase-card-body h3{font-size:18px;margin-bottom:5px}.phase-card-body p{font-size:13px;color:var(--muted);margin-bottom:10px}.phase-mini{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border)}.phase-mini-col{padding:15px 16px;border-right:1px solid var(--border)}.phase-mini-col:last-child{border-right:none}.phase-mini-col h4{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}.phase-mini-col li{font-size:12.5px;color:var(--muted);margin-left:16px;margin-bottom:5px}
+.repo-evo{display:grid;grid-template-columns:1fr 1fr;gap:16px}.repo-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}.repo-card h3{font-size:13px;padding:12px 15px;border-bottom:1px solid var(--border);background:var(--surface2)}.repo-card pre{font-size:12px}.new{color:var(--g);font-weight:900}.keep{color:var(--muted)}.note{font-size:12px;color:var(--muted);font-style:italic;margin-top:8px}.checklist{list-style:none;padding:0}.checklist li{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);cursor:pointer}.checklist li:last-child{border-bottom:none}.checklist input{accent-color:var(--g);margin-top:3px}.phase-nav{display:flex;justify-content:space-between;gap:14px;margin-top:40px}.phase-nav a{flex:1;text-align:center;text-decoration:none;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;font-weight:850}.phase-nav a:hover{border-color:var(--b);color:var(--b)}
+.footer{margin-top:54px;text-align:center;color:var(--dim);font-size:12px;border-top:1px solid var(--border);padding-top:22px}.toolbar{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:400}.tool-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:18px;cursor:pointer;box-shadow:0 5px 18px rgba(0,0,0,.35)}.tool-btn:hover{border-color:var(--b)}.toast{position:fixed;right:22px;bottom:78px;background:var(--g);color:#000;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:900;opacity:0;transform:translateY(8px);transition:.25s;z-index:500}.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:980px){.layout{display:block}.sidebar{display:none}.main{padding:28px 20px}.stat-strip,.grid-4{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3,.repo-evo{grid-template-columns:1fr}.phase-mini{grid-template-columns:1fr}.phase-mini-col{border-right:none;border-bottom:1px solid var(--border)}.phase-card-head{flex-direction:column}.stripe{width:auto;height:70px;flex-direction:row;gap:8px}.topbar{padding:0 14px}.topbar-sub{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-brand">⚡ Feedback Intelligence Platform</div><div class="topbar-sub">Master Guide V2 · Incremental Execution Model</div></div>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+  <div class="label">Master Guide</div>
+  <a href="#hero"><span class="dot" style="background:var(--r)"></span>Overview</a>
+  <a href="#principles"><span class="dot" style="background:var(--o)"></span>Build Principles</a>
+  <a href="#architecture"><span class="dot" style="background:var(--b)"></span>Architecture</a>
+  <a href="#execution"><span class="dot" style="background:var(--g)"></span>Execution Flow</a>
+  <a href="#phases"><span class="dot" style="background:var(--p)"></span>Phase Model</a>
+  <a href="#repo"><span class="dot" style="background:var(--cyan)"></span>Repo Evolution</a>
+  <a href="#matrix"><span class="dot" style="background:var(--o)"></span>Tech Matrix</a>
+  <a href="#deliverables"><span class="dot" style="background:var(--g)"></span>Deliverables</a>
+  <a href="#interview"><span class="dot" style="background:var(--p)"></span>EM Interview Lens</a>
+  <a href="#checklist"><span class="dot" style="background:var(--r)"></span>Checklist</a>
+  <div class="label">Phase Guides</div>
+  <div class="phase-links">
+    <a href="fip-phase0-foundation-interactive-final.html"><span class="dot" style="background:var(--r)"></span>Phase 0 Foundation</a>
+    <a href="fip-phase1-data-ingestion-interactive-final.html"><span class="dot" style="background:var(--o)"></span>Phase 1 Ingestion</a>
+    <a href="fip-phase2-data-platform-interactive-final.html"><span class="dot" style="background:var(--g)"></span>Phase 2 Data Platform</a>
+    <a href="fip-phase3-rag-layer-interactive-final.html"><span class="dot" style="background:var(--p)"></span>Phase 3 RAG</a>
+    <a href="fip-phase4-agents-interactive-final.html"><span class="dot" style="background:#ec4899"></span>Phase 4 Agents</a>
+    <a href="fip-phase5-product-ui-interactive-final.html"><span class="dot" style="background:var(--b)"></span>Phase 5 Product UI</a>
+    <a href="fip-phase6-production-deploy-interactive-final.html"><span class="dot" style="background:var(--r)"></span>Phase 6 Production</a>
+  </div>
+</nav>
+<main class="main">
+<section class="hero" id="hero">
+  <div class="hero-badge">Master Course Guide · Version 2.0</div>
+  <h1>Feedback Intelligence Platform<br><span>Incremental Build Roadmap</span></h1>
+  <p>This guide is the authoritative entry point for the full seven-day build. Phase 0 creates the local AWS-parity foundation. Every later phase extends that same running platform: no duplicate repo, no new local Kafka, no recreated infrastructure, no broken continuity.</p>
+  <div class="stat-strip">
+    <div class="stat"><div class="n" style="color:var(--r)">7</div><div class="l">Phases</div></div>
+    <div class="stat"><div class="n" style="color:var(--o)">1</div><div class="l">Repo</div></div>
+    <div class="stat"><div class="n" style="color:var(--g)">25K+</div><div class="l">Events</div></div>
+    <div class="stat"><div class="n" style="color:var(--p)">4</div><div class="l">Agents</div></div>
+    <div class="stat"><div class="n" style="color:var(--b)">AWS</div><div class="l">Parity</div></div>
+  </div>
+</section>
+
+<section class="section" id="principles">
+  <div class="section-head"><div class="section-num">01</div><div><h2>Core Build Principles</h2><p>The rules that keep all phase guides synchronized.</p></div></div>
+  <div class="grid-3">
+    <div class="card"><div class="card-title">🏗️ Incremental Only</div><p>Each phase consumes the outputs of the previous phase and adds new capabilities. Nothing gets recreated unless explicitly destroyed.</p></div>
+    <div class="card"><div class="card-title">☁️ FLOCI First</div><p>Phase 0 starts FLOCI and provisions AWS-shaped resources. Phases 1–5 deploy into that environment. Phase 6 promotes the same model to AWS.</p></div>
+    <div class="card"><div class="card-title">🚢 Terraform + Helm</div><p>Terraform owns infrastructure. Helm owns Kubernetes deployment. Docker Compose is not the main runtime path for the project.</p></div>
+  </div>
+  <div class="alert alert-success"><span>✅</span><div><strong>Continuity Contract</strong> The execution flow is always <code>make bootstrap</code> once, then <code>make phase1</code>, <code>make phase2</code>, <code>make phase3</code>, <code>make phase4</code>, <code>make phase5</code>, and finally <code>make phase6</code>.</div></div>
+</section>
+
+<section class="section" id="architecture">
+  <div class="section-head"><div class="section-num">02</div><div><h2>Complete Platform Architecture</h2><p>Each row lights up more of the same platform. Earlier components remain active.</p></div></div>
+  <div class="arch-wrap">
+    <div class="arch-header"><div class="arch-header-title">Architecture Timeline</div><div class="arch-header-sub">Foundation → Ingestion → Data Platform → RAG → Agents → Product → Production</div></div>
+    <div class="legend"><span><i style="background:var(--o)"></i>Infrastructure</span><span><i style="background:var(--g)"></i>Data</span><span><i style="background:var(--p)"></i>AI</span><span><i style="background:var(--b)"></i>Product</span><span><i style="background:var(--r)"></i>Ops</span></div>
+    <div class="phase-stack">
+      <div class="phase-line p0"><div class="phase-line-head"><div class="phase-chip">0</div><div class="phase-meta"><h3>Foundation</h3><p>FLOCI · Terraform · EKS · MSK · S3 · RDS · Secrets · IAM · Observability</p></div></div><div class="phase-items"><div class="phase-item">Creates local AWS-parity platform</div><div class="phase-item">Creates monorepo and shared contracts</div><div class="phase-item">Deploys base Helm skeleton</div></div></div>
+      <div class="phase-line p1"><div class="phase-line-head"><div class="phase-chip">1</div><div class="phase-meta"><h3>Data Ingestion</h3><p>Dummy generator · Connectors · Kafka producer · DLQ · Bronze landing</p></div></div><div class="phase-items"><div class="phase-item">Reuses FLOCI MSK and S3</div><div class="phase-item">Adds topics, producers, ingestion worker</div><div class="phase-item">Produces first feedback events</div></div></div>
+      <div class="phase-line p2"><div class="phase-line-head"><div class="phase-chip">2</div><div class="phase-meta"><h3>Data Platform</h3><p>Bronze → Silver → Gold · PII masking · NLP enrichment · dbt marts</p></div></div><div class="phase-items"><div class="phase-item">Consumes Bronze events</div><div class="phase-item">Adds cleaning/NLP/dbt workers</div><div class="phase-item">Produces analytics-ready Gold marts</div></div></div>
+      <div class="phase-line p3"><div class="phase-line-head"><div class="phase-chip">3</div><div class="phase-meta"><h3>RAG Layer</h3><p>Embeddings · Qdrant · Hybrid search · Retriever service</p></div></div><div class="phase-items"><div class="phase-item">Consumes Silver masked feedback</div><div class="phase-item">Adds Qdrant via Helm and embedding worker</div><div class="phase-item">Produces tenant-isolated semantic search</div></div></div>
+      <div class="phase-line p4"><div class="phase-line-head"><div class="phase-chip">4</div><div class="phase-meta"><h3>Agentic Intelligence</h3><p>LangGraph · Data Agent · RAG Agent · Business Agent · Action Agent</p></div></div><div class="phase-items"><div class="phase-item">Consumes Gold marts and RAG retriever</div><div class="phase-item">Adds governed tools and guardrails</div><div class="phase-item">Produces explainable recommendations</div></div></div>
+      <div class="phase-line p5"><div class="phase-line-head"><div class="phase-chip">5</div><div class="phase-meta"><h3>Product Surface</h3><p>React dashboard · Chat · Voice · FastAPI APIs · WebRTC</p></div></div><div class="phase-items"><div class="phase-item">Consumes agent service and Gold APIs</div><div class="phase-item">Adds user-facing product layer</div><div class="phase-item">Produces complete restaurant operator UX</div></div></div>
+      <div class="phase-line p6"><div class="phase-line-head"><div class="phase-chip">6</div><div class="phase-meta"><h3>Production Deploy</h3><p>GitHub Actions · AWS EKS · ECR · Grafana · k6 · IAM hardening</p></div></div><div class="phase-items"><div class="phase-item">Promotes same Terraform and Helm</div><div class="phase-item">Swaps FLOCI provider for AWS provider</div><div class="phase-item">Produces production-grade AWS deployment</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="execution">
+  <div class="section-head"><div class="section-num">03</div><div><h2>Execution Roadmap</h2><p>One command per phase. Each command builds on the previous output.</p></div></div>
+  <div class="exec"><div class="exec-step"><code>make bootstrap</code><span>Phase 0</span></div><div class="arrow">→</div><div class="exec-step"><code>make phase1</code><span>Ingestion</span></div><div class="arrow">→</div><div class="exec-step"><code>make phase2</code><span>Data</span></div><div class="arrow">→</div><div class="exec-step"><code>make phase3</code><span>RAG</span></div><div class="arrow">→</div><div class="exec-step"><code>make phase4</code><span>Agents</span></div><div class="arrow">→</div><div class="exec-step"><code>make phase5</code><span>Product</span></div><div class="arrow">→</div><div class="exec-step"><code>make phase6</code><span>Prod</span></div></div>
+  <div class="code-block collapsed"><div class="code-header"><span class="code-title">bash — full cumulative execution</span><div class="code-actions"><button class="code-btn" onclick="toggleCode(this)">Expand</button><button class="code-btn" onclick="copyCode(this)">Copy</button></div></div><pre># Phase 0: create local AWS-parity foundation
+make bootstrap
+
+# Phase 1: add ingestion services on existing FLOCI MSK/S3/EKS
+make phase1
+
+# Phase 2: add Bronze/Silver/Gold data platform on existing S3/RDS/EKS
+make phase2
+
+# Phase 3: add Qdrant + embedding + RAG services via Terraform/Helm
+make phase3
+
+# Phase 4: add LangGraph agent services and governed tools
+make phase4
+
+# Phase 5: add React UI, voice, chat, and dashboard APIs
+make phase5
+
+# Phase 6: promote same artifacts to AWS production
+make phase6</pre></div>
+  <div class="alert alert-warn"><span>⚠️</span><div><strong>What not to do</strong> Do not create a new repository in later phases. Do not run local Docker Compose Kafka as the main path. Do not recreate S3/RDS/MSK. Later phases extend Terraform, Helm, services, dbt, and app folders inside the same monorepo.</div></div>
+</section>
+
+<section class="section" id="phases">
+  <div class="section-head"><div class="section-num">04</div><div><h2>Incremental Phase Model</h2><p>Every phase follows the same lifecycle: prerequisites, consumes, adds, produces.</p></div></div>
+
+  <div class="phase-card p0"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:var(--r)">0</div><small>Day 1</small></div><div class="phase-card-body"><h3>Foundation — FLOCI, Terraform, Helm, Event Contract</h3><p>Creates the platform bedrock used by every later phase.</p><span class="tag inf">Infrastructure</span> <span class="tag ops">Security</span> <span class="tag dat">Schema</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Prerequisites</h4><ul><li>Docker Desktop</li><li>AWS CLI</li><li>Terraform</li><li>Helm/kubectl</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>FLOCI EKS/MSK/S3/RDS</li><li>Secrets/IAM</li><li>Base Helm chart</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>Running local AWS stack</li><li>FeedbackEvent contract</li><li>Repo skeleton</li></ul></div><div class="phase-mini-col"><h4>Next Consumes</h4><ul><li>MSK broker</li><li>S3 buckets</li><li>EKS namespace</li></ul></div></div></div>
+  <div class="phase-card p1"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:var(--o)">1</div><small>Day 2</small></div><div class="phase-card-body"><h3>Data Ingestion — Generator, Producers, DLQ, Bronze Landing</h3><p>Adds the first data flow without replacing Phase 0 infrastructure.</p><span class="tag dat">Kafka</span> <span class="tag dat">Bronze</span> <span class="tag ops">DLQ</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Consumes</h4><ul><li>FLOCI MSK</li><li>FLOCI S3</li><li>FeedbackEvent</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>Data generator</li><li>Kafka producer</li><li>Ingestion worker</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>25K+ events</li><li>Bronze Parquet</li><li>DLQ stream</li></ul></div><div class="phase-mini-col"><h4>Next Consumes</h4><ul><li>Bronze zone</li><li>Raw topics</li><li>DLQ metrics</li></ul></div></div></div>
+  <div class="phase-card p2"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:var(--g)">2</div><small>Day 3</small></div><div class="phase-card-body"><h3>Data Platform — Bronze → Silver → Gold</h3><p>Transforms raw events into governed, PII-safe, analytics-ready marts.</p><span class="tag dat">Medallion</span> <span class="tag ai">NLP</span> <span class="tag dat">dbt</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Consumes</h4><ul><li>Bronze S3 files</li><li>Raw event schema</li><li>RDS from Phase 0</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>Cleaning worker</li><li>PII masker</li><li>dbt Gold models</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>Silver enriched events</li><li>Gold marts</li><li>Data quality tests</li></ul></div><div class="phase-mini-col"><h4>Next Consumes</h4><ul><li>Masked Silver text</li><li>Gold metrics</li><li>RDS marts</li></ul></div></div></div>
+  <div class="phase-card p3"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:var(--p)">3</div><small>Day 4</small></div><div class="phase-card-body"><h3>RAG Layer — Qdrant, Embeddings, Hybrid Search</h3><p>Adds semantic retrieval on top of the existing Silver and Gold data layers.</p><span class="tag ai">Embeddings</span> <span class="tag ai">Qdrant</span> <span class="tag ops">Tenant Isolation</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Consumes</h4><ul><li>Silver masked feedback</li><li>Tenant metadata</li><li>OpenAI secret</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>Qdrant Helm release</li><li>Embedding worker</li><li>RAG retriever</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>Vector collections</li><li>Hybrid search API</li><li>Evidence context</li></ul></div><div class="phase-mini-col"><h4>Next Consumes</h4><ul><li>Retriever service</li><li>Evidence context</li><li>Gold metrics</li></ul></div></div></div>
+  <div class="phase-card p4"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:#ec4899">4</div><small>Day 5</small></div><div class="phase-card-body"><h3>Agentic Intelligence — LangGraph + Guardrails</h3><p>Combines structured metrics and RAG evidence into auditable business answers.</p><span class="tag ai">LangGraph</span> <span class="tag ai">Agents</span> <span class="tag ops">Audit</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Consumes</h4><ul><li>Gold marts</li><li>RAG retriever</li><li>Tenant context</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>4 agents</li><li>Governed tools</li><li>Guardrails</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>Recommendations</li><li>Root cause summaries</li><li>Audit logs</li></ul></div><div class="phase-mini-col"><h4>Next Consumes</h4><ul><li>Agent APIs</li><li>Action items</li><li>Dashboard metrics</li></ul></div></div></div>
+  <div class="phase-card p5"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:var(--b)">5</div><small>Day 6</small></div><div class="phase-card-body"><h3>Product Surface — Voice, Chat, Dashboard</h3><p>Ships the operator-facing product on the existing FLOCI EKS stack.</p><span class="tag ui">React</span> <span class="tag ui">Voice</span> <span class="tag ai">Agent UX</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Consumes</h4><ul><li>Agent services</li><li>Gold marts</li><li>RAG evidence</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>React app</li><li>Voice service</li><li>Dashboard API</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>Working UI</li><li>Chat and voice UX</li><li>Manager dashboard</li></ul></div><div class="phase-mini-col"><h4>Next Consumes</h4><ul><li>Docker images</li><li>Helm values</li><li>Runtime configs</li></ul></div></div></div>
+  <div class="phase-card p6"><div class="phase-card-head"><div class="stripe"><div class="num" style="color:var(--r)">6</div><small>Day 7</small></div><div class="phase-card-body"><h3>Production Deploy — AWS Promotion</h3><p>Promotes the same Terraform modules, Helm charts, services, and Docker images to AWS.</p><span class="tag inf">AWS EKS</span> <span class="tag ops">CI/CD</span> <span class="tag ops">Observability</span></div></div><div class="phase-mini"><div class="phase-mini-col"><h4>Consumes</h4><ul><li>All previous artifacts</li><li>Terraform modules</li><li>Helm charts</li></ul></div><div class="phase-mini-col"><h4>Adds</h4><ul><li>GitHub Actions</li><li>AWS provider config</li><li>Load/security tests</li></ul></div><div class="phase-mini-col"><h4>Produces</h4><ul><li>Production AWS deploy</li><li>Grafana dashboards</li><li>Runbooks</li></ul></div><div class="phase-mini-col"><h4>Final Output</h4><ul><li>Complete AI platform</li><li>Portfolio project</li><li>Interview story</li></ul></div></div></div>
+</section>
+
+<section class="section" id="repo">
+  <div class="section-head"><div class="section-num">05</div><div><h2>Repository Evolution</h2><p>The repo grows phase by phase. New folders are highlighted; existing folders stay in place.</p></div></div>
+  <div class="repo-evo">
+    <div class="repo-card"><h3>After Phase 0</h3><pre>feedback-intelligence-platform/
+├── <span class="new">infra/terraform/</span>
+├── <span class="new">infra/helm/</span>
+├── <span class="new">shared/schemas/</span>
+├── <span class="new">shared/config/</span>
+├── <span class="new">apps/api/</span>
+└── <span class="new">Makefile</span></pre></div>
+    <div class="repo-card"><h3>After Phase 1</h3><pre>feedback-intelligence-platform/
+├── <span class="keep">infra/...</span>
+├── <span class="new">services/data-generator/</span>
+├── <span class="new">services/ingestion-worker/</span>
+├── <span class="new">services/connectors/</span>
+├── <span class="new">scripts/create_topics.sh</span>
+└── <span class="new">data/dummy/</span></pre></div>
+    <div class="repo-card"><h3>After Phase 2</h3><pre>feedback-intelligence-platform/
+├── <span class="keep">services/ingestion-worker/</span>
+├── <span class="new">services/cleaning-worker/</span>
+├── <span class="new">services/nlp-worker/</span>
+├── <span class="new">data/dbt/models/gold/</span>
+├── <span class="new">data/sql/postgres/</span>
+└── <span class="new">tests/data_quality/</span></pre></div>
+    <div class="repo-card"><h3>After Phase 3</h3><pre>feedback-intelligence-platform/
+├── <span class="new">services/embedding-worker/</span>
+├── <span class="new">services/rag-retriever/</span>
+├── <span class="new">shared/search/</span>
+├── <span class="new">infra/helm/qdrant/</span>
+└── <span class="new">infra/terraform/modules/qdrant/</span></pre></div>
+    <div class="repo-card"><h3>After Phase 4</h3><pre>feedback-intelligence-platform/
+├── <span class="new">apps/agent-service/</span>
+├── <span class="new">shared/agents/</span>
+├── <span class="new">shared/guardrails/</span>
+├── <span class="new">shared/audit/</span>
+└── <span class="new">services/action-worker/</span></pre></div>
+    <div class="repo-card"><h3>After Phase 5</h3><pre>feedback-intelligence-platform/
+├── <span class="new">apps/web/</span>
+├── <span class="new">apps/voice-service/</span>
+├── <span class="new">apps/api/dashboard.py</span>
+├── <span class="new">infra/helm/web/</span>
+└── <span class="new">infra/k8s/ingress/</span></pre></div>
+  </div>
+  <p class="note">Phase 6 does not create a new application structure. It adds production environment configs, CI/CD, security policies, observability dashboards, and runbooks.</p>
+</section>
+
+<section class="section" id="matrix">
+  <div class="section-head"><div class="section-num">06</div><div><h2>Technology Ownership Matrix</h2><p>Where each major technology is introduced and how long it remains active.</p></div></div>
+  <div class="table-wrap"><table class="matrix"><thead><tr><th>Technology</th><th>Introduced</th><th>Used Through</th><th>Owner / Purpose</th><th>Continuity Rule</th></tr></thead><tbody>
+    <tr><td><strong>FLOCI</strong></td><td>Phase 0</td><td>Phase 5 local / Phase 6 promotion</td><td>Local AWS API parity</td><td>Started once by <code>make bootstrap</code></td></tr>
+    <tr><td><strong>Terraform</strong></td><td>Phase 0</td><td>Phase 6</td><td>Infrastructure provisioning</td><td>Later phases extend modules, not recreate infra</td></tr>
+    <tr><td><strong>Helm</strong></td><td>Phase 0</td><td>Phase 6</td><td>Kubernetes deployment</td><td>Every service deploys into existing EKS</td></tr>
+    <tr><td><strong>FLOCI MSK / Kafka</strong></td><td>Phase 0/1</td><td>Phase 6</td><td>Event backbone</td><td>No Docker Compose Kafka as main path</td></tr>
+    <tr><td><strong>FLOCI S3</strong></td><td>Phase 0</td><td>Phase 6</td><td>Bronze/Silver/Gold storage</td><td>Use AWS S3 APIs against FLOCI endpoint</td></tr>
+    <tr><td><strong>RDS PostgreSQL</strong></td><td>Phase 0/2</td><td>Phase 6</td><td>Gold marts and operational state</td><td>Phase 2 adds schemas/models only</td></tr>
+    <tr><td><strong>dbt</strong></td><td>Phase 2</td><td>Phase 6</td><td>Gold analytics models</td><td>Models build on Silver/Gold datasets</td></tr>
+    <tr><td><strong>Qdrant</strong></td><td>Phase 3</td><td>Phase 6</td><td>Vector DB and hybrid search</td><td>Provision/deploy with Terraform + Helm</td></tr>
+    <tr><td><strong>LangGraph</strong></td><td>Phase 4</td><td>Phase 6</td><td>Agent orchestration</td><td>Uses governed tools only</td></tr>
+    <tr><td><strong>React + WebRTC</strong></td><td>Phase 5</td><td>Phase 6</td><td>Product surface</td><td>Deploy via Helm to existing EKS</td></tr>
+    <tr><td><strong>GitHub Actions + ECR</strong></td><td>Phase 6</td><td>Phase 6+</td><td>Production CI/CD</td><td>Promotes same Docker images</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="section" id="deliverables">
+  <div class="section-head"><div class="section-num">07</div><div><h2>Deliverables Matrix</h2><p>What should exist after every phase completes.</p></div></div>
+  <div class="table-wrap"><table class="matrix"><thead><tr><th>Phase</th><th>Infrastructure</th><th>Services</th><th>Data Output</th><th>Demo / Proof</th></tr></thead><tbody>
+    <tr><td><strong>P0</strong></td><td>FLOCI EKS/MSK/S3/RDS/Secrets/IAM</td><td>FastAPI skeleton</td><td>Event schema</td><td><code>make bootstrap</code> passes</td></tr>
+    <tr><td><strong>P1</strong></td><td>Kafka topics and service IAM</td><td>Generator, producer, ingestion worker</td><td>Bronze events in S3</td><td>25K dummy events generated</td></tr>
+    <tr><td><strong>P2</strong></td><td>Bucket prefixes, DB schemas</td><td>Cleaning, PII, NLP, dbt</td><td>Silver and Gold datasets</td><td>dbt tests pass</td></tr>
+    <tr><td><strong>P3</strong></td><td>Qdrant deploy and storage</td><td>Embedding worker, RAG retriever</td><td>Vector collections</td><td>Semantic search returns evidence</td></tr>
+    <tr><td><strong>P4</strong></td><td>Agent service deployment</td><td>4 agents, tools, guardrails</td><td>Audited answers/actions</td><td>Root cause question answered</td></tr>
+    <tr><td><strong>P5</strong></td><td>Ingress and UI Helm release</td><td>React, dashboard, voice, chat APIs</td><td>Interactive product views</td><td>Manager can ask by voice/chat</td></tr>
+    <tr><td><strong>P6</strong></td><td>AWS EKS/MSK/S3/RDS + CI/CD</td><td>All services promoted</td><td>Production data flow</td><td>Load/security/observability proof</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="section" id="interview">
+  <div class="section-head"><div class="section-num">08</div><div><h2>Engineering Manager Interview Lens</h2><p>How to tell the story in leadership, system design, and AI platform interviews.</p></div></div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title">🎯 Story Pattern</div><p>“I did not build seven disconnected demos. I built one evolving platform. Phase 0 gave the team AWS-parity locally. Every phase added a production capability without breaking deployment discipline.”</p></div>
+    <div class="card"><div class="card-title">⚖️ Tradeoff Pattern</div><p>“The tradeoff was initial setup time versus future velocity. FLOCI + Terraform + Helm cost more on day one, but it avoided local/prod drift and made production promotion predictable.”</p></div>
+    <div class="card"><div class="card-title">🧠 AI Safety Pattern</div><p>“Agents never query arbitrary tables directly. They use governed tools over Gold marts and tenant-filtered RAG retrieval, with audit logs for every tool call.”</p></div>
+    <div class="card"><div class="card-title">📈 Scale Pattern</div><p>“The system scales independently: Kafka for ingestion, S3 for lake storage, dbt for marts, Qdrant for search, LangGraph for orchestration, and React/FastAPI for UX.”</p></div>
+  </div>
+</section>
+
+<section class="section" id="checklist">
+  <div class="section-head"><div class="section-num">09</div><div><h2>Project Completion Checklist</h2><p>Interactive checklist saved locally in your browser.</p></div></div>
+  <div class="card"><ul class="checklist" id="checklistItems">
+    <li><input type="checkbox"> <span>Phase 0 foundation runs with <code>make bootstrap</code></span></li>
+    <li><input type="checkbox"> <span>Phase 1 produces 25K+ events into FLOCI MSK and Bronze S3</span></li>
+    <li><input type="checkbox"> <span>Phase 2 creates Bronze/Silver/Gold data products without recreating infra</span></li>
+    <li><input type="checkbox"> <span>Phase 3 deploys Qdrant with Helm and indexes masked Silver text</span></li>
+    <li><input type="checkbox"> <span>Phase 4 answers business questions using Gold + RAG with audit trail</span></li>
+    <li><input type="checkbox"> <span>Phase 5 UI, chat, voice, and dashboard run on existing FLOCI EKS</span></li>
+    <li><input type="checkbox"> <span>Phase 6 promotes the same Terraform/Helm/Docker artifacts to AWS</span></li>
+  </ul></div>
+</section>
+
+<div class="phase-nav"><a href="fip-phase0-foundation-interactive-final.html">Start Phase 0 →</a><a href="fip-htmls-interactive-final.zip">Download Phase Package</a></div>
+<div class="footer">Feedback Intelligence Platform · Master Guide V2 · Incremental, FLOCI-first, Terraform + Helm execution model</div>
+</main>
+</div>
+<div class="toolbar"><button class="tool-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Top">↑</button><button class="tool-btn" onclick="toggleAllCode()" title="Expand code">⤢</button></div><div class="toast" id="toast">Copied</div>
+<script>
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1700)}
+function copyCode(btn){const block=btn.closest('.code-block');const pre=block.querySelector('pre');navigator.clipboard.writeText(pre.innerText).then(()=>{btn.textContent='✓ Copied';toast('Copied to clipboard');setTimeout(()=>btn.textContent='Copy',1500)})}
+function toggleCode(btn){const block=btn.closest('.code-block');block.classList.toggle('collapsed');btn.textContent=block.classList.contains('collapsed')?'Expand':'Collapse'}
+function toggleAllCode(){document.querySelectorAll('.code-block').forEach(b=>b.classList.toggle('collapsed'));toast('Toggled code blocks')}
+const key='fip_master_v2_checks';function loadChecks(){const s=JSON.parse(localStorage.getItem(key)||'[]');document.querySelectorAll('#checklistItems input').forEach((c,i)=>c.checked=!!s[i])}function saveChecks(){const s=[...document.querySelectorAll('#checklistItems input')].map(c=>c.checked);localStorage.setItem(key,JSON.stringify(s));toast('Checklist saved')}document.querySelectorAll('#checklistItems input').forEach(c=>c.addEventListener('change',saveChecks));loadChecks();
+const links=[...document.querySelectorAll('.sidebar a[href^="#"]')];const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);window.addEventListener('scroll',()=>{let cur='';secs.forEach(s=>{if(s.getBoundingClientRect().top<120)cur='#'+s.id});links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')===cur))});
+</script>
+</body>
+</html>

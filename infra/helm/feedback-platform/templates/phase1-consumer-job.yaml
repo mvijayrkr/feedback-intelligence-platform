@@ -1,0 +1,28 @@
+{{- if and .Values.ingestion.enabled .Values.ingestion.consumer.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: feedback-consumer
+  namespace: {{ default "feedback" .Values.namespace | quote }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: consumer
+          image: "{{ .Values.ingestion.image.repository }}:{{ .Values.ingestion.image.tag }}"
+          imagePullPolicy: {{ .Values.ingestion.image.pullPolicy }}
+          command: ["python", "services/ingestion-worker/consumer.py"]
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.ingestion.kafka.bootstrapServers | quote }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.ingestion.kafka.topic | quote }}
+            - name: MAX_MESSAGES
+              value: {{ .Values.ingestion.consumer.maxMessages | quote }}
+            - name: AWS_ENDPOINT_URL
+              value: {{ .Values.ingestion.aws.endpointUrl | quote }}
+            - name: RAW_BUCKET
+              value: {{ .Values.ingestion.s3.rawBucket | quote }}
+{{- end }}

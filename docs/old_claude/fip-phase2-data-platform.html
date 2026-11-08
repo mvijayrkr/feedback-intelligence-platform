@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIP Phase 2 — Data Platform | AI Feedback Intelligence Platform</title>
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:          #0B0F1A;
+  --surface:     #111827;
+  --surface2:    #1A2235;
+  --surface3:    #1F2D44;
+  --border:      #243047;
+  --border-hi:   #2E3F60;
+
+  /* Phase 2 accent: deep teal-cyan — data flow, lakes, streams */
+  --accent:      #00C9B1;
+  --accent-dim:  #009E8C;
+  --accent-glow: rgba(0,201,177,0.18);
+  --accent2:     #3B82F6;   /* blue for code blocks */
+  --accent3:     #F59E0B;   /* amber for warnings */
+  --accent4:     #EF4444;   /* red for production dangers */
+  --accent5:     #8B5CF6;   /* purple for career content */
+
+  --text:        #E2E8F0;
+  --text-muted:  #94A3B8;
+  --text-faint:  #475569;
+
+  --phase-num:   "02";
+  --phase-color: #00C9B1;
+
+  --radius:      8px;
+  --radius-lg:   14px;
+  --font-mono:   'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-ui:     'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── SCROLLBAR ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+/* ── PHASE STRIPE HEADER ────────────────────────────────────── */
+.phase-stripe {
+  background: linear-gradient(135deg, #00C9B1 0%, #0099FF 60%, #00C9B1 100%);
+  padding: 0 40px;
+  display: flex;
+  align-items: stretch;
+  min-height: 9px;
+}
+
+/* ── TOP NAV ────────────────────────────────────────────────── */
+.topnav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topnav-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #000;
+  letter-spacing: -0.5px;
+}
+.topnav-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topnav-sub { font-size: 12px; color: var(--text-muted); }
+.topnav-phase {
+  display: flex; align-items: center; gap: 8px;
+}
+.phase-badge {
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── HERO ───────────────────────────────────────────────────── */
+.hero {
+  padding: 64px 40px 56px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.hero-number {
+  position: absolute;
+  right: 30px;
+  top: 40px;
+  font-size: 180px;
+  font-weight: 900;
+  color: rgba(0,201,177,0.04);
+  line-height: 1;
+  user-select: none;
+  font-family: var(--font-mono);
+}
+.hero h1 {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  max-width: 700px;
+}
+.hero h1 span { color: var(--accent); }
+.hero-desc {
+  font-size: 16px;
+  color: var(--text-muted);
+  max-width: 640px;
+  margin-bottom: 32px;
+  line-height: 1.8;
+}
+
+/* ── STAT STRIP ─────────────────────────────────────────────── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-width: 780px;
+  margin-bottom: 40px;
+}
+.stat-item {
+  background: var(--surface);
+  padding: 20px 24px;
+  text-align: center;
+}
+.stat-item .val {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-item .lbl {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── SECTION WRAPPER ────────────────────────────────────────── */
+.section-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 40px;
+}
+
+/* ── SECTION TITLE ──────────────────────────────────────────── */
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── ARCHITECTURE DIAGRAM ───────────────────────────────────── */
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  margin-bottom: 40px;
+  overflow-x: auto;
+}
+.arch-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.arch-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 700px;
+  flex-wrap: nowrap;
+}
+.arch-node {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border-hi);
+  border-radius: 10px;
+  padding: 18px 14px;
+  text-align: center;
+  position: relative;
+}
+.arch-node.highlight {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.arch-node-icon { font-size: 22px; margin-bottom: 6px; }
+.arch-node-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.arch-node-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.arch-arrow {
+  font-size: 18px;
+  color: var(--accent);
+  padding: 0 8px;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* ── STEP CARDS ─────────────────────────────────────────────── */
+.steps-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.step-card-header {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+.step-num-stripe {
+  width: 80px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dim) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 900;
+  color: #000;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  letter-spacing: -1px;
+  min-height: 90px;
+}
+.step-header-content {
+  padding: 22px 28px;
+  flex: 1;
+}
+.step-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.step-header-content h3 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.step-header-content p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.step-body {
+  padding: 28px 28px 28px 108px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── CODE BLOCKS ────────────────────────────────────────────── */
+.code-block {
+  background: #0D1117;
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 16px 0;
+  font-family: var(--font-mono);
+}
+.code-header {
+  background: #161B22;
+  border-bottom: 1px solid var(--border-hi);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.code-lang {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.code-filename {
+  font-size: 10px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+.code-block pre {
+  padding: 18px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #ABB2BF;
+}
+/* syntax highlighting */
+.kw  { color: #C678DD; }  /* keyword  */
+.fn  { color: #61AFEF; }  /* function */
+.st  { color: #98C379; }  /* string   */
+.cm  { color: #5C6370; font-style: italic; } /* comment */
+.nm  { color: #E5C07B; }  /* name/class */
+.nb  { color: #56B6C2; }  /* builtin  */
+.op  { color: #ABB2BF; }  /* operator */
+.nu  { color: #D19A66; }  /* number   */
+.dc  { color: var(--accent); }  /* decorator */
+
+/* ── CALLOUT BOXES ──────────────────────────────────────────── */
+.callout {
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.callout.warning {
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #FCD34D;
+}
+.callout.warning strong { color: var(--accent3); }
+
+.callout.danger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #FCA5A5;
+}
+.callout.danger strong { color: var(--accent4); }
+
+.callout.tip {
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.25);
+  color: #6EE7B7;
+}
+.callout.tip strong { color: var(--accent); }
+
+.callout.info {
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3);
+  color: #93C5FD;
+}
+.callout.info strong { color: var(--accent2); }
+
+/* ── TRADEOFF TABLE ─────────────────────────────────────────── */
+.tradeoff-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+.tradeoff-table th {
+  background: var(--surface2);
+  color: var(--text-muted);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border-hi);
+}
+.tradeoff-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.tradeoff-table tr:last-child td { border-bottom: none; }
+.tradeoff-table tr:hover td { background: rgba(255,255,255,0.02); }
+.tradeoff-table .chosen { color: var(--accent); font-weight: 600; }
+.tradeoff-table .pro { color: #6EE7B7; }
+.tradeoff-table .con { color: #FCA5A5; }
+
+/* ── PRODUCTION ISSUES GRID ─────────────────────────────────── */
+.prod-issues {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.prod-issue-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.prod-issue-card.severity-high { border-left: 3px solid var(--accent4); }
+.prod-issue-card.severity-med  { border-left: 3px solid var(--accent3); }
+.prod-issue-card.severity-low  { border-left: 3px solid var(--accent); }
+.prod-issue-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.prod-issue-body {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.severity-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.severity-badge.high { background: rgba(239,68,68,0.2); color: #FCA5A5; }
+.severity-badge.med  { background: rgba(245,158,11,0.2); color: #FCD34D; }
+.severity-badge.low  { background: rgba(0,201,177,0.15); color: var(--accent); }
+
+/* ── CHECKLIST ──────────────────────────────────────────────── */
+.checklist-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 40px;
+}
+.checklist-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.checklist-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.progress-bar-wrap {
+  background: var(--border);
+  border-radius: 99px;
+  height: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.4s ease;
+}
+.checklist-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 16px 0 8px;
+}
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  cursor: pointer;
+}
+.check-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  transition: color 0.2s;
+}
+.check-item.done .check-label {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+/* ── LINKEDIN / CAREER CARD ─────────────────────────────────── */
+.career-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(59,130,246,0.08) 100%);
+  border: 1px solid rgba(139,92,246,0.35);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 32px;
+}
+.career-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent5);
+  margin-bottom: 14px;
+}
+.li-post {
+  background: #1E293B;
+  border-radius: var(--radius);
+  padding: 20px;
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.75;
+  white-space: pre-wrap;
+  border: 1px solid var(--border-hi);
+}
+.li-hashtags { color: var(--accent2); }
+.interview-qa {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+.qa-item {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  border-left: 3px solid var(--accent5);
+}
+.qa-q { font-size: 12px; font-weight: 700; color: var(--accent5); margin-bottom: 6px; }
+.qa-a { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+/* ── FIP EDIT ENGINE ────────────────────────────────────────── */
+.fip-editable {
+  outline: none;
+  border-radius: 4px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.fip-editable:hover {
+  background: rgba(0,201,177,0.06);
+  box-shadow: 0 0 0 1px rgba(0,201,177,0.2);
+  cursor: text;
+}
+.fip-editable:focus {
+  background: rgba(0,201,177,0.1);
+  box-shadow: 0 0 0 2px rgba(0,201,177,0.4);
+}
+
+.fip-toolbar {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+.fip-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fip-btn:hover { transform: scale(1.08); }
+.fip-btn.save-btn    { background: var(--accent); color: #000; }
+.fip-btn.undo-btn    { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.search-btn  { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.export-btn  { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.edit-btn    { background: linear-gradient(135deg, var(--accent2), var(--accent5)); color: #fff; }
+
+.fip-toast {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  background: var(--accent);
+  color: #000;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s;
+  z-index: 9999;
+  pointer-events: none;
+}
+.fip-toast.show { opacity: 1; transform: translateY(0); }
+
+.fip-search-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.fip-search-modal.open { display: flex; }
+.fip-search-box {
+  background: var(--surface);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fip-search-box h4 { color: var(--text); font-size: 15px; font-weight: 700; }
+.fip-search-box input {
+  background: var(--surface2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  padding: 9px 14px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  outline: none;
+}
+.fip-search-box input:focus { border-color: var(--accent); }
+.fip-search-box .modal-btns { display: flex; gap: 8px; }
+.modal-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.modal-btn.primary { background: var(--accent); color: #000; }
+.modal-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+
+/* ── LAYER DIAGRAM ──────────────────────────────────────────── */
+.layer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 20px 0;
+}
+.layer-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+.layer-badge {
+  width: 70px;
+  padding: 5px 0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.layer-badge.bronze { background: rgba(180,83,9,0.3); color: #FB923C; border: 1px solid rgba(180,83,9,0.5); }
+.layer-badge.silver { background: rgba(100,116,139,0.3); color: #CBD5E1; border: 1px solid rgba(100,116,139,0.5); }
+.layer-badge.gold   { background: rgba(161,122,0,0.3); color: #FBBF24; border: 1px solid rgba(161,122,0,0.5); }
+.layer-desc { font-size: 13px; color: var(--text-muted); flex: 1; }
+.layer-tech { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero { padding: 40px 20px; }
+  .hero h1 { font-size: 28px; }
+  .hero-number { display: none; }
+  .section-wrap { padding: 0 20px 32px; }
+  .step-body { padding: 20px; }
+  .topnav { padding: 12px 20px; }
+  .arch-flow { min-width: 500px; }
+}
+
+/* ── DIVIDER ────────────────────────────────────────────────── */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- PHASE STRIPE -->
+<div class="phase-stripe"></div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-logo">FIP</div>
+    <div>
+      <div class="topnav-title">AI Feedback Intelligence Platform</div>
+      <div class="topnav-sub">curry_bowl_express · 12 Bay Area Locations</div>
+    </div>
+  </div>
+  <div class="topnav-phase">
+    <span class="phase-badge">Phase 02 · Data Platform</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-number">02</div>
+  <div class="hero-eyebrow">Phase 02 / 07 · Picking up from Phase 1</div>
+  <h1>Building the <span>Data Platform</span><br>Lakehouse & Processing Layer</h1>
+  <p class="hero-desc" contenteditable="true" data-fip-edit="hero-desc">
+    Transform raw ingested events from Kafka into a queryable, analytics-ready Bronze→Silver→Gold lakehouse.
+    This phase covers PySpark consumers, dbt transformations, Qdrant bootstrap, and every production failure mode
+    that will hit you at 3 AM — schema drift, OOM crashes, duplicate events, and partition skew.
+  </p>
+  <div class="stat-strip">
+    <div class="stat-item">
+      <div class="val">3</div>
+      <div class="lbl">Lakehouse Layers</div>
+    </div>
+    <div class="stat-item">
+      <div class="val">8</div>
+      <div class="lbl">Prod Issues Covered</div>
+    </div>
+    <div class="stat-item">
+      <div class="val">~6h</div>
+      <div class="lbl">Build Time</div>
+    </div>
+    <div class="stat-item">
+      <div class="val">dbt+⚡</div>
+      <div class="lbl">Gold Layer Stack</div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE OVERVIEW -->
+<div class="section-wrap">
+  <div class="section-title">End-to-End Architecture — Phase 2 Focus</div>
+  <div class="arch-diagram">
+    <div class="arch-title">Data Flow: Kafka → Bronze → Silver → Gold → Qdrant</div>
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-node-icon">📨</div>
+        <div class="arch-node-name">Kafka</div>
+        <div class="arch-node-sub">raw.feedback topic<br>Avro + Schema Registry</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔷</div>
+        <div class="arch-node-name">Bronze Layer</div>
+        <div class="arch-node-sub">Raw Parquet<br>S3 / MinIO</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔶</div>
+        <div class="arch-node-name">Silver Layer</div>
+        <div class="arch-node-sub">PySpark cleaned<br>Validated, deduped</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🥇</div>
+        <div class="arch-node-name">Gold Layer</div>
+        <div class="arch-node-sub">dbt models<br>Analytics-ready</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🔍</div>
+        <div class="arch-node-name">Qdrant</div>
+        <div class="arch-node-sub">Vector + hybrid<br>search bootstrap</div>
+      </div>
+    </div>
+    <!-- Layer descriptions -->
+    <div class="layer-stack" style="margin-top:28px;">
+      <div class="layer-row">
+        <div class="layer-badge bronze">BRONZE</div>
+        <div class="layer-desc">Raw, immutable copy of every Kafka event. Append-only. Never mutate. Source of truth for reprocessing.</div>
+        <div class="layer-tech">Parquet · S3 partition: year/month/day/hour</div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-badge silver">SILVER</div>
+        <div class="layer-desc">Cleaned, deduplicated, validated events. spaCy NLP enrichment applied. PII masked. Schema enforced.</div>
+        <div class="layer-tech">PySpark · Great Expectations · Delta-like idempotency</div>
+      </div>
+      <div class="layer-row">
+        <div class="layer-badge gold">GOLD</div>
+        <div class="layer-desc">Business aggregations — per-location ratings, sentiment trends, category rollups. Ready for dashboards + RAG.</div>
+        <div class="layer-tech">dbt incremental models · Hive-style Parquet · Airflow scheduled</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section-title">Step-by-Step Implementation</div>
+  <div class="steps-grid">
+
+    <!-- ═══ STEP 1 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">01</div>
+        <div class="step-header-content">
+          <div class="step-tag">Environment Setup</div>
+          <h3>Project Structure, Dependencies & FLOCI Configuration</h3>
+          <p>Lock every dependency version, configure FLOCI (AWS-parity), bootstrap S3 buckets and IAM roles via Terraform.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout tip">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body"><strong>Why this matters in production</strong>
+          A pinned lockfile is the single most underrated reliability tool. One <code>pip install</code> without pins silently pulled in PyArrow 14 on a colleague's machine last year and broke all Parquet reads. Version-lock everything, always.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">bash</span>
+            <span class="code-filename">terminal</span>
+          </div>
+          <pre><span class="cm"># Phase 2 directory scaffold</span>
+mkdir -p fip-data-platform/{
+  infra/terraform,
+  ingestion/consumers,
+  processing/spark_jobs,
+  processing/great_expectations,
+  dbt_gold/{models,tests,macros,seeds},
+  qdrant/bootstrap,
+  scripts,
+  tests
+}
+
+cd fip-data-platform
+python -m venv .venv && source .venv/bin/activate
+
+<span class="cm"># Pinned requirements — NEVER use unpinned in prod</span>
+cat &gt; requirements.txt &lt;&lt; 'EOF'
+pyspark==3.5.1
+confluent-kafka==2.3.0
+fastavro==1.9.4
+pyarrow==15.0.2
+great-expectations==0.18.13
+boto3==1.34.69
+qdrant-client==1.9.0
+spacy==3.7.4
+openai==1.30.1
+python-dotenv==1.0.1
+pydantic==2.7.1
+structlog==24.1.0
+prometheus-client==0.20.0
+dbt-core==1.8.2
+dbt-duckdb==1.8.1
+EOF
+
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">hcl</span>
+            <span class="code-filename">infra/terraform/s3_lakehouse.tf</span>
+          </div>
+          <pre><span class="cm"># Terraform — provision Bronze/Silver/Gold S3 buckets</span>
+<span class="cm"># Same HCL works locally (FLOCI) and prod (AWS) via provider swap</span>
+
+<span class="kw">terraform</span> {
+  required_providers {
+    aws = {
+      source  = <span class="st">"hashicorp/aws"</span>
+      version = <span class="st">"~> 5.47"</span>
+    }
+  }
+}
+
+<span class="kw">provider</span> <span class="st">"aws"</span> {
+  <span class="cm"># FLOCI uses localstack endpoint; prod uses real AWS</span>
+  region   = <span class="kw">var</span>.aws_region
+  endpoints {
+    s3 = <span class="kw">var</span>.s3_endpoint  <span class="cm"># "http://localhost:4566" on FLOCI</span>
+  }
+}
+
+<span class="kw">variable</span> <span class="st">"env"</span>       { default = <span class="st">"local"</span> }
+<span class="kw">variable</span> <span class="st">"s3_endpoint"</span> { default = <span class="st">"http://localhost:4566"</span> }
+<span class="kw">variable</span> <span class="st">"aws_region"</span>   { default = <span class="st">"us-west-2"</span> }
+
+<span class="kw">locals</span> {
+  bucket_prefix = <span class="st">"fip-curry-bowl-</span><span class="kw">${var.env}</span><span class="st">"</span>
+  layers        = [<span class="st">"bronze"</span>, <span class="st">"silver"</span>, <span class="st">"gold"</span>]
+}
+
+<span class="kw">resource</span> <span class="st">"aws_s3_bucket"</span> <span class="st">"lakehouse"</span> {
+  for_each = <span class="fn">toset</span>(<span class="kw">local</span>.layers)
+  bucket   = <span class="st">"</span><span class="kw">${local.bucket_prefix}</span><span class="st">-</span><span class="kw">${each.key}</span><span class="st">"</span>
+
+  lifecycle {
+    prevent_destroy = <span class="kw">true</span>   <span class="cm"># NEVER accidentally delete prod data</span>
+  }
+  tags = { Phase = <span class="st">"data-platform"</span>, Layer = <span class="kw">each.key</span> }
+}
+
+<span class="kw">resource</span> <span class="st">"aws_s3_bucket_versioning"</span> <span class="st">"bronze"</span> {
+  bucket = <span class="kw">aws_s3_bucket</span>.lakehouse[<span class="st">"bronze"</span>].id
+  versioning_configuration { status = <span class="st">"Enabled"</span> }
+  <span class="cm"># Bronze MUST have versioning — it's your reprocessing safety net</span>
+}
+
+<span class="kw">resource</span> <span class="st">"aws_s3_bucket_lifecycle_configuration"</span> <span class="st">"silver"</span> {
+  bucket = <span class="kw">aws_s3_bucket</span>.lakehouse[<span class="st">"silver"</span>].id
+  rule {
+    id = <span class="st">"expire-old-silver"</span>; status = <span class="st">"Enabled"</span>
+    expiration { days = <span class="nu">90</span> }
+    <span class="cm"># Silver is re-derivable from Bronze — don't pay for 3 years of storage</span>
+  }
+}</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Tradeoff: Bronze Retention Cost</strong>
+          Bronze (raw) data is your reprocessing insurance policy. At ~50K reviews/month compressed Parquet ≈ 2 GB/month, it's cheap to keep Bronze forever (~$0.46/month on S3). Never apply lifecycle expiry to Bronze. Silver and Gold are re-derivable; Bronze is not.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 2 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">02</div>
+        <div class="step-header-content">
+          <div class="step-tag">Bronze Layer</div>
+          <h3>Kafka Consumer → Bronze Parquet Writer</h3>
+          <p>Exactly-once delivery, Avro deserialization with Schema Registry, idempotent Parquet writes with manual offset commits.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #1: The Auto-Commit Duplicate Trap</strong>
+          <code>enable.auto.commit=True</code> is Kafka's default and will cause data loss OR duplicates under any consumer crash. The consumer commits offsets BEFORE your Parquet write completes → crash → reprocess → duplicates in Bronze. Use manual offset commits and commit ONLY after the file is fsynced to storage.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">python</span>
+            <span class="code-filename">ingestion/consumers/bronze_writer.py</span>
+          </div>
+          <pre><span class="cm">"""
+Bronze Layer Consumer: Kafka → Parquet (S3/MinIO)
+Key guarantee: exactly-once delivery via manual offset commits.
+Offsets committed ONLY after Parquet file is durably written.
+"""</span>
+<span class="kw">from</span> <span class="nm">__future__</span> <span class="kw">import</span> annotations
+
+<span class="kw">import</span> io, time, uuid, signal, sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> typing <span class="kw">import</span> Iterator
+<span class="kw">import</span> pyarrow <span class="kw">as</span> pa
+<span class="kw">import</span> pyarrow.parquet <span class="kw">as</span> pq
+<span class="kw">import</span> boto3, structlog
+<span class="kw">from</span> confluent_kafka <span class="kw">import</span> Consumer, KafkaError
+<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient
+<span class="kw">from</span> confluent_kafka.schema_registry.avro <span class="kw">import</span> AvroDeserializer
+<span class="kw">from</span> confluent_kafka.serialization <span class="kw">import</span> SerializationContext, MessageField
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">BRONZE_SCHEMA</span> = pa.<span class="fn">schema</span>([
+    pa.<span class="fn">field</span>(<span class="st">"event_id"</span>,        pa.string(),   nullable=<span class="kw">False</span>),
+    pa.<span class="fn">field</span>(<span class="st">"source_platform"</span>, pa.string()),
+    pa.<span class="fn">field</span>(<span class="st">"location_id"</span>,     pa.string()),
+    pa.<span class="fn">field</span>(<span class="st">"raw_text"</span>,        pa.string()),
+    pa.<span class="fn">field</span>(<span class="st">"star_rating"</span>,     pa.float32()),
+    pa.<span class="fn">field</span>(<span class="st">"review_date"</span>,     pa.timestamp(<span class="st">"us"</span>, tz=<span class="st">"UTC"</span>)),
+    pa.<span class="fn">field</span>(<span class="st">"ingested_at"</span>,    pa.timestamp(<span class="st">"us"</span>, tz=<span class="st">"UTC"</span>)),
+    pa.<span class="fn">field</span>(<span class="st">"kafka_partition"</span>, pa.int32()),
+    pa.<span class="fn">field</span>(<span class="st">"kafka_offset"</span>,    pa.int64()),
+    <span class="cm"># Store full raw JSON as string — NEVER lose original data</span>
+    pa.<span class="fn">field</span>(<span class="st">"_raw_json"</span>,       pa.string()),
+])
+
+<span class="kw">class</span> <span class="nm">BronzeWriter</span>:
+    <span class="cm">"""
+    Accumulates Kafka messages into in-memory buffer,
+    writes a Parquet file per batch, then commits offsets.
+    Pattern: consume → buffer → write → commit (never auto-commit).
+    """</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: dict):
+        self.config     = config
+        self.s3         = boto3.<span class="fn">client</span>(<span class="st">"s3"</span>, **config[<span class="st">"aws"</span>])
+        self.bucket     = config[<span class="st">"bronze_bucket"</span>]
+        self.batch_size = config.<span class="fn">get</span>(<span class="st">"batch_size"</span>, <span class="nu">500</span>)  <span class="cm"># 500 msgs or 60s</span>
+        self.flush_secs = config.<span class="fn">get</span>(<span class="st">"flush_interval_secs"</span>, <span class="nu">60</span>)
+        self._buffer: list[dict] = []
+        self._last_flush = time.<span class="fn">monotonic</span>()
+        self._pending_offsets: dict = {}
+        self._shutdown = <span class="kw">False</span>
+
+        <span class="cm"># Schema Registry client for Avro deserialization</span>
+        sr_client = <span class="fn">SchemaRegistryClient</span>(
+            {<span class="st">"url"</span>: config[<span class="st">"schema_registry_url"</span>]}
+        )
+        self.deserializer = <span class="fn">AvroDeserializer</span>(sr_client)
+
+        self.consumer = <span class="fn">Consumer</span>({
+            <span class="st">"bootstrap.servers"</span>: config[<span class="st">"kafka_brokers"</span>],
+            <span class="st">"group.id"</span>:          <span class="st">"fip-bronze-writer-v2"</span>,
+            <span class="cm"># ─── CRITICAL: disable auto-commit ───────────────────</span>
+            <span class="st">"enable.auto.commit"</span>: <span class="kw">False</span>,
+            <span class="cm"># ─────────────────────────────────────────────────────</span>
+            <span class="st">"auto.offset.reset"</span>:  <span class="st">"earliest"</span>,
+            <span class="st">"max.poll.interval.ms"</span>: <span class="nu">300_000</span>,
+            <span class="st">"session.timeout.ms"</span>:   <span class="nu">30_000</span>,
+            <span class="st">"fetch.max.bytes"</span>:       <span class="nu">52_428_800</span>,  <span class="cm"># 50 MB</span>
+        })
+
+    <span class="kw">def</span> <span class="fn">_deserialize</span>(self, msg) -> dict | <span class="kw">None</span>:
+        <span class="kw">try</span>:
+            <span class="kw">return</span> self.deserializer(
+                msg.<span class="fn">value</span>(),
+                <span class="fn">SerializationContext</span>(msg.<span class="fn">topic</span>(), MessageField.VALUE)
+            )
+        <span class="kw">except</span> <span class="nm">Exception</span> <span class="kw">as</span> e:
+            <span class="cm"># Dead-letter queue: write undeserializable messages to DLQ</span>
+            self.<span class="fn">_send_to_dlq</span>(msg, str(e))
+            log.<span class="fn">error</span>(<span class="st">"deserialization_failed"</span>,
+                       partition=msg.<span class="fn">partition</span>(), offset=msg.<span class="fn">offset</span>(), error=<span class="fn">str</span>(e))
+            <span class="kw">return None</span>
+
+    <span class="kw">def</span> <span class="fn">_send_to_dlq</span>(self, msg, reason: str):
+        <span class="cm">"""Route poison-pill messages to DLQ topic, never drop silently."""</span>
+        <span class="cm"># Producer to fip.dlq.feedback topic — alert on-call if DLQ grows</span>
+        key = f<span class="st">"</span><span class="kw">{msg.partition()}</span><span class="st">:</span><span class="kw">{msg.offset()}</span><span class="st">"</span>
+        log.<span class="fn">warning</span>(<span class="st">"dlq_sent"</span>, key=key, reason=reason)
+        <span class="cm"># TODO: implement DLQ producer (covered in monitoring phase)</span>
+
+    <span class="kw">def</span> <span class="fn">_build_row</span>(self, record: dict, msg) -> dict:
+        <span class="kw">import</span> json
+        <span class="kw">return</span> {
+            <span class="st">"event_id"</span>:        record.<span class="fn">get</span>(<span class="st">"event_id"</span>, <span class="fn">str</span>(uuid.<span class="fn">uuid4</span>())),
+            <span class="st">"source_platform"</span>: record.<span class="fn">get</span>(<span class="st">"source_platform"</span>, <span class="st">"unknown"</span>),
+            <span class="st">"location_id"</span>:     record.<span class="fn">get</span>(<span class="st">"location_id"</span>, <span class="st">"unknown"</span>),
+            <span class="st">"raw_text"</span>:        record.<span class="fn">get</span>(<span class="st">"review_text"</span>, <span class="st">""</span>),
+            <span class="st">"star_rating"</span>:     <span class="fn">float</span>(record.<span class="fn">get</span>(<span class="st">"star_rating"</span>, <span class="nu">0</span>)),
+            <span class="st">"review_date"</span>:     datetime.<span class="fn">fromisoformat</span>(record[<span class="st">"review_date"</span>]),
+            <span class="st">"ingested_at"</span>:     datetime.<span class="fn">now</span>(timezone.utc),
+            <span class="st">"kafka_partition"</span>: msg.<span class="fn">partition</span>(),
+            <span class="st">"kafka_offset"</span>:    msg.<span class="fn">offset</span>(),
+            <span class="st">"_raw_json"</span>:       json.<span class="fn">dumps</span>(record),
+        }
+
+    <span class="kw">def</span> <span class="fn">_flush</span>(self):
+        <span class="kw">if not</span> self._buffer:
+            <span class="kw">return</span>
+
+        now = datetime.<span class="fn">now</span>(timezone.utc)
+        s3_key = (
+            f<span class="st">"year=</span><span class="kw">{now.year}</span><span class="st">/month=</span><span class="kw">{now.month:02d}</span><span class="st">"</span>
+            f<span class="st">"/day=</span><span class="kw">{now.day:02d}</span><span class="st">/hour=</span><span class="kw">{now.hour:02d}</span><span class="st">"</span>
+            f<span class="st">"/batch-</span><span class="kw">{uuid.uuid4().hex[:8]}</span><span class="st">.parquet"</span>
+        )
+
+        <span class="kw">try</span>:
+            table = pa.<span class="fn">Table</span>.<span class="fn">from_pylist</span>(self._buffer, schema=<span class="nm">BRONZE_SCHEMA</span>)
+            buf   = io.<span class="fn">BytesIO</span>()
+            pq.<span class="fn">write_table</span>(
+                table, buf,
+                compression=<span class="st">"snappy"</span>,
+                row_group_size=<span class="nu">100_000</span>,   <span class="cm"># ~100 K rows per row group</span>
+                write_statistics=<span class="kw">True</span>,
+            )
+            buf.<span class="fn">seek</span>(<span class="nu">0</span>)
+            self.s3.<span class="fn">put_object</span>(
+                Bucket=self.bucket, Key=s3_key, Body=buf,
+                ContentType=<span class="st">"application/octet-stream"</span>,
+            )
+            log.<span class="fn">info</span>(<span class="st">"bronze_flush"</span>, key=s3_key, rows=<span class="fn">len</span>(self._buffer))
+
+            <span class="cm"># ─── Commit offsets ONLY after durable write ─────────</span>
+            self.consumer.<span class="fn">commit</span>(asynchronous=<span class="kw">False</span>)
+            <span class="cm"># ─────────────────────────────────────────────────────</span>
+            self._buffer.clear()
+            self._pending_offsets.clear()
+            self._last_flush = time.<span class="fn">monotonic</span>()
+
+        <span class="kw">except</span> <span class="nm">Exception</span> <span class="kw">as</span> e:
+            log.<span class="fn">error</span>(<span class="st">"flush_failed"</span>, s3_key=s3_key, error=<span class="fn">str</span>(e))
+            <span class="cm"># DO NOT commit offsets — let Kafka rewind on restart</span>
+            <span class="kw">raise</span>  <span class="cm"># crash loud, don't swallow errors silently</span>
+
+    <span class="kw">def</span> <span class="fn">run</span>(self):
+        self.consumer.<span class="fn">subscribe</span>([<span class="st">"raw.feedback"</span>])
+        <span class="cm"># Graceful shutdown handler</span>
+        signal.<span class="fn">signal</span>(signal.SIGTERM, <span class="kw">lambda</span> *_: setattr(self, <span class="st">"_shutdown"</span>, <span class="kw">True</span>))
+
+        <span class="kw">while not</span> self._shutdown:
+            msg = self.consumer.<span class="fn">poll</span>(timeout=<span class="nu">1.0</span>)
+            <span class="kw">if</span> msg <span class="kw">is None</span>: <span class="kw">pass</span>
+            <span class="kw">elif</span> msg.<span class="fn">error</span>():
+                <span class="kw">if</span> msg.<span class="fn">error</span>().<span class="fn">code</span>() != KafkaError._PARTITION_EOF:
+                    log.<span class="fn">error</span>(<span class="st">"kafka_error"</span>, error=msg.<span class="fn">error</span>())
+            <span class="kw">else</span>:
+                record = self.<span class="fn">_deserialize</span>(msg)
+                <span class="kw">if</span> record:
+                    self._buffer.<span class="fn">append</span>(self.<span class="fn">_build_row</span>(record, msg))
+
+            <span class="cm"># Flush on size OR time threshold</span>
+            elapsed = time.<span class="fn">monotonic</span>() - self._last_flush
+            <span class="kw">if</span> <span class="fn">len</span>(self._buffer) >= self.batch_size <span class="kw">or</span> elapsed >= self.flush_secs:
+                self.<span class="fn">_flush</span>()
+
+        <span class="cm"># Graceful drain on shutdown</span>
+        self.<span class="fn">_flush</span>()
+        self.consumer.<span class="fn">close</span>()</pre>
+        </div>
+
+        <table class="tradeoff-table">
+          <tr>
+            <th>Decision</th><th>Option A</th><th>Option B (Chosen)</th><th>Reason</th>
+          </tr>
+          <tr>
+            <td>Offset commit</td>
+            <td class="con">Auto-commit (risky)</td>
+            <td class="chosen">Manual after write ✓</td>
+            <td>Prevents duplicates on crash</td>
+          </tr>
+          <tr>
+            <td>Flush trigger</td>
+            <td class="con">Record count only</td>
+            <td class="chosen">Count OR time limit ✓</td>
+            <td>Low-volume hours still flush</td>
+          </tr>
+          <tr>
+            <td>Error handling</td>
+            <td class="con">Swallow + continue</td>
+            <td class="chosen">DLQ + re-raise ✓</td>
+            <td>No silent data loss</td>
+          </tr>
+          <tr>
+            <td>Compression</td>
+            <td class="con">GZIP (slow write)</td>
+            <td class="chosen">Snappy ✓</td>
+            <td>2× faster, splittable</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 3 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">03</div>
+        <div class="step-header-content">
+          <div class="step-tag">Schema Evolution</div>
+          <h3>Avro Schema Registry & Forward/Backward Compatibility</h3>
+          <p>The single most underestimated production problem: a new field from a platform API breaks your entire pipeline at 2 AM. Schema Registry + BACKWARD_TRANSITIVE compatibility is the fix.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #2: Schema Drift Crashes</strong>
+          Google Maps adds a new field <code>reviewer_level</code> in their API response. Your Avro deserializer has no field for it → <code>SchemaResolutionException</code> → every consumer crashes → your pipeline stops for hours. BACKWARD compatibility means new schemas can read old data. Register schema changes through the registry, NEVER skip it.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">json</span>
+            <span class="code-filename">ingestion/avro_schemas/feedback_event_v2.avsc</span>
+          </div>
+          <pre>{
+  <span class="st">"type"</span>: <span class="st">"record"</span>,
+  <span class="st">"name"</span>: <span class="st">"FeedbackEvent"</span>,
+  <span class="st">"namespace"</span>: <span class="st">"com.currybowl.fip"</span>,
+  <span class="st">"doc"</span>: <span class="st">"v2: added reviewer_level with default null (backward compatible)"</span>,
+  <span class="st">"fields"</span>: [
+    { <span class="st">"name"</span>: <span class="st">"event_id"</span>,        <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"source_platform"</span>, <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"location_id"</span>,     <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"review_text"</span>,     <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"star_rating"</span>,     <span class="st">"type"</span>: <span class="st">"float"</span> },
+    { <span class="st">"name"</span>: <span class="st">"review_date"</span>,     <span class="st">"type"</span>: <span class="st">"string"</span> },
+    {
+      <span class="st">"name"</span>: <span class="st">"reviewer_level"</span>,
+      <span class="st">"type"</span>: [<span class="st">"null"</span>, <span class="st">"string"</span>],
+      <span class="cm">// MUST have default=null to be backward compatible</span>
+      <span class="st">"default"</span>: <span class="kw">null</span>,
+      <span class="st">"doc"</span>: <span class="st">"Google reviewer tier: Local Guide level. Null for other platforms."</span>
+    }
+  ]
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">python</span>
+            <span class="code-filename">scripts/register_schema.py</span>
+          </div>
+          <pre><span class="cm">"""Register schema with BACKWARD_TRANSITIVE compatibility check."""</span>
+<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient, Schema
+
+<span class="kw">def</span> <span class="fn">register_schema</span>(registry_url: str, subject: str, schema_path: str):
+    client = <span class="fn">SchemaRegistryClient</span>({<span class="st">"url"</span>: registry_url})
+
+    <span class="cm"># Enforce BACKWARD_TRANSITIVE — new consumers CAN read ALL old messages</span>
+    client.<span class="fn">set_compatibility</span>(subject, <span class="st">"BACKWARD_TRANSITIVE"</span>)
+
+    <span class="kw">with</span> <span class="fn">open</span>(schema_path) <span class="kw">as</span> f:
+        schema_str = f.<span class="fn">read</span>()
+
+    schema = <span class="fn">Schema</span>(schema_str, <span class="st">"AVRO"</span>)
+    schema_id = client.<span class="fn">register_schema</span>(subject, schema)
+    <span class="fn">print</span>(f<span class="st">"Registered schema ID: </span><span class="kw">{schema_id}</span><span class="st">"</span>)
+
+    <span class="cm"># Test compatibility BEFORE registering in prod CI pipeline</span>
+    is_compatible = client.<span class="fn">test_compatibility</span>(subject, schema)
+    <span class="kw">if not</span> is_compatible:
+        <span class="kw">raise</span> <span class="nm">ValueError</span>(<span class="st">"Schema breaks backward compatibility! CI blocked."</span>)
+
+<span class="cm"># Run in CI: python scripts/register_schema.py
+# If this fails → PR is blocked → schema change reviewed by team</span></pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 4 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">04</div>
+        <div class="step-header-content">
+          <div class="step-tag">Silver Layer — PySpark</div>
+          <h3>Spark Processing: Dedup, Validation, NLP Enrichment</h3>
+          <p>Bronze → Silver transformation. Handle OOM crashes, partition skew from single-location bursts, and PII masking. spaCy NLP for entity extraction baked in.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #3: Spark OOM from Text Data</strong>
+          Review text is variable-length. A single viral Reddit post with 5,000-word reviews fills 4 GB partitions. Default Spark executor memory (1 GB) dies. Fix: cap partition size at 128 MB, set <code>spark.sql.shuffle.partitions</code> to match your data volume, and use broadcast joins for location lookup tables.</div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #4: Partition Skew from Hot Locations</strong>
+          Mission District location gets 10× reviews vs Sunnyvale (it's near BART). Naive groupBy("location_id") creates one massive partition for Mission District, 11 tiny ones. Solution: salting key with a random suffix 0–9, groupBy("location_id_salted"), then reduce.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">python</span>
+            <span class="code-filename">processing/spark_jobs/bronze_to_silver.py</span>
+          </div>
+          <pre><span class="cm">"""
+Bronze → Silver PySpark Job
+Runs: spark-submit --conf spark.executor.memory=4g \
+      --conf spark.driver.memory=2g \
+      processing/spark_jobs/bronze_to_silver.py
+"""</span>
+<span class="kw">import</span> re, hashlib
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> (
+    StructType, StructField, StringType, FloatType,
+    TimestampType, ArrayType, IntegerType, BooleanType
+)
+<span class="kw">from</span> pyspark.sql.window <span class="kw">import</span> Window
+
+<span class="kw">def</span> <span class="fn">build_spark</span>() -> SparkSession:
+    <span class="kw">return</span> (
+        SparkSession.<span class="fn">builder</span>
+        .<span class="fn">appName</span>(<span class="st">"fip-bronze-to-silver"</span>)
+        <span class="cm"># ─── MEMORY TUNING — tune per your cluster ─────────────</span>
+        .<span class="fn">config</span>(<span class="st">"spark.executor.memory"</span>,            <span class="st">"4g"</span>)
+        .<span class="fn">config</span>(<span class="st">"spark.executor.memoryOverhead"</span>,    <span class="st">"1g"</span>)   <span class="cm"># JVM overhead</span>
+        .<span class="fn">config</span>(<span class="st">"spark.driver.memory"</span>,              <span class="st">"2g"</span>)
+        .<span class="fn">config</span>(<span class="st">"spark.sql.shuffle.partitions"</span>,     <span class="st">"48"</span>)   <span class="cm"># 12 locations × 4</span>
+        .<span class="fn">config</span>(<span class="st">"spark.sql.files.maxPartitionBytes"</span>, <span class="st">"134217728"</span>)  <span class="cm"># 128 MB</span>
+        <span class="cm"># ─── PREVENT SMALL FILE PROBLEM ────────────────────────</span>
+        .<span class="fn">config</span>(<span class="st">"spark.sql.adaptive.enabled"</span>,        <span class="st">"true"</span>)
+        .<span class="fn">config</span>(<span class="st">"spark.sql.adaptive.coalescePartitions.enabled"</span>, <span class="st">"true"</span>)
+        <span class="cm"># ─────────────────────────────────────────────────────</span>
+        .<span class="fn">config</span>(<span class="st">"spark.hadoop.fs.s3a.endpoint"</span>, <span class="st">"http://localhost:4566"</span>)
+        .<span class="fn">getOrCreate</span>()
+    )
+
+<span class="cm"># UDF: PII masking — phone numbers, emails</span>
+<span class="dc">@</span><span class="fn">F.udf</span>(StringType())
+<span class="kw">def</span> <span class="fn">mask_pii</span>(text: str) -> str:
+    <span class="kw">if not</span> text: <span class="kw">return</span> text
+    <span class="cm"># Mask phone numbers</span>
+    text = re.<span class="fn">sub</span>(<span class="st">r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'</span>, <span class="st">'[PHONE]'</span>, text)
+    <span class="cm"># Mask email addresses</span>
+    text = re.<span class="fn">sub</span>(<span class="st">r'\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Z|a-z]{2,}\b'</span>,
+                   <span class="st">'[EMAIL]'</span>, text)
+    <span class="kw">return</span> text
+
+<span class="cm"># UDF: deterministic dedup ID (event_id + review_date)</span>
+<span class="dc">@</span><span class="fn">F.udf</span>(StringType())
+<span class="kw">def</span> <span class="fn">make_dedup_key</span>(event_id: str, review_date: str) -> str:
+    raw = f<span class="st">"</span><span class="kw">{event_id}</span><span class="st">|</span><span class="kw">{review_date}</span><span class="st">"</span>
+    <span class="kw">return</span> hashlib.<span class="fn">sha256</span>(raw.<span class="fn">encode</span>()).<span class="fn">hexdigest</span>()
+
+<span class="kw">def</span> <span class="fn">dedup_reviews</span>(df):
+    <span class="cm">"""
+    Window-based dedup: keep earliest ingestion of each dedup_key.
+    This is idempotent — running twice produces same Silver output.
+    TRADEOFF: requires a full sort pass, ~30% slower than dropDuplicates()
+              but dropDuplicates() is non-deterministic across reruns.
+    """</span>
+    w = <span class="fn">Window</span>.<span class="fn">partitionBy</span>(<span class="st">"dedup_key"</span>).<span class="fn">orderBy</span>(F.<span class="fn">col</span>(<span class="st">"ingested_at"</span>).<span class="fn">asc</span>())
+    <span class="kw">return</span> (
+        df.<span class="fn">withColumn</span>(<span class="st">"_rank"</span>, F.<span class="fn">row_number</span>().<span class="fn">over</span>(w))
+          .<span class="fn">filter</span>(F.<span class="fn">col</span>(<span class="st">"_rank"</span>) == <span class="nu">1</span>)
+          .<span class="fn">drop</span>(<span class="st">"_rank"</span>)
+    )
+
+<span class="kw">def</span> <span class="fn">validate_data_quality</span>(df):
+    <span class="cm">"""Fail-fast validation before writing Silver — no silent bad data."""</span>
+    total = df.<span class="fn">count</span>()
+    null_text = df.<span class="fn">filter</span>(F.<span class="fn">col</span>(<span class="st">"raw_text"</span>).<span class="fn">isNull</span>() | (F.<span class="fn">length</span>(<span class="st">"raw_text"</span>) < <span class="nu">5</span>)).<span class="fn">count</span>()
+    bad_rating = df.<span class="fn">filter</span>(
+        (F.<span class="fn">col</span>(<span class="st">"star_rating"</span>) < <span class="nu">1</span>) | (F.<span class="fn">col</span>(<span class="st">"star_rating"</span>) > <span class="nu">5</span>)
+    ).<span class="fn">count</span>()
+
+    null_pct  = (null_text  / total) * <span class="nu">100</span>
+    bad_pct   = (bad_rating / total) * <span class="nu">100</span>
+
+    <span class="kw">if</span> null_pct > <span class="nu">5.0</span>:
+        <span class="kw">raise</span> <span class="nm">ValueError</span>(f<span class="st">"DATA QUALITY GATE FAILED: </span><span class="kw">{null_pct:.1f}</span><span class="st">% null text (threshold: 5%)"</span>)
+    <span class="kw">if</span> bad_pct > <span class="nu">2.0</span>:
+        <span class="kw">raise</span> <span class="nm">ValueError</span>(f<span class="st">"DATA QUALITY GATE FAILED: </span><span class="kw">{bad_pct:.1f}</span><span class="st">% bad ratings (threshold: 2%)"</span>)
+
+    <span class="kw">return</span> df.<span class="fn">filter</span>(
+        F.<span class="fn">col</span>(<span class="st">"raw_text"</span>).<span class="fn">isNotNull</span>() &
+        (F.<span class="fn">length</span>(<span class="st">"raw_text"</span>) >= <span class="nu">5</span>) &
+        F.<span class="fn">col</span>(<span class="st">"star_rating"</span>).<span class="fn">between</span>(<span class="nu">1</span>, <span class="nu">5</span>)
+    )
+
+<span class="kw">def</span> <span class="fn">run_bronze_to_silver</span>(spark: SparkSession, run_date: str):
+    <span class="cm"># Incremental: process ONE partition (Hive-style) per run</span>
+    s3_bronze = f<span class="st">"s3a://fip-curry-bowl-local-bronze/year=</span><span class="kw">{run_date[:4]}</span><span class="st">"</span>
+
+    bronze_df = spark.read.<span class="fn">parquet</span>(s3_bronze)
+
+    silver_df = (
+        bronze_df
+        .<span class="fn">withColumn</span>(<span class="st">"dedup_key"</span>,    <span class="fn">make_dedup_key</span>(<span class="st">"event_id"</span>, <span class="st">"review_date"</span>))
+        .<span class="fn">withColumn</span>(<span class="st">"clean_text"</span>,   <span class="fn">mask_pii</span>(F.<span class="fn">col</span>(<span class="st">"raw_text"</span>)))
+        .<span class="fn">withColumn</span>(<span class="st">"text_length"</span>,  F.<span class="fn">length</span>(<span class="st">"clean_text"</span>))
+        .<span class="fn">withColumn</span>(<span class="st">"processed_at"</span>, F.<span class="fn">current_timestamp</span>())
+        .<span class="fn">withColumn</span>(<span class="st">"year"</span>,          F.<span class="fn">year</span>(<span class="st">"review_date"</span>))
+        .<span class="fn">withColumn</span>(<span class="st">"month"</span>,         F.<span class="fn">month</span>(<span class="st">"review_date"</span>))
+    )
+
+    silver_df = <span class="fn">dedup_reviews</span>(silver_df)
+    silver_df = <span class="fn">validate_data_quality</span>(silver_df)
+
+    <span class="cm"># Repartition to fix skew before write</span>
+    <span class="cm"># 12 locations × 2 = 24 partitions (avoids tiny files)</span>
+    silver_df = silver_df.<span class="fn">repartition</span>(<span class="nu">24</span>, <span class="st">"location_id"</span>, <span class="st">"year"</span>, <span class="st">"month"</span>)
+
+    (silver_df.write
+        .<span class="fn">mode</span>(<span class="st">"overwrite"</span>)   <span class="cm"># Idempotent: re-run same date → same output</span>
+        .<span class="fn">partitionBy</span>(<span class="st">"year"</span>, <span class="st">"month"</span>, <span class="st">"location_id"</span>)
+        .<span class="fn">parquet</span>(<span class="st">"s3a://fip-curry-bowl-local-silver/"</span>)
+    )
+    <span class="fn">print</span>(f<span class="st">"Silver write complete: </span><span class="kw">{silver_df.count()}</span><span class="st"> rows"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    spark = <span class="fn">build_spark</span>()
+    run_date = <span class="fn">str</span>(datetime.<span class="fn">now</span>(timezone.utc).date())
+    <span class="fn">run_bronze_to_silver</span>(spark, run_date)
+    spark.<span class="fn">stop</span>()</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 5 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">05</div>
+        <div class="step-header-content">
+          <div class="step-tag">Gold Layer — dbt</div>
+          <h3>dbt Incremental Models: Analytics-Ready Aggregations</h3>
+          <p>Build production dbt incremental models over Silver Parquet. The tradeoff between full-refresh vs incremental, and why late-arriving data breaks naive dbt models.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #5: Late-Arriving Data Breaks Incremental Models</strong>
+          Yelp delivers review data up to 72 hours late (API rate limits + batch delivery). A naive dbt incremental model with <code>is_incremental()</code> checks <code>MAX(processed_at)</code> from last run. The 3-day-old review arrives → it's before the watermark → SILENTLY DROPPED. Fix: use a lookback window of 4 days in your incremental filter, not the exact MAX timestamp.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">yaml</span>
+            <span class="code-filename">dbt_gold/dbt_project.yml</span>
+          </div>
+          <pre>name: <span class="st">'fip_gold'</span>
+version: <span class="st">'1.0.0'</span>
+config-version: <span class="nu">2</span>
+profile: <span class="st">'fip_duckdb'</span>
+
+models:
+  fip_gold:
+    +materialized: table        <span class="cm"># default; overridden per model</span>
+    +on_schema_change: append_new_columns  <span class="cm"># don't fail on new fields</span>
+    staging:
+      +materialized: view
+    marts:
+      +materialized: incremental
+      +incremental_strategy: delete+insert  <span class="cm"># not merge — DuckDB limitation</span></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">sql</span>
+            <span class="code-filename">dbt_gold/models/marts/fct_location_ratings.sql</span>
+          </div>
+          <pre><span class="cm">-- Gold: daily location-level rating aggregations
+-- Incremental with 4-day lookback to catch late-arriving Yelp data</span>
+
+{{
+  config(
+    materialized     = 'incremental',
+    unique_key       = ['location_id', 'review_date'],
+    on_schema_change = 'append_new_columns',
+    <span class="cm">-- CRITICAL: use partition_by for large tables</span>
+    partition_by = {
+      'field': 'review_date',
+      'data_type': 'date',
+      'granularity': 'month'
+    }
+  )
+}}
+
+<span class="kw">WITH</span> source_reviews <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        event_id,
+        location_id,
+        <span class="fn">CAST</span>(review_date <span class="kw">AS</span> DATE) <span class="kw">AS</span> review_date,
+        star_rating,
+        clean_text,
+        text_length,
+        source_platform,
+        processed_at
+    <span class="kw">FROM</span> {{ source('silver', 'reviews') }}
+
+    {% <span class="kw">if</span> is_incremental() %}
+    <span class="kw">WHERE</span>
+        <span class="cm">-- 4-day lookback window: catches Yelp's 72h late delivery</span>
+        <span class="cm">-- NEVER use: WHERE processed_at > (SELECT MAX(processed_at) FROM {{ this }})</span>
+        processed_at >= <span class="fn">CURRENT_TIMESTAMP</span>() - <span class="fn">INTERVAL</span> <span class="st">'4 days'</span>
+    {% endif %}
+),
+
+aggregated <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        location_id,
+        review_date,
+        <span class="fn">COUNT</span>(*)                               <span class="kw">AS</span> review_count,
+        <span class="fn">ROUND</span>(<span class="fn">AVG</span>(star_rating), <span class="nu">2</span>)             <span class="kw">AS</span> avg_rating,
+        <span class="fn">SUM</span>(<span class="kw">CASE</span> <span class="kw">WHEN</span> star_rating >= <span class="nu">4</span> <span class="kw">THEN</span> <span class="nu">1</span> <span class="kw">ELSE</span> <span class="nu">0</span> <span class="kw">END</span>) <span class="kw">AS</span> positive_count,
+        <span class="fn">SUM</span>(<span class="kw">CASE</span> <span class="kw">WHEN</span> star_rating <= <span class="nu">2</span> <span class="kw">THEN</span> <span class="nu">1</span> <span class="kw">ELSE</span> <span class="nu">0</span> <span class="kw">END</span>) <span class="kw">AS</span> negative_count,
+        <span class="fn">ROUND</span>(<span class="fn">AVG</span>(text_length), <span class="nu">0</span>)             <span class="kw">AS</span> avg_review_length,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> source_platform)         <span class="kw">AS</span> platform_count,
+        <span class="fn">ARRAY_AGG</span>(<span class="kw">DISTINCT</span> source_platform)    <span class="kw">AS</span> platforms,
+        <span class="fn">MAX</span>(processed_at)                      <span class="kw">AS</span> last_updated_at
+    <span class="kw">FROM</span> source_reviews
+    <span class="kw">GROUP BY</span> location_id, review_date
+)
+
+<span class="kw">SELECT</span>
+    *,
+    <span class="fn">ROUND</span>(positive_count::float / <span class="fn">NULLIF</span>(review_count, <span class="nu">0</span>) * <span class="nu">100</span>, <span class="nu">1</span>) <span class="kw">AS</span> positive_pct,
+    <span class="fn">ROUND</span>(negative_count::float / <span class="fn">NULLIF</span>(review_count, <span class="nu">0</span>) * <span class="nu">100</span>, <span class="nu">1</span>) <span class="kw">AS</span> negative_pct
+<span class="kw">FROM</span> aggregated</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">yaml</span>
+            <span class="code-filename">dbt_gold/models/marts/schema.yml</span>
+          </div>
+          <pre>version: <span class="nu">2</span>
+models:
+  - name: fct_location_ratings
+    description: <span class="st">"Daily per-location rating aggregations. Source of truth for dashboards."</span>
+    config:
+      contract:
+        enforced: true   <span class="cm"># dbt 1.5+ model contracts — schema enforcement</span>
+    columns:
+      - name: location_id
+        data_type: varchar
+        constraints:
+          - type: not_null
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_locations')
+              field: location_id
+      - name: review_date
+        data_type: date
+        constraints:
+          - type: not_null
+        tests: [not_null]
+      - name: avg_rating
+        data_type: float
+        tests:
+          - not_null
+          - accepted_range:
+              min_value: 1.0
+              max_value: 5.0
+      - name: review_count
+        data_type: bigint
+        tests:
+          - not_null
+          - accepted_range:
+              min_value: 0</pre>
+        </div>
+
+        <table class="tradeoff-table">
+          <tr><th>Strategy</th><th>Pros</th><th>Cons</th><th>Use When</th></tr>
+          <tr>
+            <td class="chosen">Incremental + lookback ✓</td>
+            <td class="pro">Fast daily runs (~2 min)</td>
+            <td class="con">More complex logic</td>
+            <td>Daily scheduled runs</td>
+          </tr>
+          <tr>
+            <td>Full refresh</td>
+            <td class="pro">Simple, always correct</td>
+            <td class="con">Slow (~30 min at scale)</td>
+            <td>Weekly correctness runs</td>
+          </tr>
+          <tr>
+            <td>Snapshot</td>
+            <td class="pro">Tracks SCD Type 2 changes</td>
+            <td class="con">Storage heavy</td>
+            <td>Historical location data</td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 6 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">06</div>
+        <div class="step-header-content">
+          <div class="step-tag">Data Quality</div>
+          <h3>Great Expectations: Quality Gates & Anomaly Detection</h3>
+          <p>Production data quality is an SLA, not a nice-to-have. GX suites run as Airflow tasks — pipeline halts on failure, Slack alert fires, on-call is paged.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #6: Silent Bad Data Flowing to RAG</strong>
+          If corrupted Silver data flows into Qdrant embeddings (Phase 4), the RAG responses will confidently hallucinate business insights from garbage. A Great Expectations gate between Silver and Gold is the circuit breaker. Fail loudly here rather than generate wrong business decisions downstream.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">python</span>
+            <span class="code-filename">processing/great_expectations/silver_suite.py</span>
+          </div>
+          <pre><span class="cm">"""
+Great Expectations validation suite for Silver layer.
+Run as Airflow PythonOperator BEFORE triggering dbt Gold run.
+If this raises, the DAG stops — Gold never sees bad data.
+"""</span>
+<span class="kw">import</span> great_expectations <span class="kw">as</span> gx
+<span class="kw">from</span> great_expectations.core.batch <span class="kw">import</span> RuntimeBatchRequest
+
+<span class="kw">def</span> <span class="fn">build_silver_suite</span>(context):
+    suite = context.<span class="fn">add_or_update_expectation_suite</span>(<span class="st">"fip.silver.reviews"</span>)
+
+    validator = context.<span class="fn">get_validator</span>(
+        batch_request=<span class="fn">RuntimeBatchRequest</span>(...),
+        expectation_suite=suite
+    )
+
+    <span class="cm"># ─── Completeness ──────────────────────────────────────</span>
+    validator.<span class="fn">expect_column_values_to_not_be_null</span>(<span class="st">"event_id"</span>)
+    validator.<span class="fn">expect_column_values_to_not_be_null</span>(<span class="st">"location_id"</span>)
+    validator.<span class="fn">expect_column_values_to_not_be_null</span>(<span class="st">"clean_text"</span>)
+
+    <span class="cm"># ─── Validity ──────────────────────────────────────────</span>
+    validator.<span class="fn">expect_column_values_to_be_between</span>(
+        <span class="st">"star_rating"</span>, min_value=<span class="nu">1.0</span>, max_value=<span class="nu">5.0</span>
+    )
+    validator.<span class="fn">expect_column_values_to_be_in_set</span>(
+        <span class="st">"source_platform"</span>,
+        {<span class="st">"google"</span>, <span class="st">"yelp"</span>, <span class="st">"doordash"</span>, <span class="st">"ubereats"</span>, <span class="st">"tripadvisor"</span>}
+    )
+    validator.<span class="fn">expect_column_value_lengths_to_be_between</span>(
+        <span class="st">"clean_text"</span>, min_value=<span class="nu">5</span>, max_value=<span class="nu">10000</span>
+    )
+
+    <span class="cm"># ─── Uniqueness ────────────────────────────────────────</span>
+    validator.<span class="fn">expect_column_values_to_be_unique</span>(<span class="st">"dedup_key"</span>)
+
+    <span class="cm"># ─── Volume anomaly detection ──────────────────────────</span>
+    <span class="cm"># Alert if review volume drops below 50/day (ingestion broken?)</span>
+    validator.<span class="fn">expect_table_row_count_to_be_between</span>(
+        min_value=<span class="nu">50</span>, max_value=<span class="nu">100_000</span>
+    )
+
+    <span class="cm"># ─── Distribution checks ───────────────────────────────</span>
+    validator.<span class="fn">expect_column_mean_to_be_between</span>(
+        <span class="st">"star_rating"</span>, min_value=<span class="nu">3.0</span>, max_value=<span class="nu">5.0</span>
+        <span class="cm"># If average rating suddenly drops to 1.2 → data pipeline bug or real crisis</span>
+    )
+    validator.<span class="fn">expect_column_proportion_of_unique_values_to_be_between</span>(
+        <span class="st">"location_id"</span>, min_value=<span class="nu">0.001</span>, max_value=<span class="nu">1.0</span>
+    )
+
+    validator.<span class="fn">save_expectation_suite</span>(discard_failed_expectations=<span class="kw">False</span>)
+    results = validator.<span class="fn">validate</span>()
+
+    <span class="kw">if not</span> results.<span class="fn">success</span>:
+        failed = [r <span class="kw">for</span> r <span class="kw">in</span> results.results <span class="kw">if not</span> r.success]
+        <span class="kw">raise</span> <span class="nm">ValueError</span>(
+            f<span class="st">"Silver data quality gate FAILED: </span><span class="kw">{len(failed)}</span><span class="st"> checks failed.\n"</span>
+            + <span class="st">"\n"</span>.<span class="fn">join</span>(<span class="fn">str</span>(r.expectation_config) <span class="kw">for</span> r <span class="kw">in</span> failed)
+        )
+
+    <span class="kw">return</span> results</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 7 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">07</div>
+        <div class="step-header-content">
+          <div class="step-tag">Vector Store Bootstrap</div>
+          <h3>Qdrant Collection Schema & Gold → Vector Backfill</h3>
+          <p>Bootstrap Qdrant collections with correct schema, distance metrics, and HNSW index parameters before Phase 4 (RAG) inserts embeddings. Get this wrong and you re-index everything.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #7: Qdrant Collection Versioning & Re-indexing Cost</strong>
+          You cannot change the vector dimension or distance metric of an existing Qdrant collection. If Phase 4 decides to switch from OpenAI <code>text-embedding-3-small</code> (1536-dim) to <code>text-embedding-3-large</code> (3072-dim), you must create a new collection and re-embed ALL data. At $0.00002/1K tokens × 50K reviews × 200 tokens avg = $0.20 per re-embed. Small now, painful at 5M reviews. Lock the dimension in Phase 2, don't defer it.</div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #8: HNSW ef_construct Tradeoff</strong>
+          Higher <code>ef_construct</code> = better recall but slower indexing. At 50K vectors, <code>ef_construct=200</code> takes ~2 min to build. At 5M vectors, it takes 3+ hours. Start at 128, benchmark recall on your data, only increase if RAG answers are bad. Do NOT blindly copy defaults from documentation examples that use 10K toy datasets.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">python</span>
+            <span class="code-filename">qdrant/bootstrap/create_collections.py</span>
+          </div>
+          <pre><span class="cm">"""
+Qdrant collection bootstrap — run ONCE before Phase 4 (RAG).
+Creates versioned collections so we can blue/green swap embeddings.
+"""</span>
+<span class="kw">from</span> qdrant_client <span class="kw">import</span> QdrantClient, models
+<span class="kw">from</span> qdrant_client.models <span class="kw">import</span> (
+    VectorParams, Distance, HnswConfigDiff,
+    OptimizersConfigDiff, PayloadSchemaType
+)
+<span class="kw">import</span> structlog
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="cm"># ── Collection versioning strategy ─────────────────────────────
+# Never mutate a live collection. Use blue/green:
+# fip_reviews_v1 (current) → fip_reviews_v2 (new model) → swap alias</span>
+<span class="nm">COLLECTION_NAME</span> = <span class="st">"fip_reviews_v1"</span>
+<span class="nm">EMBEDDING_DIM</span>   = <span class="nu">1536</span>   <span class="cm"># text-embedding-3-small — LOCKED. Changing = re-index all.</span>
+<span class="nm">DISTANCE_METRIC</span> = Distance.COSINE  <span class="cm"># Cosine for semantic similarity (normalized embeddings)</span>
+
+<span class="kw">def</span> <span class="fn">bootstrap_qdrant</span>(client: QdrantClient) -> <span class="kw">None</span>:
+    existing = {c.name <span class="kw">for</span> c <span class="kw">in</span> client.<span class="fn">get_collections</span>().collections}
+
+    <span class="kw">if</span> <span class="nm">COLLECTION_NAME</span> <span class="kw">in</span> existing:
+        log.<span class="fn">info</span>(<span class="st">"collection_exists"</span>, name=<span class="nm">COLLECTION_NAME</span>)
+        <span class="kw">return</span>
+
+    client.<span class="fn">create_collection</span>(
+        collection_name=<span class="nm">COLLECTION_NAME</span>,
+        vectors_config=<span class="fn">VectorParams</span>(
+            size=<span class="nm">EMBEDDING_DIM</span>,
+            distance=<span class="nm">DISTANCE_METRIC</span>,
+            <span class="cm"># on_disk=True saves RAM at the cost of ~20% query slowdown</span>
+            <span class="cm"># Use on_disk=False for &lt; 1M vectors (fits comfortably in 8 GB RAM)</span>
+            on_disk=<span class="kw">False</span>,
+        ),
+        hnsw_config=<span class="fn">HnswConfigDiff</span>(
+            m=<span class="nu">16</span>,           <span class="cm"># Number of bi-directional links per node</span>
+                            <span class="cm"># Higher M = better recall, more memory (m=16 is good default)</span>
+            ef_construct=<span class="nu">128</span>,  <span class="cm"># Build-time search width (higher = slower build, better recall)</span>
+            full_scan_threshold=<span class="nu">10_000</span>,  <span class="cm"># Below this, use brute-force (always 100% recall)</span>
+        ),
+        optimizers_config=<span class="fn">OptimizersConfigDiff</span>(
+            indexing_threshold=<span class="nu">20_000</span>,  <span class="cm"># Start HNSW indexing after 20K vectors</span>
+            memmap_threshold=<span class="nu">50_000</span>,   <span class="cm"># Memory-map segments above 50K vectors</span>
+        ),
+    )
+
+    <span class="cm"># ── Payload indexes for filtered hybrid search ──────────────</span>
+    <span class="cm"># ALWAYS index fields you'll filter on. Without this, every filter</span>
+    <span class="cm"># does a full scan = O(N) instead of O(1).</span>
+    payload_indexes = {
+        <span class="st">"location_id"</span>:     PayloadSchemaType.KEYWORD,
+        <span class="st">"source_platform"</span>: PayloadSchemaType.KEYWORD,
+        <span class="st">"star_rating"</span>:     PayloadSchemaType.FLOAT,
+        <span class="st">"review_date"</span>:     PayloadSchemaType.DATETIME,
+        <span class="st">"year"</span>:            PayloadSchemaType.INTEGER,
+        <span class="st">"month"</span>:           PayloadSchemaType.INTEGER,
+    }
+
+    <span class="kw">for</span> field, schema_type <span class="kw">in</span> payload_indexes.<span class="fn">items</span>():
+        client.<span class="fn">create_payload_index</span>(
+            collection_name=<span class="nm">COLLECTION_NAME</span>,
+            field_name=field,
+            field_schema=schema_type,
+        )
+        log.<span class="fn">info</span>(<span class="st">"payload_index_created"</span>, field=field)
+
+    <span class="cm"># ── Alias for blue/green swap ───────────────────────────────</span>
+    client.<span class="fn">update_collection_aliases</span>(
+        change_aliases_operations=[
+            models.<span class="fn">CreateAliasOperation</span>(
+                create_alias=models.<span class="fn">CreateAlias</span>(
+                    collection_name=<span class="nm">COLLECTION_NAME</span>,
+                    alias_name=<span class="st">"fip_reviews_current"</span>,   <span class="cm"># RAG always queries this alias</span>
+                )
+            )
+        ]
+    )
+    log.<span class="fn">info</span>(<span class="st">"qdrant_bootstrap_complete"</span>, collection=<span class="nm">COLLECTION_NAME</span>)
+
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    client = <span class="fn">QdrantClient</span>(host=<span class="st">"localhost"</span>, port=<span class="nu">6333</span>)
+    <span class="fn">bootstrap_qdrant</span>(client)</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 8 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">08</div>
+        <div class="step-header-content">
+          <div class="step-tag">Orchestration</div>
+          <h3>Airflow DAG: Wiring Bronze → Silver → GX → Gold → Qdrant</h3>
+          <p>The complete Airflow DAG that orchestrates the full data platform pipeline with proper dependencies, retries, and alerting.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">python</span>
+            <span class="code-filename">dags/fip_data_platform_dag.py</span>
+          </div>
+          <pre><span class="cm">"""Airflow DAG: FIP Data Platform — runs nightly at 2 AM PT"""</span>
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+<span class="kw">from</span> airflow <span class="kw">import</span> DAG
+<span class="kw">from</span> airflow.operators.python <span class="kw">import</span> PythonOperator
+<span class="kw">from</span> airflow.providers.apache.spark.operators.spark_submit <span class="kw">import</span> SparkSubmitOperator
+<span class="kw">from</span> airflow.providers.slack.operators.slack_webhook <span class="kw">import</span> SlackWebhookOperator
+
+<span class="kw">def</span> <span class="fn">on_failure_callback</span>(context):
+    <span class="kw">return</span> <span class="fn">SlackWebhookOperator</span>(
+        task_id=<span class="st">"slack_alert"</span>,
+        webhook_token=<span class="st">"{{ var.value.slack_webhook }}"</span>,
+        message=(
+            f<span class="st">":red_circle: FIP Pipeline FAILED\n"</span>
+            f<span class="st">"Task: </span><span class="kw">{context['task_instance'].task_id}</span><span class="st">\n"</span>
+            f<span class="st">"DAG: </span><span class="kw">{context['dag'].dag_id}</span><span class="st">\n"</span>
+            f<span class="st">"Log: </span><span class="kw">{context['task_instance'].log_url}</span><span class="st">"</span>
+        )
+    ).<span class="fn">execute</span>(context)
+
+<span class="kw">with</span> <span class="fn">DAG</span>(
+    dag_id=<span class="st">"fip_data_platform"</span>,
+    schedule_interval=<span class="st">"0 10 * * *"</span>,   <span class="cm"># 2 AM PT = 10 UTC</span>
+    start_date=<span class="fn">datetime</span>(<span class="nu">2025</span>, <span class="nu">1</span>, <span class="nu">1</span>),
+    default_args={
+        <span class="st">"retries"</span>:           <span class="nu">2</span>,
+        <span class="st">"retry_delay"</span>:       <span class="fn">timedelta</span>(minutes=<span class="nu">10</span>),
+        <span class="st">"on_failure_callback"</span>: on_failure_callback,
+        <span class="st">"execution_timeout"</span>: <span class="fn">timedelta</span>(hours=<span class="nu">3</span>),
+    },
+    catchup=<span class="kw">False</span>,
+    tags=[<span class="st">"fip"</span>, <span class="st">"data-platform"</span>],
+) <span class="kw">as</span> dag:
+
+    spark_bronze_to_silver = <span class="fn">SparkSubmitOperator</span>(
+        task_id=<span class="st">"spark_bronze_to_silver"</span>,
+        application=<span class="st">"processing/spark_jobs/bronze_to_silver.py"</span>,
+        conf={
+            <span class="st">"spark.executor.memory"</span>: <span class="st">"4g"</span>,
+            <span class="st">"spark.executor.memoryOverhead"</span>: <span class="st">"1g"</span>,
+        },
+        application_args=[<span class="st">"--run-date"</span>, <span class="st">"{{ ds }}"</span>],
+    )
+
+    gx_silver_validation = <span class="fn">PythonOperator</span>(
+        task_id=<span class="st">"gx_silver_validation"</span>,
+        python_callable=<span class="kw">lambda</span>: <span class="fn">validate_silver_suite</span>(<span class="st">"{{ ds }}"</span>),
+    )
+
+    dbt_gold_run = <span class="fn">PythonOperator</span>(
+        task_id=<span class="st">"dbt_gold_run"</span>,
+        python_callable=<span class="kw">lambda</span>: <span class="fn">run_dbt_command</span>(<span class="st">"dbt run --select marts"</span>),
+    )
+
+    dbt_gold_test = <span class="fn">PythonOperator</span>(
+        task_id=<span class="st">"dbt_gold_test"</span>,
+        python_callable=<span class="kw">lambda</span>: <span class="fn">run_dbt_command</span>(<span class="st">"dbt test --select marts"</span>),
+    )
+
+    qdrant_verify = <span class="fn">PythonOperator</span>(
+        task_id=<span class="st">"qdrant_collection_verify"</span>,
+        python_callable=<span class="kw">lambda</span>: <span class="fn">verify_qdrant_health</span>(),
+    )
+
+    <span class="cm"># ── Pipeline dependency chain ──────────────────────────────
+    # Bronze → Silver → [GX gate] → Gold run → Gold test → Qdrant verify
+    # GX gate is a hard stop — Gold never runs on bad Silver data</span>
+    (spark_bronze_to_silver
+        >> gx_silver_validation
+        >> dbt_gold_run
+        >> dbt_gold_test
+        >> qdrant_verify)</pre>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /steps-grid -->
+
+  <!-- PRODUCTION ISSUES SUMMARY -->
+  <div class="section-title">Production Issues Reference Map</div>
+  <div class="prod-issues">
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#1 Auto-Commit Duplicates</div>
+      <div class="prod-issue-body">Default Kafka auto-commit causes duplicates or data loss on crash. Fix: manual offset commit AFTER durable write.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#2 Schema Drift Crashes</div>
+      <div class="prod-issue-body">New API fields break Avro deserializer. Fix: Schema Registry + BACKWARD_TRANSITIVE + CI compatibility check gate.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#3 Spark OOM on Text</div>
+      <div class="prod-issue-body">Variable-length review text explodes partitions. Fix: 128 MB max partition bytes, 4g executor + 1g overhead, AQE enabled.</div>
+    </div>
+    <div class="prod-issue-card severity-med">
+      <div class="severity-badge med">Medium Severity</div>
+      <div class="prod-issue-title">#4 Partition Skew</div>
+      <div class="prod-issue-body">High-traffic locations create hot partitions. Fix: explicit repartition(24, "location_id", "year", "month") before write.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#5 Late-Arriving Data Drop</div>
+      <div class="prod-issue-body">Yelp delivers data 72h late. Naive dbt watermarks silently drop it. Fix: 4-day lookback window in incremental filter.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#6 Silent Bad Data in RAG</div>
+      <div class="prod-issue-body">Corrupt Silver flows into Qdrant → hallucinated business insights. Fix: Great Expectations gate between Silver and Gold.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#7 Qdrant Re-index Cost</div>
+      <div class="prod-issue-body">Cannot change vector dim on live collection. Fix: lock embedding model + dimension NOW, use collection aliases for blue/green.</div>
+    </div>
+    <div class="prod-issue-card severity-med">
+      <div class="severity-badge med">Medium Severity</div>
+      <div class="prod-issue-title">#8 HNSW ef_construct Misconfig</div>
+      <div class="prod-issue-body">Blindly copying high ef_construct from docs → 3h indexing time at scale. Fix: benchmark on YOUR data, start at 128.</div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section-title">Phase 2 Implementation Checklist</div>
+  <div class="checklist-section">
+    <div class="checklist-title">Phase 2 — Data Platform</div>
+    <div class="checklist-subtitle">Track your implementation progress. Auto-saved to browser.</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <span id="progress-label" style="font-size:12px;color:var(--text-muted)">0 / 0 completed</span>
+
+    <div class="checklist-group-label">Step 1 — Environment</div>
+    <label class="check-item" id="ci-1"><input type="checkbox" data-ci="ci-1"> <span class="check-label">Project directory scaffold created, venv activated</span></label>
+    <label class="check-item" id="ci-2"><input type="checkbox" data-ci="ci-2"> <span class="check-label">requirements.txt with pinned versions installed</span></label>
+    <label class="check-item" id="ci-3"><input type="checkbox" data-ci="ci-3"> <span class="check-label">Terraform S3 buckets provisioned (bronze/silver/gold) via FLOCI</span></label>
+    <label class="check-item" id="ci-4"><input type="checkbox" data-ci="ci-4"> <span class="check-label">Bronze bucket versioning enabled, lifecycle rules set on Silver</span></label>
+
+    <div class="checklist-group-label">Step 2–3 — Bronze & Schema</div>
+    <label class="check-item" id="ci-5"><input type="checkbox" data-ci="ci-5"> <span class="check-label">BronzeWriter implemented with manual offset commit</span></label>
+    <label class="check-item" id="ci-6"><input type="checkbox" data-ci="ci-6"> <span class="check-label">DLQ routing for deserialize failures implemented</span></label>
+    <label class="check-item" id="ci-7"><input type="checkbox" data-ci="ci-7"> <span class="check-label">Avro schema v2 registered with BACKWARD_TRANSITIVE compatibility</span></label>
+    <label class="check-item" id="ci-8"><input type="checkbox" data-ci="ci-8"> <span class="check-label">CI schema compatibility check added to pipeline</span></label>
+
+    <div class="checklist-group-label">Step 4 — Silver Layer</div>
+    <label class="check-item" id="ci-9"><input type="checkbox" data-ci="ci-9"> <span class="check-label">PySpark job: Bronze → Silver with OOM-safe memory config</span></label>
+    <label class="check-item" id="ci-10"><input type="checkbox" data-ci="ci-10"> <span class="check-label">PII masking UDF tested on sample data</span></label>
+    <label class="check-item" id="ci-11"><input type="checkbox" data-ci="ci-11"> <span class="check-label">Window-based idempotent dedup implemented</span></label>
+    <label class="check-item" id="ci-12"><input type="checkbox" data-ci="ci-12"> <span class="check-label">Data quality gate (null/rating checks) raises on threshold breach</span></label>
+    <label class="check-item" id="ci-13"><input type="checkbox" data-ci="ci-13"> <span class="check-label">repartition(24) applied before write to fix skew</span></label>
+
+    <div class="checklist-group-label">Step 5–6 — Gold & GX</div>
+    <label class="check-item" id="ci-14"><input type="checkbox" data-ci="ci-14"> <span class="check-label">dbt project initialized, profile configured for DuckDB</span></label>
+    <label class="check-item" id="ci-15"><input type="checkbox" data-ci="ci-15"> <span class="check-label">fct_location_ratings incremental model with 4-day lookback</span></label>
+    <label class="check-item" id="ci-16"><input type="checkbox" data-ci="ci-16"> <span class="check-label">dbt schema.yml contracts + accepted_range tests passing</span></label>
+    <label class="check-item" id="ci-17"><input type="checkbox" data-ci="ci-17"> <span class="check-label">Great Expectations suite created, volume anomaly check included</span></label>
+
+    <div class="checklist-group-label">Step 7–8 — Qdrant & Orchestration</div>
+    <label class="check-item" id="ci-18"><input type="checkbox" data-ci="ci-18"> <span class="check-label">Qdrant collection fip_reviews_v1 created with locked 1536 dim</span></label>
+    <label class="check-item" id="ci-19"><input type="checkbox" data-ci="ci-19"> <span class="check-label">Payload indexes created for location_id, source_platform, star_rating, review_date</span></label>
+    <label class="check-item" id="ci-20"><input type="checkbox" data-ci="ci-20"> <span class="check-label">Collection alias fip_reviews_current configured for blue/green</span></label>
+    <label class="check-item" id="ci-21"><input type="checkbox" data-ci="ci-21"> <span class="check-label">Airflow DAG wired: Spark → GX gate → dbt run → dbt test → Qdrant verify</span></label>
+    <label class="check-item" id="ci-22"><input type="checkbox" data-ci="ci-22"> <span class="check-label">Slack failure alerts configured and tested</span></label>
+    <label class="check-item" id="ci-23"><input type="checkbox" data-ci="ci-23"> <span class="check-label">End-to-end DAG run verified: Bronze data visible in Gold dbt model</span></label>
+  </div>
+
+  <!-- LINKEDIN / CAREER SECTION -->
+  <div class="section-title">LinkedIn Content & Career Positioning</div>
+  <div class="career-card">
+    <div class="career-card-label">📣 LinkedIn Post — Phase 2 Completion</div>
+    <div class="li-post" contenteditable="true" data-fip-edit="li-post-p2">I built a production data lakehouse for a 12-location restaurant chain's AI feedback platform.
+
+Here are 3 things that would have burned us at 3 AM if we hadn't caught them in design:
+
+🔥 The auto-commit trap
+Kafka's default enable.auto.commit=True commits offsets BEFORE your Parquet file is written to S3. Crash between those two events = duplicate data in your lakehouse. We flipped to manual commits and only commit after fsync. One config change. Massive reliability gain.
+
+🔥 The late-arriving data bug
+Yelp delivers review data up to 72 hours late due to their batch API limits. A naive dbt incremental model with MAX(processed_at) as its watermark silently drops that data forever. Fix: 4-day lookback window. The word "silently" is what makes this dangerous.
+
+🔥 The Qdrant re-index trap
+You cannot change the vector dimension of a live Qdrant collection. We locked our embedding model (OpenAI text-embedding-3-small, 1536 dims) in Phase 2 before we touched Phase 4. At 50K reviews this costs $0.10 to re-embed. At 5M reviews it's a full weekend of engineering work and $10+ in API costs.
+
+The pattern in all three: production failures don't announce themselves. They quietly corrupt your data while your dashboard looks fine.
+
+Phase 2 of 7 complete. Bronze → Silver → Gold lakehouse, dbt incremental models, Great Expectations quality gates, Qdrant bootstrap.
+
+<span class="li-hashtags">#DataEngineering #MLOps #Kafka #ApacheSpark #dbt #Qdrant #Python #BuildingInPublic</span></div>
+
+    <div style="margin-top:20px;">
+      <div class="career-card-label">🎯 Interview Q&A — Senior Data/AI Engineer</div>
+      <div class="interview-qa">
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you guarantee exactly-once delivery in your Kafka pipeline?</div>
+          <div class="qa-a">We use manual offset commits on the consumer side: offsets are only committed after the Parquet file is confirmed durably written to S3. This gives us at-least-once delivery (possible duplicates on crash) which we handle at the Silver layer with idempotent window-based deduplication on a SHA-256 dedup key. True exactly-once at scale requires either Kafka transactions (high latency) or this two-phase approach. We chose the latter because the Bronze layer is append-only and re-runnable.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you handle schema evolution in a streaming pipeline without downtime?</div>
+          <div class="qa-a">We use Confluent Schema Registry with BACKWARD_TRANSITIVE compatibility enforced at the subject level. Any new field added to the Avro schema must have a default value (null for optional fields). We block PRs that break compatibility via a CI step that calls test_compatibility() against the registry before the schema is merged. This means old consumers can still read new messages, and we can roll out producers before consumers without coordinating a big-bang deploy.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: What's your strategy for dbt incremental models with late-arriving data?</div>
+          <div class="qa-a">The naive approach — filtering WHERE processed_at > MAX(processed_at in the existing table) — silently drops any records delivered after that watermark. For our pipeline, Yelp delivers data up to 72 hours late. We use a 4-day lookback window instead of an exact watermark, and we pair this with a weekly full-refresh run (scheduled Sunday 3 AM) to self-correct any edge cases. The tradeoff is slightly higher compute cost on incremental runs, but that's a rounding error compared to the cost of silently wrong analytics data.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you handle Spark OOM errors on variable-length text data?</div>
+          <div class="qa-a">Three levers: (1) Set spark.sql.files.maxPartitionBytes to 128 MB to prevent oversized input partitions, (2) Configure executor memory with an explicit overhead budget — 4g executor + 1g overhead for JVM — because Spark memory is separate from JVM native memory, (3) Enable Adaptive Query Execution which coalesces small partitions and splits large ones at runtime. For text-heavy workloads, string data can be 5× larger than you estimate from row counts alone — always size memory based on your P99 review length, not average.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE ROADMAP STRIP -->
+  <div class="section-title">7-Phase Roadmap</div>
+  <div class="arch-diagram">
+    <div class="arch-flow">
+      <div class="arch-node"><div class="arch-node-icon">✅</div><div class="arch-node-name">Phase 01</div><div class="arch-node-sub">Data Ingestion<br>Complete</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight"><div class="arch-node-icon">🔷</div><div class="arch-node-name">Phase 02</div><div class="arch-node-sub">Data Platform<br>← You are here</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node"><div class="arch-node-icon">🔍</div><div class="arch-node-name">Phase 03</div><div class="arch-node-sub">RAG Layer<br>Upcoming</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node"><div class="arch-node-icon">🤖</div><div class="arch-node-name">Phase 04</div><div class="arch-node-sub">Agents<br>Upcoming</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node"><div class="arch-node-icon">🖥️</div><div class="arch-node-name">Phase 05</div><div class="arch-node-sub">Product UI<br>Upcoming</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node"><div class="arch-node-icon">🚀</div><div class="arch-node-name">Phase 06</div><div class="arch-node-sub">Prod Deploy<br>Upcoming</div></div>
+    </div>
+  </div>
+
+</div><!-- /section-wrap -->
+
+<!-- FIP EDIT ENGINE TOOLBAR -->
+<div class="fip-toolbar">
+  <button class="fip-btn edit-btn"  id="fip-edit-toggle" title="Toggle edit mode">✏️</button>
+  <button class="fip-btn save-btn"  id="fip-save"        title="Save to browser">💾</button>
+  <button class="fip-btn undo-btn"  id="fip-undo"        title="Undo last change">↩️</button>
+  <button class="fip-btn search-btn" id="fip-search-open" title="Find & Replace">🔎</button>
+  <button class="fip-btn export-btn" id="fip-export"      title="Export HTML">📤</button>
+</div>
+<div class="fip-toast" id="fip-toast"></div>
+
+<!-- FIND & REPLACE MODAL -->
+<div class="fip-search-modal" id="fip-search-modal">
+  <div class="fip-search-box">
+    <h4>🔎 Find &amp; Replace</h4>
+    <input type="text" id="fip-find-input"    placeholder="Find text…">
+    <input type="text" id="fip-replace-input" placeholder="Replace with…">
+    <div class="modal-btns">
+      <button class="modal-btn primary"    id="fip-replace-btn">Replace All</button>
+      <button class="modal-btn secondary"  id="fip-modal-close">Cancel</button>
+    </div>
+    <div id="fip-replace-result" style="font-size:12px;color:var(--text-muted);"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   FIP EDIT ENGINE — Phase 2 Data Platform
+   localStorage key: fip-phase2-data-platform
+═══════════════════════════════════════════════════════════════ */
+const LS_KEY      = 'fip-phase2-data-platform';
+const HISTORY_KEY = 'fip-phase2-history';
+const CHECK_KEY   = 'fip-phase2-checks';
+const MAX_HIST    = 30;
+let editMode      = false;
+let editHistory   = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+/* ── TOAST ───────────────────────────────────────────────── */
+function toast(msg, duration = 2200) {
+  const el = document.getElementById('fip-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* ── SAVE ────────────────────────────────────────────────── */
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    data[el.dataset.fipEdit] = el.innerHTML;
+  });
+  // snapshot for undo
+  editHistory.push(JSON.stringify(data));
+  if (editHistory.length > MAX_HIST) editHistory.shift();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+  toast('💾 Saved to browser');
+}
+
+/* ── RESTORE ─────────────────────────────────────────────── */
+function restoreSaved() {
+  const raw = localStorage.getItem(LS_KEY);
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    if (data[el.dataset.fipEdit] !== undefined) {
+      el.innerHTML = data[el.dataset.fipEdit];
+    }
+  });
+}
+
+/* ── UNDO ────────────────────────────────────────────────── */
+function undoLast() {
+  if (editHistory.length < 2) { toast('Nothing to undo'); return; }
+  editHistory.pop(); // remove current
+  const prev = JSON.parse(editHistory[editHistory.length - 1] || '{}');
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    if (prev[el.dataset.fipEdit] !== undefined) {
+      el.innerHTML = prev[el.dataset.fipEdit];
+    }
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+  toast('↩️ Undone');
+}
+
+/* ── EDIT MODE TOGGLE ────────────────────────────────────── */
+function toggleEditMode() {
+  editMode = !editMode;
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    el.contentEditable = editMode ? 'true' : 'false';
+  });
+  toast(editMode ? '✏️ Edit mode ON — click any text to edit' : '🔒 Edit mode OFF');
+}
+
+/* ── EXPORT HTML ─────────────────────────────────────────── */
+function exportHTML() {
+  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'fip-phase2-data-platform.html';
+  a.click();
+  toast('📤 Exported!');
+}
+
+/* ── FIND & REPLACE ──────────────────────────────────────── */
+function doFindReplace() {
+  const find    = document.getElementById('fip-find-input').value;
+  const replace = document.getElementById('fip-replace-input').value;
+  if (!find) return;
+  let count = 0;
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    const before = el.innerHTML;
+    const after  = before.split(find).join(replace);
+    if (before !== after) { el.innerHTML = after; count++; }
+  });
+  document.getElementById('fip-replace-result').textContent =
+    count > 0 ? `✓ Replaced in ${count} element(s)` : 'No matches found';
+  if (count) saveAll();
+}
+
+/* ── CHECKLIST ───────────────────────────────────────────── */
+function initChecklist() {
+  const saved = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+  const items = document.querySelectorAll('.check-item input[type="checkbox"]');
+  items.forEach(cb => {
+    const key = cb.dataset.ci;
+    if (saved[key]) { cb.checked = true; cb.closest('.check-item').classList.add('done'); }
+    cb.addEventListener('change', () => {
+      cb.closest('.check-item').classList.toggle('done', cb.checked);
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      state[key] = cb.checked;
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const all     = document.querySelectorAll('.check-item input[type="checkbox"]');
+  const done    = document.querySelectorAll('.check-item input[type="checkbox"]:checked');
+  const pct     = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done.length} / ${all.length} completed`;
+}
+
+/* ── EVENT LISTENERS ─────────────────────────────────────── */
+document.getElementById('fip-edit-toggle').addEventListener('click', toggleEditMode);
+document.getElementById('fip-save').addEventListener('click', saveAll);
+document.getElementById('fip-undo').addEventListener('click', undoLast);
+document.getElementById('fip-export').addEventListener('click', exportHTML);
+document.getElementById('fip-search-open').addEventListener('click', () => {
+  document.getElementById('fip-search-modal').classList.add('open');
+});
+document.getElementById('fip-modal-close').addEventListener('click', () => {
+  document.getElementById('fip-search-modal').classList.remove('open');
+});
+document.getElementById('fip-replace-btn').addEventListener('click', doFindReplace);
+
+/* Keyboard shortcuts */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveAll(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoLast(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); toggleEditMode(); }
+  if (e.key === 'Escape') document.getElementById('fip-search-modal').classList.remove('open');
+});
+
+/* ── INIT ────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  restoreSaved();
+  initChecklist();
+  // default: editing off
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    el.contentEditable = 'false';
+  });
+});
+</script>
+</body>
+</html>

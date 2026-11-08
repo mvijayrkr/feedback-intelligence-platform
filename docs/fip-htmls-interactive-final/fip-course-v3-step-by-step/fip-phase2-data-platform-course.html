@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FIP Phase 2 — Data Platform</title><style>
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--surface3:#202a3d;--border:#30363d;--accent:#f78166;--accent2:#79c0ff;--accent3:#56d364;--accent4:#d2a8ff;--accent5:#ffa657;--danger:#ff7b72;--text:#e6edf3;--muted:#8b949e;--dim:#6e7681;--code:#0d1117;--mono:'JetBrains Mono','Fira Code','Consolas',monospace;--ui:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ui);font-size:15px;line-height:1.65}.topbar{position:sticky;top:0;z-index:50;height:54px;background:rgba(13,17,23,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px}.brand{font-size:13px;font-weight:900;color:var(--accent);letter-spacing:.07em;text-transform:uppercase}.phase-pill{font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px}.layout{display:flex}.sidebar{position:sticky;top:54px;width:270px;height:calc(100vh - 54px);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:18px 0;overflow-y:auto}.side-label{font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;padding:12px 18px 5px}.sidebar a{display:block;color:var(--muted);text-decoration:none;font-size:13px;padding:8px 18px;border-left:3px solid transparent}.sidebar a:hover,.sidebar a.active{background:var(--surface2);color:var(--text);border-left-color:var(--accent)}.main{flex:1;max-width:1080px;padding:42px 48px 80px}.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 40px;margin-bottom:34px;position:relative;overflow:hidden}.hero:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent4),var(--accent2))}.eyebrow{display:inline-flex;color:var(--accent);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}h1{font-size:32px;line-height:1.15;margin:0 0 12px}h1 span{color:var(--accent2)}.hero p{max-width:780px;color:var(--muted);margin:0}.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:26px;background:var(--border)}.meta{background:var(--surface2);padding:14px;text-align:center}.meta .k{font-size:10px;color:var(--dim);text-transform:uppercase;font-weight:800}.meta .v{font-size:13px;color:var(--accent2);font-weight:800}.section{margin:0 0 50px;scroll-margin-top:75px}.section-header{display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:20px}.section-number{font-size:11px;font-weight:900;color:var(--accent);background:rgba(247,129,102,.1);border:1px solid rgba(247,129,102,.25);border-radius:7px;padding:5px 10px;min-width:42px;text-align:center}.section h2{font-size:21px;margin:0 0 3px}.section-header p{font-size:13px;color:var(--muted);margin:0}.callout{border-radius:12px;border:1px solid rgba(121,192,255,.25);background:rgba(121,192,255,.06);padding:15px 18px;color:#a5d6ff;margin:16px 0}.callout.warn{border-color:rgba(255,166,87,.3);background:rgba(255,166,87,.06);color:#ffd1a1}.callout.good{border-color:rgba(86,211,100,.3);background:rgba(86,211,100,.06);color:#a8f0b4}.callout.danger{border-color:rgba(255,123,114,.3);background:rgba(255,123,114,.06);color:#ffb4ad}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}.card h3{font-size:15px;color:var(--accent2);margin:0 0 8px}.card p,.card li{font-size:13.5px;color:var(--muted)}.card ul{padding-left:20px;margin:8px 0 0}.step-list{display:grid;gap:12px}.step{display:grid;grid-template-columns:44px 1fr;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}.step .n{width:34px;height:34px;border-radius:10px;background:rgba(247,129,102,.12);border:1px solid rgba(247,129,102,.3);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900}.step h3{font-size:15px;margin:0 0 4px}.step p{font-size:13px;color:var(--muted);margin:0}.code-block{background:var(--code);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}.code-header{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 12px}.code-lang{font-size:11px;font-weight:900;color:var(--accent5);text-transform:uppercase;letter-spacing:.05em}.code-file{font-size:11px;color:var(--dim);font-family:var(--mono);margin-left:auto}.code-actions{display:flex;gap:6px}.copy-btn,.collapse-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:800;cursor:pointer}.copy-btn:hover,.collapse-btn:hover{border-color:var(--accent2);color:var(--accent2)}.copy-btn.copied{border-color:var(--accent3);color:var(--accent3)}pre{margin:0;padding:16px;overflow:auto;color:#c9d1d9;font-family:var(--mono);font-size:12.5px;line-height:1.55}pre.collapsed{max-height:320px;overflow:hidden}.phase-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:40px}.phase-nav a,.phase-nav span{background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;padding:14px 16px}.phase-nav .k{display:block;font-size:10px;font-weight:900;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}.phase-nav .t{display:block;color:var(--text);font-weight:800}.toc-progress{height:4px;background:var(--border);border-radius:10px;margin:8px 18px 12px;overflow:hidden}.toc-progress div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}.file-path{display:inline-block;font-family:var(--mono);color:var(--accent5);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:12px}table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}th{background:var(--surface2);color:var(--accent2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}td{color:var(--muted)}@media(max-width:900px){.layout{display:block}.sidebar{display:none}.main{padding:28px 20px}.phase-nav{grid-template-columns:1fr}.topbar{padding:0 14px}.phase-pill{display:none}}
+</style></head><body><div class="topbar"><div class="brand">⚡ Feedback Intelligence Platform</div><div class="phase-pill">Phase 2 · Data Platform · Course Build</div></div><div class="layout"><nav class="sidebar"><div class="side-label">Phase 2</div><a href="#top">Summary</a><div class="toc-progress"><div></div></div><div class="side-label">Sections</div><a href="#s1">01 · Overview</a><a href="#s2">02 · Prerequisites</a><a href="#s3">03 · Files to Create</a><a href="#s4">04 · Execution</a><a href="#s5">05 · Verification</a><a href="#s6">06 · Troubleshooting</a><a href="#s7">07 · Next</a><div class="side-label">Course</div><a href="00_fip_Project_Guide_V3_Course.html">Master Guide</a></nav><main class="main" id="top"><div class="hero"><div class="eyebrow">Phase 2 / 6 · Step-by-step tutorial</div><h1>Data Platform: <span>Bronze → Silver → Gold</span></h1><p>Transform raw feedback into governed, PII-safe analytics marts.</p><div class="meta-grid"><div class="meta"><div class="k">Mode</div><div class="v">Create files first</div></div><div class="meta"><div class="k">Infra</div><div class="v">Incremental</div></div><div class="meta"><div class="k">Execution</div><div class="v">Verify each phase</div></div></div></div><section class="section" id="s1">
+  <div class="section-header"><div class="section-number">01</div><div><h2>Overview</h2><p>What this phase does and why it exists</p></div></div>
+  
+<div class="grid"><div class="card"><h3>Consumes</h3><p>Phase 1 has generated/published raw feedback events.</p></div><div class="card"><h3>Adds</h3><p>Adds Bronze cleaner, PII masker, NLP enrichment, Silver data, and dbt Gold model skeleton.</p></div><div class="card"><h3>Produces</h3><p>PII-safe Silver and Gold analytics models for Phase 3/4.</p></div></div>
+<div class="callout good"><strong>Course rule:</strong> create every file shown in this phase before running the execution command. No hidden generator scripts. No infrastructure is recreated.</div>
+</section><section class="section" id="s2">
+  <div class="section-header"><div class="section-number">02</div><div><h2>Prerequisites</h2><p>Complete these before creating files</p></div></div>
+  
+<div class="step-list"><div class="step"><div class="n">1</div><div><h3>Confirm previous phase output</h3><p>Phase 1 has generated/published raw feedback events.</p></div></div><div class="step"><div class="n">2</div><div><h3>Stay in the same repository</h3><p>All commands run from <span class="file-path">feedback-intelligence-platform/</span>. Do not create a second project folder.</p></div></div><div class="step"><div class="n">3</div><div><h3>Use existing FLOCI foundation</h3><p>Later phases reuse the Phase 0 FLOCI stack, S3 buckets, topics, secrets, and Helm structure.</p></div></div></div>
+</section><section class="section" id="s3">
+  <div class="section-header"><div class="section-number">03</div><div><h2>Files to Create</h2><p>Create these files exactly in this order</p></div></div>
+  
+<div class="code-block" data-filename="terminal">
+  <div class="code-header"><span class="code-lang">bash — Create Phase 2 folders</span><span class="code-file">terminal</span></div>
+  <pre><code>mkdir -p services/cleaning-worker services/nlp-worker data/dbt/models/{bronze,silver,gold} data/dbt/tests data/{bronze,silver}</code></pre>
+</div>
+<div class="code-block" data-filename="services/cleaning-worker/bronze_cleaner.py">
+  <div class="code-header"><span class="code-lang">python — Bronze cleaner</span><span class="code-file">services/cleaning-worker/bronze_cleaner.py</span></div>
+  <pre><code>import json, hashlib, pathlib
+IN = pathlib.Path(&quot;data/dummy/out/feedback_events.jsonl&quot;)
+OUT = pathlib.Path(&quot;data/bronze/feedback_bronze.jsonl&quot;)
+OUT.parent.mkdir(parents=True, exist_ok=True)
+seen = set()
+with IN.open() as src, OUT.open(&quot;w&quot;) as dst:
+    for line in src:
+        obj = json.loads(line)
+        key = hashlib.sha256(f&quot;{obj[&#x27;tenant_id&#x27;]}|{obj[&#x27;source_event_id&#x27;]}&quot;.encode()).hexdigest()
+        if key in seen: continue
+        seen.add(key); obj[&quot;dedup_key&quot;] = key
+        dst.write(json.dumps(obj) + &quot;\n&quot;)
+print(f&quot;✅ bronze rows={len(seen)}&quot;)</code></pre>
+</div>
+<div class="code-block" data-filename="services/nlp-worker/pii_masker.py">
+  <div class="code-header"><span class="code-lang">python — PII masker</span><span class="code-file">services/nlp-worker/pii_masker.py</span></div>
+  <pre><code>import re
+EMAIL = re.compile(r&quot;[\w.+-]+@[\w-]+\.[\w.-]+&quot;)
+PHONE = re.compile(r&quot;\b(?:\+?1[-. ]?)?\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}\b&quot;)
+def mask_pii(text: str) -&gt; str:
+    return PHONE.sub(&quot;[PHONE]&quot;, EMAIL.sub(&quot;[EMAIL]&quot;, text))</code></pre>
+</div>
+<div class="code-block" data-filename="services/nlp-worker/enrich.py">
+  <div class="code-header"><span class="code-lang">python — NLP enricher</span><span class="code-file">services/nlp-worker/enrich.py</span></div>
+  <pre><code>import json, pathlib
+from pii_masker import mask_pii
+IN = pathlib.Path(&quot;data/bronze/feedback_bronze.jsonl&quot;)
+OUT = pathlib.Path(&quot;data/silver/feedback_silver.jsonl&quot;)
+OUT.parent.mkdir(parents=True, exist_ok=True)
+def sentiment(rating):
+    if rating is None: return &quot;unknown&quot;
+    if rating &gt;= 4: return &quot;positive&quot;
+    if rating &lt;= 2: return &quot;negative&quot;
+    return &quot;neutral&quot;
+with IN.open() as src, OUT.open(&quot;w&quot;) as dst:
+    for line in src:
+        obj = json.loads(line); obj[&quot;masked_text&quot;] = mask_pii(obj[&quot;review_text&quot;])
+        obj[&quot;sentiment&quot;] = sentiment(obj.get(&quot;rating&quot;)); obj[&quot;severity&quot;] = &quot;high&quot; if obj[&quot;sentiment&quot;] == &quot;negative&quot; else &quot;normal&quot;
+        dst.write(json.dumps(obj) + &quot;\n&quot;)
+print(&quot;✅ wrote silver&quot;)</code></pre>
+</div>
+<div class="code-block" data-filename="data/dbt/dbt_project.yml">
+  <div class="code-header"><span class="code-lang">yaml — dbt project</span><span class="code-file">data/dbt/dbt_project.yml</span></div>
+  <pre><code>name: fip_analytics
+version: 1.0.0
+config-version: 2
+profile: fip_analytics
+model-paths: [&quot;models&quot;]
+models:
+  fip_analytics:
+    bronze: {+materialized: view}
+    silver: {+materialized: view}
+    gold: {+materialized: table}</code></pre>
+</div>
+<div class="code-block" data-filename="data/dbt/models/gold/location_daily_metrics.sql">
+  <div class="code-header"><span class="code-lang">sql — Gold model</span><span class="code-file">data/dbt/models/gold/location_daily_metrics.sql</span></div>
+  <pre><code>select tenant_id, location_id, cast(event_ts as date) as event_date,
+       count(*) as feedback_count, avg(rating) as avg_rating,
+       sum(case when sentiment = &#x27;negative&#x27; then 1 else 0 end) as negative_count
+from {{ ref(&#x27;silver_feedback&#x27;) }}
+group by 1,2,3</code></pre>
+</div>
+<div class="code-block" data-filename="terminal">
+  <div class="code-header"><span class="code-lang">bash — Execution steps</span><span class="code-file">terminal</span></div>
+  <pre><code>python services/cleaning-worker/bronze_cleaner.py
+PYTHONPATH=services/nlp-worker python services/nlp-worker/enrich.py
+# dbt run --project-dir data/dbt   # run once profile is configured</code></pre>
+</div>
+<div class="code-block" data-filename="terminal">
+  <div class="code-header"><span class="code-lang">bash — Verification</span><span class="code-file">terminal</span></div>
+  <pre><code>wc -l data/bronze/feedback_bronze.jsonl
+wc -l data/silver/feedback_silver.jsonl
+head -n 2 data/silver/feedback_silver.jsonl</code></pre>
+</div>
+</section><section class="section" id="s4">
+  <div class="section-header"><div class="section-number">04</div><div><h2>Execution</h2><p>Run only after all files above exist</p></div></div>
+  
+<div class="code-block" data-filename="terminal">
+  <div class="code-header"><span class="code-lang">bash — Execution steps</span><span class="code-file">terminal</span></div>
+  <pre><code>python services/cleaning-worker/bronze_cleaner.py
+PYTHONPATH=services/nlp-worker python services/nlp-worker/enrich.py
+# dbt run --project-dir data/dbt   # run once profile is configured</code></pre>
+</div>
+</section><section class="section" id="s5">
+  <div class="section-header"><div class="section-number">05</div><div><h2>Verification</h2><p>Confirm this phase is complete</p></div></div>
+  
+<div class="code-block" data-filename="terminal">
+  <div class="code-header"><span class="code-lang">bash — Verification</span><span class="code-file">terminal</span></div>
+  <pre><code>wc -l data/bronze/feedback_bronze.jsonl
+wc -l data/silver/feedback_silver.jsonl
+head -n 2 data/silver/feedback_silver.jsonl</code></pre>
+</div>
+</section><section class="section" id="s6">
+  <div class="section-header"><div class="section-number">06</div><div><h2>Troubleshooting</h2><p>Common errors and direct fixes</p></div></div>
+  
+<table><tr><th>Error</th><th>Likely Cause</th><th>Fix</th></tr>
+<tr><td>Terraform initialized in an empty directory</td><td>Terraform files were not created first.</td><td>Create every file under <span class="file-path">infra/terraform/envs/local-floci/</span> before running <span class="file-path">make bootstrap</span>.</td></tr>
+<tr><td>Command not found</td><td>Missing local tool.</td><td>Run install commands and then <span class="file-path">make doctor</span>.</td></tr>
+<tr><td>Import error</td><td>Package path mismatch.</td><td>Use underscore package paths such as <span class="file-path">apps/agent_service</span> for Python imports.</td></tr>
+</table>
+</section><section class="section" id="s7">
+  <div class="section-header"><div class="section-number">07</div><div><h2>Next</h2><p>What the following phase consumes</p></div></div>
+  <div class="callout">Phase complete. Continue to the next phase without recreating prior infrastructure.</div>
+</section><div class="phase-nav"><a href="fip-phase1-data-ingestion-course.html"><span class="k">Previous</span><span class="t">Phase 1</span></a><a href="00_fip_Project_Guide_V3_Course.html"><span class="k">Guide</span><span class="t">Master Guide</span></a><a href="fip-phase3-rag-layer-course.html"><span class="k">Next</span><span class="t">Phase 3</span></a></div></main></div><script>
+(function(){
+  function enhanceCode(){document.querySelectorAll('.code-block').forEach((block)=>{const header=block.querySelector('.code-header');const pre=block.querySelector('pre');if(!header||!pre||header.querySelector('.code-actions'))return;const actions=document.createElement('div');actions.className='code-actions';const copy=document.createElement('button');copy.className='copy-btn';copy.textContent='📋 Copy';copy.onclick=async()=>{const text=pre.innerText;try{await navigator.clipboard.writeText(text);copy.textContent='✓ Copied';copy.classList.add('copied');setTimeout(()=>{copy.textContent='📋 Copy';copy.classList.remove('copied')},1600)}catch(e){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();copy.textContent='✓ Copied';setTimeout(()=>copy.textContent='📋 Copy',1600)}};actions.appendChild(copy);if(pre.innerText.split('\n').length>18){const col=document.createElement('button');col.className='collapse-btn';col.textContent='Expand';pre.classList.add('collapsed');col.onclick=()=>{pre.classList.toggle('collapsed');col.textContent=pre.classList.contains('collapsed')?'Expand':'Collapse'};actions.appendChild(col)}header.appendChild(actions)})}
+  function activeNav(){const links=[...document.querySelectorAll('.sidebar a[href^="#"]')];const sections=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);function update(){let current=sections[0];for(const s of sections){if(s.getBoundingClientRect().top<110) current=s}links.forEach(a=>a.classList.toggle('active', current && a.getAttribute('href')==='#'+current.id));const p=document.querySelector('.toc-progress div');if(p){const h=document.documentElement;const pct=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;p.style.width=Math.max(0,Math.min(100,pct))+'%'}};document.addEventListener('scroll',update,{passive:true});update()}
+  document.addEventListener('DOMContentLoaded',()=>{enhanceCode();activeNav()});
+})();
+</script></body></html>

@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback Intelligence Platform</title>
+<style>
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#1c2333; --border:#30363d;
+  --text:#e6edf3; --muted:#8b949e; --dim:#6e7681;
+  --r:#f78166; --b:#79c0ff; --g:#56d364; --p:#d2a8ff; --o:#ffa657;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(13,17,23,.97);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+  padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.topbar-brand{font-size:13px;font-weight:800;color:var(--r);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.topbar-sub{font-size:12px;color:var(--muted);background:var(--surface2);padding:4px 14px;border-radius:20px;border:1px solid var(--border);white-space:nowrap;}
+.fip-toolbar-inject{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1080px;margin:0 auto;padding:48px 28px 100px;}
+
+/* ── HERO ── */
+.hero{text-align:center;margin-bottom:52px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(247,129,102,.1);
+  border:1px solid rgba(247,129,102,.3);color:var(--r);font-size:11px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:18px;}
+.hero h1{font-size:34px;font-weight:900;line-height:1.15;margin-bottom:14px;}
+.hero h1 em{color:var(--b);font-style:normal;}
+.hero p{color:var(--muted);font-size:15px;max-width:560px;margin:0 auto 28px;}
+.hero-stats{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat .n{font-size:28px;font-weight:900;line-height:1;}
+.stat .l{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* ── SECTION TITLE ── */
+.sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--dim);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:"";flex:1;height:1px;background:var(--border);}
+
+/* ── MERGE TABLE ── */
+.merge-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:52px;}
+.merge-table th{background:var(--surface2);color:var(--muted);font-size:11px;text-transform:uppercase;
+  letter-spacing:.06em;padding:10px 16px;border:1px solid var(--border);text-align:left;}
+.merge-table td{padding:11px 16px;border:1px solid var(--border);vertical-align:top;color:var(--muted);}
+.merge-table tr:nth-child(even) td{background:rgba(28,35,51,.5);}
+.merge-table td.old{color:var(--dim);text-decoration:line-through;opacity:.55;}
+.merge-table td.into{color:var(--g);font-weight:700;}
+.merge-table td strong{color:var(--text);}
+
+/* ── ARCHITECTURE DIAGRAM ── */
+.arch-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  margin-bottom:52px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.25);}
+.arch-header{background:linear-gradient(90deg,var(--surface2),rgba(28,35,51,.6));
+  border-bottom:1px solid var(--border);padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.arch-header-title{font-size:12px;font-weight:800;color:var(--text);letter-spacing:.06em;text-transform:uppercase;}
+.arch-header-sub{font-size:11px;color:var(--dim);font-weight:600;}
+.arch-legend{display:flex;flex-wrap:wrap;gap:8px;padding:14px 24px;
+  background:rgba(10,14,20,.6);border-bottom:1px solid var(--border);}
+.arch-legend-item{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);}
+.arch-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.arch-layers{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);}
+.arch-layer{padding:12px 16px;text-align:center;border-right:1px solid var(--border);font-size:10px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;}
+.arch-layer:last-child{border-right:none;}
+.arch-layer span{display:block;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;margin-top:4px;opacity:.85;}
+.arch-flow{padding:28px 24px 12px;display:flex;flex-direction:column;gap:0;}
+.arch-phase{position:relative;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface2);overflow:hidden;margin-bottom:0;}
+.arch-phase:not(:last-child){margin-bottom:8px;}
+.arch-phase-head{display:flex;align-items:center;gap:14px;padding:14px 18px;
+  border-bottom:1px solid var(--border);background:rgba(0,0,0,.15);}
+.arch-num{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;flex-shrink:0;line-height:1;}
+.arch-phase-meta{flex:1;min-width:0;}
+.arch-phase-title{font-size:15px;font-weight:800;color:var(--text);line-height:1.25;}
+.arch-phase-day{font-size:11px;color:var(--dim);font-weight:700;margin-top:2px;}
+.arch-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;padding:14px 18px;}
+.arch-item{font-size:12px;line-height:1.45;padding:9px 12px;border-radius:8px;
+  border:1px solid transparent;display:flex;align-items:flex-start;gap:8px;}
+.arch-item::before{content:"";width:3px;border-radius:2px;align-self:stretch;flex-shrink:0;min-height:16px;}
+.arch-item.inf{background:rgba(255,166,87,.06);border-color:rgba(255,166,87,.18);color:#e8c4a0;}
+.arch-item.inf::before{background:var(--o);}
+.arch-item.dat{background:rgba(86,211,100,.06);border-color:rgba(86,211,100,.18);color:#a8e6b0;}
+.arch-item.dat::before{background:var(--g);}
+.arch-item.ai{background:rgba(210,168,255,.06);border-color:rgba(210,168,255,.18);color:#d4b8f0;}
+.arch-item.ai::before{background:var(--p);}
+.arch-item.ui{background:rgba(247,129,102,.06);border-color:rgba(247,129,102,.18);color:#f0b0a0;}
+.arch-item.ui::before{background:var(--r);}
+.arch-outcome{padding:12px 18px;font-size:12px;color:var(--muted);font-style:italic;line-height:1.55;
+  background:rgba(210,168,255,.04);border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-start;}
+.arch-outcome::before{content:"↳";color:var(--p);font-style:normal;font-weight:800;flex-shrink:0;}
+.arch-connector{display:flex;justify-content:center;padding:4px 0;color:var(--dim);font-size:18px;line-height:1;opacity:.6;}
+.arch-p0 .arch-num{background:rgba(247,129,102,.15);color:var(--r);border:1px solid rgba(247,129,102,.3);}
+.arch-p0{border-left:3px solid var(--r);}
+.arch-p1 .arch-num{background:rgba(121,192,255,.15);color:var(--b);border:1px solid rgba(121,192,255,.3);}
+.arch-p1{border-left:3px solid var(--b);}
+.arch-p2 .arch-num{background:rgba(86,211,100,.15);color:var(--g);border:1px solid rgba(86,211,100,.3);}
+.arch-p2{border-left:3px solid var(--g);}
+.arch-p3 .arch-num{background:rgba(210,168,255,.15);color:var(--p);border:1px solid rgba(210,168,255,.3);}
+.arch-p3{border-left:3px solid var(--p);}
+.arch-p4 .arch-num{background:rgba(255,166,87,.15);color:var(--o);border:1px solid rgba(255,166,87,.3);}
+.arch-p4{border-left:3px solid var(--o);}
+.arch-p5 .arch-num{background:rgba(121,192,255,.15);color:var(--b);border:1px solid rgba(121,192,255,.3);}
+.arch-p5{border-left:3px solid var(--b);}
+.arch-p6 .arch-num{background:rgba(247,129,102,.15);color:var(--r);border:1px solid rgba(247,129,102,.3);}
+.arch-p6{border-left:3px solid var(--r);}
+
+/* ══════════════════════════════════════════════
+   PHASE CARDS — the main fix
+══════════════════════════════════════════════ */
+.phase-card{
+  border:1px solid var(--border);border-radius:14px;
+  margin-bottom:32px;overflow:hidden;
+  background:var(--surface);
+}
+
+/* Big colored left stripe + number */
+.phase-header{
+  display:flex;align-items:stretch;min-height:100px;
+  border-bottom:1px solid var(--border);
+}
+.phase-stripe{
+  width:100px;flex-shrink:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;padding:16px 8px;
+}
+.phase-num{font-size:38px;font-weight:900;line-height:1;letter-spacing:-.02em;}
+.phase-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75;}
+.phase-day{font-size:11px;font-weight:700;opacity:.65;margin-top:4px;}
+
+.phase-header-body{flex:1;padding:18px 22px;display:flex;flex-direction:column;justify-content:center;gap:10px;}
+.phase-title{font-size:19px;font-weight:800;color:var(--text);line-height:1.25;}
+.phase-tagline{font-size:13px;color:var(--muted);}
+.phase-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.ptag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.03em;}
+.pt-infra{background:rgba(255,166,87,.1); color:var(--o);border:1px solid rgba(255,166,87,.25);}
+.pt-data {background:rgba(86,211,100,.1); color:var(--g);border:1px solid rgba(86,211,100,.25);}
+.pt-ai   {background:rgba(210,168,255,.1);color:var(--p);border:1px solid rgba(210,168,255,.25);}
+.pt-ui   {background:rgba(121,192,255,.1);color:var(--b);border:1px solid rgba(121,192,255,.25);}
+.pt-ops  {background:rgba(247,129,102,.1);color:var(--r);border:1px solid rgba(247,129,102,.25);}
+
+/* Phase color themes */
+.ph0 .phase-stripe{background:linear-gradient(160deg,rgba(247,129,102,.18),rgba(247,129,102,.06));}
+.ph0 .phase-num{color:var(--r);}
+.ph0 .phase-card{border-left:4px solid var(--r);}
+
+.ph1 .phase-stripe{background:linear-gradient(160deg,rgba(121,192,255,.18),rgba(121,192,255,.06));}
+.ph1 .phase-num{color:var(--b);}
+.ph1{border-left:4px solid var(--b)!important;}
+
+.ph2 .phase-stripe{background:linear-gradient(160deg,rgba(86,211,100,.18),rgba(86,211,100,.06));}
+.ph2 .phase-num{color:var(--g);}
+.ph2{border-left:4px solid var(--g)!important;}
+
+.ph3 .phase-stripe{background:linear-gradient(160deg,rgba(210,168,255,.18),rgba(210,168,255,.06));}
+.ph3 .phase-num{color:var(--p);}
+.ph3{border-left:4px solid var(--p)!important;}
+
+.ph4 .phase-stripe{background:linear-gradient(160deg,rgba(255,166,87,.18),rgba(255,166,87,.06));}
+.ph4 .phase-num{color:var(--o);}
+.ph4{border-left:4px solid var(--o)!important;}
+
+.ph5 .phase-stripe{background:linear-gradient(160deg,rgba(121,192,255,.18),rgba(121,192,255,.06));}
+.ph5 .phase-num{color:var(--b);}
+.ph5{border-left:4px solid var(--b)!important;}
+
+.ph6 .phase-stripe{background:linear-gradient(160deg,rgba(247,129,102,.18),rgba(247,129,102,.06));}
+.ph6 .phase-num{color:var(--r);}
+.ph6{border-left:4px solid var(--r)!important;}
+
+/* Phase body: 3 columns */
+.phase-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-bottom:1px solid var(--border);}
+.phase-col{padding:20px 22px;border-right:1px solid var(--border);}
+.phase-col:last-child{border-right:none;}
+.phase-col h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--dim);margin-bottom:12px;}
+.phase-col ul{list-style:none;padding:0;}
+.phase-col li{font-size:13px;color:var(--muted);padding:4px 0;display:flex;gap:8px;align-items:flex-start;line-height:1.45;}
+.phase-col li::before{content:"→";font-size:11px;color:var(--b);margin-top:2px;flex-shrink:0;}
+.phase-col li.chk::before{content:"✓";color:var(--g);}
+.phase-col li.star::before{content:"★";color:var(--o);}
+
+/* LinkedIn hook */
+.phase-hook{padding:16px 22px;background:rgba(210,168,255,.04);border-top:none;}
+.hook-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--p);margin-bottom:6px;}
+.hook-text{font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;}
+
+/* ── DECISION GRID ── */
+.decision-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:52px;}
+.dc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.dc-q{font-size:13px;font-weight:700;color:var(--o);margin-bottom:8px;}
+.dc-a{font-size:13px;color:var(--muted);line-height:1.65;}
+.dc-a strong{color:var(--g);}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:0;
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:52px;}
+.sum-cell{padding:14px 12px;border-right:1px solid var(--border);text-align:center;}
+.sum-cell:last-child{border-right:none;}
+.sum-phase{font-size:20px;font-weight:900;margin-bottom:4px;}
+.sum-name{font-size:11px;font-weight:700;color:var(--muted);line-height:1.3;margin-bottom:6px;}
+.sum-day{font-size:10px;color:var(--dim);}
+
+/* ── CTA ── */
+.cta{background:linear-gradient(135deg,rgba(121,192,255,.06),rgba(210,168,255,.06));
+  border:1px solid rgba(121,192,255,.25);border-radius:14px;padding:36px;text-align:center;}
+.cta h3{font-size:20px;font-weight:800;margin-bottom:10px;}
+.cta p{color:var(--muted);font-size:14px;margin-bottom:24px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.cta-btn{padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;letter-spacing:.03em;}
+.cta-yes{background:var(--g);color:#000;}
+.cta-alt{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+
+@media(max-width:760px){
+  .phase-body{grid-template-columns:1fr;}
+  .phase-col{border-right:none;border-bottom:1px solid var(--border);}
+  .decision-grid{grid-template-columns:1fr;}
+  .summary-strip{grid-template-columns:repeat(2,1fr);}
+  .phase-stripe{width:80px;}
+  .phase-num{font-size:28px;}
+  .arch-layers{grid-template-columns:repeat(2,1fr);}
+  .arch-layer:nth-child(2){border-right:none;}
+  .arch-layer:nth-child(1),.arch-layer:nth-child(2){border-bottom:1px solid var(--border);}
+  .arch-items{grid-template-columns:1fr;}
+  .arch-header{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">⚡ Feedback Intelligence Platform</div>
+  <div class="topbar-sub">Vijay Rkr Madduri</div>
+  <div class="fip-toolbar-inject"></div>
+</div>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Implementation Approach</div>
+  <h1><em>⚡ Feedback Intelligence Platform ⚡</em></h1>
+  <p data-fip-edit="hero-p">Each phase tells a complete engineering story, ships full runnable production code.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="n" style="color:var(--r)">7</div><div class="l">Phases</div></div>
+    <!-- <div class="stat"><div class="n" style="color:var(--b)">7</div><div class="l">LinkedIn Days</div></div>-->
+    <div class="stat"><div class="n" style="color:var(--g)">25K+</div><div class="l">Dummy Records</div></div>
+    <div class="stat"><div class="n" style="color:var(--p)">4</div><div class="l">AI Agents</div></div>
+    <div class="stat"><div class="n" style="color:var(--o)">100%</div><div class="l">Runnable Code</div></div>
+  </div>
+</div>
+
+<!-- VISUAL SUMMARY STRIP -->
+<div class="sec-title">At a glance</div>
+<div class="summary-strip" style="margin-bottom:52px;">
+  <div class="sum-cell" style="background:rgba(247,129,102,.07);">
+    <div class="sum-phase" style="color:var(--r)">P0</div>
+    <div class="sum-name">Foundation</div>
+    <div class="sum-day">Day 1</div>
+  </div>
+  <div class="sum-cell" style="background:rgba(121,192,255,.07);">
+    <div class="sum-phase" style="color:var(--b)">P1</div>
+    <div class="sum-name">Ingestion</div>
+    <div class="sum-day">Day 2</div>
+  </div>
+  <div class="sum-cell" style="background:rgba(86,211,100,.07);">
+    <div class="sum-phase" style="color:var(--g)">P2</div>
+    <div class="sum-name">Data Platform</div>
+    <div class="sum-day">Day 3</div>
+  </div>
+  <div class="sum-cell" style="background:rgba(210,168,255,.07);">
+    <div class="sum-phase" style="color:var(--p)">P3</div>
+    <div class="sum-name">RAG Layer</div>
+    <div class="sum-day">Day 4</div>
+  </div>
+  <div class="sum-cell" style="background:rgba(255,166,87,.07);">
+    <div class="sum-phase" style="color:var(--o)">P4</div>
+    <div class="sum-name">Agents</div>
+    <div class="sum-day">Day 5</div>
+  </div>
+  <div class="sum-cell" style="background:rgba(121,192,255,.07);">
+    <div class="sum-phase" style="color:var(--b)">P5</div>
+    <div class="sum-name">Product UI</div>
+    <div class="sum-day">Day 6</div>
+  </div>
+  <div class="sum-cell" style="background:rgba(247,129,102,.07);">
+    <div class="sum-phase" style="color:var(--r)">P6</div>
+    <div class="sum-name">Production</div>
+    <div class="sum-day">Day 7</div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="sec-title">Revised architecture</div>
+<div class="arch-wrap" style="margin-bottom:52px;">
+  <div class="arch-header">
+    <div class="arch-header-title">Full Platform Architecture</div>
+    <div class="arch-header-sub">Balanced: solid infra + deep AI · Click Edit to modify</div>
+  </div>
+  <div class="arch-legend">
+    <span class="arch-legend-item"><span class="arch-legend-dot" style="background:var(--o)"></span> Infrastructure</span>
+    <span class="arch-legend-item"><span class="arch-legend-dot" style="background:var(--g)"></span> Data Pipeline</span>
+    <span class="arch-legend-item"><span class="arch-legend-dot" style="background:var(--p)"></span> AI / ML</span>
+    <span class="arch-legend-item"><span class="arch-legend-dot" style="background:var(--r)"></span> Product UI</span>
+  </div>
+  <div class="arch-layers">
+    <div class="arch-layer" style="background:rgba(247,129,102,.06);color:var(--r);">Foundation/Infra<span>P0 · P6</span></div>
+    <div class="arch-layer" style="background:rgb a(86,211,100,.06);color:var(--g);">Data<span>P1 · P2</span></div>
+    <div class="arch-layer" style="background:rgba(210,168,255,.06);color:var(--p);">Intelligence<span>P3 · P4</span></div>
+    <div class="arch-layer" style="background:rgba(121,192,255,.06);color:var(--b);">Product Experience<span>P5</span></div>
+  </div>
+  <div class="arch-flow" data-fip-edit="arch-diagram">
+
+    <div class="arch-phase arch-p0">
+      <div class="arch-phase-head">
+        <div class="arch-num">0</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Foundation</div>
+          <div class="arch-phase-day">Day 1 · FLOCI · Terraform · Helm · Event Schema</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item inf">FLOCI local AWS emulator (EKS · MSK · S3 · RDS · Secrets Manager · IAM)</div>
+        <div class="arch-item inf">Terraform modules → same HCL reused for prod AWS (provider swap only)</div>
+        <div class="arch-item inf">Helm chart skeleton deployed to FLOCI EKS</div>
+      </div>
+      <div class="arch-outcome">FeedbackEvent Pydantic schema · Security baseline · Structured logging</div>
+    </div>
+    <div class="arch-connector">↓</div>
+
+    <div class="arch-phase arch-p1">
+      <div class="arch-phase-head">
+        <div class="arch-num">1</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Data Ingestion Pipeline</div>
+          <div class="arch-phase-day">Day 2 · Kafka · Bronze landing · DLQ</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item dat">Dummy generator: 7 sources · 13 scenarios · 25K+ records</div>
+        <div class="arch-item dat">Kafka producers → feedback.raw.events (6 topics designed)</div>
+        <div class="arch-item dat">Ingestion worker: validate FeedbackEvent → S3 Bronze landing zone</div>
+        <div class="arch-item dat">DLQ: feedback.dlq.events · dead-letter monitoring · alerting</div>
+      </div>
+      <div class="arch-outcome">First real data flowing end-to-end through the platform</div>
+    </div>
+    <div class="arch-connector">↓</div>
+
+    <div class="arch-phase arch-p2">
+      <div class="arch-phase-head">
+        <div class="arch-num">2</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Data Platform (Bronze → Silver → Gold)</div>
+          <div class="arch-phase-day">Day 3 · Medallion · NLP · dbt Gold marts</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item dat">Bronze: dedup · schema enforce · Parquet · S3 partitioning</div>
+        <div class="arch-item dat">PII masker: emails · phones · names stripped before Silver</div>
+        <div class="arch-item ai">NLP worker: spaCy (entities/PII) + OpenAI (topic · sentiment · severity)</div>
+        <div class="arch-item dat">Silver: enriched events → S3 Silver + RDS PostgreSQL</div>
+        <div class="arch-item dat">Gold: dbt models → location_daily_metrics · topic_severity_index · complaint_velocity · action_recommendations</div>
+      </div>
+      <div class="arch-outcome">Raw feedback → analytics-ready governed data marts</div>
+    </div>
+    <div class="arch-connector">↓</div>
+
+    <div class="arch-phase arch-p3">
+      <div class="arch-phase-head">
+        <div class="arch-num">3</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Embeddings + RAG Layer</div>
+          <div class="arch-phase-day">Day 4 · Qdrant · Hybrid search · Retrieval</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item ai">Embedding worker: Silver masked text → text-embedding-3-small → Qdrant</div>
+        <div class="arch-item ai">Qdrant: per-tenant collection · metadata payload · batch upsert</div>
+        <div class="arch-item ai">Hybrid search: dense vector + BM25 sparse + RRF re-ranking</div>
+        <div class="arch-item ai">RAG retriever: query → top-k evidence → structured context for agents</div>
+      </div>
+      <div class="arch-outcome">Feedback searchable by meaning, not just keywords, with tenant isolation</div>
+    </div>
+    <div class="arch-connector">↓</div>
+
+    <div class="arch-phase arch-p4">
+      <div class="arch-phase-head">
+        <div class="arch-num">4</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Agentic Intelligence</div>
+          <div class="arch-phase-day">Day 5 · 4 Agents · LangGraph · Guardrails</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item ai">Data Analyst Agent: governed SQL tools → Gold marts only (no raw SQL)</div>
+        <div class="arch-item ai">Business User RAG Agent: search + summarise unstructured feedback</div>
+        <div class="arch-item ai">Business Analyst Agent: LangGraph → metrics + RAG → root cause + actions</div>
+        <div class="arch-item ai">Action Agent: insight → task creation (confirmation guardrail required)</div>
+        <div class="arch-item ai">Guardrails: tenant isolation · no LLM SQL · audit every session</div>
+      </div>
+      <div class="arch-outcome">"Why is San Jose revenue dropping?" answered with evidence + recommendations</div>
+    </div>
+    <div class="arch-connector">↓</div>
+
+    <div class="arch-phase arch-p5">
+      <div class="arch-phase-head">
+        <div class="arch-num">5</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Product Surface (Voice + Chat + Dashboard)</div>
+          <div class="arch-phase-day">Day 6 · React · WebRTC · Real-time analytics</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item ui">Voice Agent: WebRTC mic → OpenAI Realtime → governed tools → spoken answer</div>
+        <div class="arch-item ui">Chat Interface: React streaming → agent service → typed responses</div>
+        <div class="arch-item ui">Dashboard: location heatmap · rating trends · complaint velocity · topic breakdown · action items · real-time refresh</div>
+      </div>
+      <div class="arch-outcome">Full product: owners ask questions by voice or chat, see data on screen</div>
+    </div>
+    <div class="arch-connector">↓</div>
+
+    <div class="arch-phase arch-p6">
+      <div class="arch-phase-head">
+        <div class="arch-num">6</div>
+        <div class="arch-phase-meta">
+          <div class="arch-phase-title">Production Deploy + Observability</div>
+          <div class="arch-phase-day">Day 7 · CI/CD · AWS EKS · Security audit</div>
+        </div>
+      </div>
+      <div class="arch-items">
+        <div class="arch-item inf">GitHub Actions CI/CD: lint → test → build → ECR push → Helm deploy</div>
+        <div class="arch-item inf">AWS EKS deploy: same Terraform modules, real provider, zero code changes</div>
+        <div class="arch-item inf">Prometheus + Grafana + Loki: 9 platform metrics · custom dashboards</div>
+        <div class="arch-item inf">k6 load tests: 10K events/sec · voice latency benchmarks</div>
+        <div class="arch-item inf">Security audit: IAM policies · network policies · secret rotation</div>
+      </div>
+      <div class="arch-outcome">Production-grade system on real AWS — the FLOCI investment pays off</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PHASE CARDS -->
+<div class="sec-title">Phase detail — what gets built in each</div>
+
+<!-- P0 -->
+<div class="phase-card ph0">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">0</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 1</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p0-title">Foundation — FLOCI · Terraform · Helm · Event Schema</div>
+      <div class="phase-tagline" data-fip-edit="p0-tagline">The infrastructure bedrock. Every subsequent phase builds on exactly this. AWS-parity locally from minute one.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-infra">FLOCI</span>
+        <span class="ptag pt-infra">Terraform</span>
+        <span class="ptag pt-infra">Helm + EKS</span>
+        <span class="ptag pt-data">Pydantic Schema</span>
+        <span class="ptag pt-ops">Security Baseline</span>
+        <span class="ptag pt-ops">Observability</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>Infrastructure Built</h4>
+      <ul>
+        <li data-fip-edit="p0-b1">FLOCI local AWS emulator running</li>
+        <li data-fip-edit="p0-b2">Terraform modules: S3 · MSK · RDS · Secrets · EKS · IAM · Observability</li>
+        <li data-fip-edit="p0-b3">FLOCI resources provisioned via terraform apply</li>
+        <li data-fip-edit="p0-b4">Helm chart skeleton deployed into FLOCI EKS</li>
+        <li data-fip-edit="p0-b5">Full GitHub repo scaffolded</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p0-c1">All Terraform HCL modules</li>
+        <li class="chk" data-fip-edit="p0-c2">FeedbackEvent Pydantic schema + enums</li>
+        <li class="chk" data-fip-edit="p0-c3">Structured JSON logger</li>
+        <li class="chk" data-fip-edit="p0-c4">Secrets Manager config loader</li>
+        <li class="chk" data-fip-edit="p0-c5">FastAPI skeleton (health · ready · metrics)</li>
+        <li class="chk" data-fip-edit="p0-c6">Makefile · .env.example · .gitignore</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p0-s1">AWS-parity local dev, not a toy stack</li>
+        <li class="star" data-fip-edit="p0-s2">Terraform-first: same IaC for local and prod</li>
+        <li class="star" data-fip-edit="p0-s3">Security before the first feature line</li>
+        <li class="star" data-fip-edit="p0-s4">Production standards from day one</li>
+        <li class="star" data-fip-edit="p0-s5">EM thinking: foundation enables team velocity</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 1 Hook</div>
+    <div class="hook-text" data-fip-edit="p0-hook">"Most engineers start with the feature. Senior engineers start with the foundation. Here's how I spent Day 1 building an AWS-parity local environment — before writing a single line of product code — and why that decision will save weeks of cloud migration pain later."</div>
+  </div>
+</div>
+
+<!-- P1 -->
+<div class="phase-card ph1">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">1</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 2</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p1-title">Data Ingestion — Dummy Data Generator · Kafka Pipeline · DLQ</div>
+      <div class="phase-tagline" data-fip-edit="p1-tagline">25,000 realistic feedback events generated and flowing through Kafka into S3. First real data in the platform.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-data">Kafka MSK</span>
+        <span class="ptag pt-data">confluent-kafka</span>
+        <span class="ptag pt-data">S3 Bronze</span>
+        <span class="ptag pt-ops">DLQ Pattern</span>
+        <span class="ptag pt-infra">7 Sources</span>
+        <span class="ptag pt-infra">13 Scenarios</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>What Gets Built</h4>
+      <ul>
+        <li data-fip-edit="p1-b1">Dummy generator: Google · Reddit · DoorDash · UberEats · Survey · QR · Voice</li>
+        <li data-fip-edit="p1-b2">13 scenarios: cold food · missing items · rude staff · price · portions + more</li>
+        <li data-fip-edit="p1-b3">Kafka producer with schema validation before publish</li>
+        <li data-fip-edit="p1-b4">Ingestion worker: consume → validate → write S3 Bronze (Parquet)</li>
+        <li data-fip-edit="p1-b5">DLQ consumer: retry 3× → dead-letter → alert</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p1-c1">generator.py (all 7 source types)</li>
+        <li class="chk" data-fip-edit="p1-c2">kafka_producer.py (idempotent, retries)</li>
+        <li class="chk" data-fip-edit="p1-c3">ingestion_worker.py (Kafka consumer)</li>
+        <li class="chk" data-fip-edit="p1-c4">s3_writer.py (Parquet + partitioning)</li>
+        <li class="chk" data-fip-edit="p1-c5">dlq_consumer.py + alerting</li>
+        <li class="chk" data-fip-edit="p1-c6">Dockerfile + Helm values per service</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p1-s1">Event-driven architecture with real Kafka patterns</li>
+        <li class="star" data-fip-edit="p1-s2">Schema-first data contracts (not schema-last)</li>
+        <li class="star" data-fip-edit="p1-s3">DLQ for resilience — production non-negotiable</li>
+        <li class="star" data-fip-edit="p1-s4">Why dummy data > live APIs for pipeline dev</li>
+        <li class="star" data-fip-edit="p1-s5">Decoupled producers/consumers for team scale</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 2 Hook</div>
+    <div class="hook-text" data-fip-edit="p1-hook">"Before I touch a single real API, I built a generator that produces 25,000 realistic restaurant feedback events across 7 sources and 13 complaint scenarios. Here's why realistic dummy data is the difference between a working data platform and a demo that breaks on real data."</div>
+  </div>
+</div>
+
+<!-- P2 -->
+<div class="phase-card ph2">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">2</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 3</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p2-title">Data Platform — Bronze → Silver → Gold · NLP · dbt Analytics</div>
+      <div class="phase-tagline" data-fip-edit="p2-tagline">Raw messy feedback transforms into PII-safe, NLP-enriched, analytics-ready Gold marts. The intelligence foundation.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-data">Medallion Architecture</span>
+        <span class="ptag pt-data">dbt</span>
+        <span class="ptag pt-ai">spaCy + OpenAI NLP</span>
+        <span class="ptag pt-data">PII Masking</span>
+        <span class="ptag pt-data">Parquet + RDS</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>What Gets Built</h4>
+      <ul>
+        <li data-fip-edit="p2-b1">Bronze worker: dedup · timestamp normalise · Parquet partition</li>
+        <li data-fip-edit="p2-b2">PII masker: spaCy NER strips emails · phones · names before Silver</li>
+        <li data-fip-edit="p2-b3">NLP worker: sentiment + topic classification + severity (spaCy + OpenAI)</li>
+        <li data-fip-edit="p2-b4">Silver writer: enriched events → S3 Silver + RDS PostgreSQL</li>
+        <li data-fip-edit="p2-b5">dbt Gold: 4 marts — location_daily_metrics · topic_severity_index · complaint_velocity · action_recommendations</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p2-c1">cleaning_worker.py (Bronze)</li>
+        <li class="chk" data-fip-edit="p2-c2">pii_masker.py (spaCy NER)</li>
+        <li class="chk" data-fip-edit="p2-c3">nlp_worker.py (topic · sentiment · severity)</li>
+        <li class="chk" data-fip-edit="p2-c4">silver_writer.py (RDS + S3)</li>
+        <li class="chk" data-fip-edit="p2-c5">dbt/models/gold/ (4 models with tests)</li>
+        <li class="chk" data-fip-edit="p2-c6">schema.yml · sources.yml · dbt_project.yml</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p2-s1">Medallion architecture — enterprise data standard</li>
+        <li class="star" data-fip-edit="p2-s2">PII governance at pipeline level, not app level</li>
+        <li class="star" data-fip-edit="p2-s3">NLP tool selection: spaCy (throughput) + OpenAI (accuracy)</li>
+        <li class="star" data-fip-edit="p2-s4">dbt = data lineage + testing + documentation</li>
+        <li class="star" data-fip-edit="p2-s5">Data quality as engineering discipline</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 3 Hook</div>
+    <div class="hook-text" data-fip-edit="p2-hook">"Raw feedback data is noise. Here's how I built a 3-layer data platform that transforms 25K messy restaurant reviews into PII-safe, NLP-enriched Gold analytics marts — using the same Bronze/Silver/Gold medallion pattern that powers enterprise data platforms at Databricks scale."</div>
+  </div>
+</div>
+
+<!-- P3 -->
+<div class="phase-card ph3">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">3</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 4</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p3-title">RAG Layer — Embeddings · Qdrant · Hybrid Search · Retrieval</div>
+      <div class="phase-tagline" data-fip-edit="p3-tagline">Feedback becomes searchable by meaning. Hybrid dense+sparse search with per-tenant isolation. The unstructured intelligence layer.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-ai">OpenAI Embeddings</span>
+        <span class="ptag pt-ai">Qdrant</span>
+        <span class="ptag pt-ai">Hybrid Search</span>
+        <span class="ptag pt-ai">BM25 + RRF</span>
+        <span class="ptag pt-ops">Tenant Isolation</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>What Gets Built</h4>
+      <ul>
+        <li data-fip-edit="p3-b1">Embedding worker: masked Silver text → text-embedding-3-small → Qdrant batch upsert</li>
+        <li data-fip-edit="p3-b2">Qdrant: per-tenant collection · location/source/sentiment metadata payload</li>
+        <li data-fip-edit="p3-b3">Hybrid search: dense cosine + BM25 sparse + Reciprocal Rank Fusion</li>
+        <li data-fip-edit="p3-b4">RAG retriever service: query → top-k → structured evidence context</li>
+        <li data-fip-edit="p3-b5">Batch embedder for bulk processing + incremental updates</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p3-c1">embedding_worker.py</li>
+        <li class="chk" data-fip-edit="p3-c2">qdrant_store.py (collections · upsert · search)</li>
+        <li class="chk" data-fip-edit="p3-c3">hybrid_search.py (dense + BM25 + RRF)</li>
+        <li class="chk" data-fip-edit="p3-c4">rag_retriever.py (query → evidence)</li>
+        <li class="chk" data-fip-edit="p3-c5">batch_embedder.py (bulk + incremental)</li>
+        <li class="chk" data-fip-edit="p3-c6">Qdrant Helm chart + persistent volume config</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p3-s1">Hybrid search — beyond naive cosine similarity</li>
+        <li class="star" data-fip-edit="p3-s2">Tenant isolation in vector DBs (not just APIs)</li>
+        <li class="star" data-fip-edit="p3-s3">PII-safe indexing: masked text only in vectors</li>
+        <li class="star" data-fip-edit="p3-s4">Why Qdrant over pgvector at this scale</li>
+        <li class="star" data-fip-edit="p3-s5">Production RAG vs demo RAG: what's different</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 4 Hook</div>
+    <div class="hook-text" data-fip-edit="p3-hook">"Everyone builds RAG. Almost nobody builds it right. Here's how I built a hybrid vector search layer that finds relevant restaurant feedback by meaning — not keywords — with BM25 re-ranking, per-tenant Qdrant isolation, and PII-safe indexing. The differences are what matter in production."</div>
+  </div>
+</div>
+
+<!-- P4 -->
+<div class="phase-card ph4">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">4</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 5</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p4-title">Agentic Intelligence — 4 Agents · LangGraph · Guardrails · Audit</div>
+      <div class="phase-tagline" data-fip-edit="p4-tagline">The reasoning layer. Structured + unstructured intelligence fused. Agents that are safe, auditable, and genuinely useful.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-ai">LangGraph</span>
+        <span class="ptag pt-ai">4 Agent Types</span>
+        <span class="ptag pt-ai">Tool Calling</span>
+        <span class="ptag pt-ops">Guardrails</span>
+        <span class="ptag pt-ops">Audit Logging</span>
+        <span class="ptag pt-ops">Tenant Safety</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>What Gets Built</h4>
+      <ul>
+        <li data-fip-edit="p4-b1">Data Analyst Agent: governed read-only SQL tools → Gold marts only</li>
+        <li data-fip-edit="p4-b2">Business User RAG Agent: search + summarise unstructured feedback</li>
+        <li data-fip-edit="p4-b3">Business Analyst Agent: LangGraph → call both agents → root cause + actions</li>
+        <li data-fip-edit="p4-b4">Action Agent: recommendation → task (confirmation guardrail required)</li>
+        <li data-fip-edit="p4-b5">Full audit trail: prompt · tool calls · results · answer · latency</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p4-c1">data_analyst_agent.py</li>
+        <li class="chk" data-fip-edit="p4-c2">rag_agent.py</li>
+        <li class="chk" data-fip-edit="p4-c3">business_analyst_agent.py (LangGraph flow)</li>
+        <li class="chk" data-fip-edit="p4-c4">action_agent.py</li>
+        <li class="chk" data-fip-edit="p4-c5">agent_tools.py (all governed tool functions)</li>
+        <li class="chk" data-fip-edit="p4-c6">guardrails.py · audit_logger.py</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p4-s1">Multi-agent orchestration with LangGraph</li>
+        <li class="star" data-fip-edit="p4-s2">LLM safety: no raw SQL ever touches the DB</li>
+        <li class="star" data-fip-edit="p4-s3">Structured + unstructured intelligence fusion</li>
+        <li class="star" data-fip-edit="p4-s4">Auditability as a production AI requirement</li>
+        <li class="star" data-fip-edit="p4-s5">EM angle: agent design for business operators</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 5 Hook</div>
+    <div class="hook-text" data-fip-edit="p4-hook">"I built 4 AI agents that together answer: 'Why is San Jose revenue dropping and what should the manager do?' — combining structured metrics from our data warehouse with 25K customer reviews via RAG, orchestrated with LangGraph. Here's the architecture that makes this safe and auditable in production."</div>
+  </div>
+</div>
+
+<!-- P5 -->
+<div class="phase-card ph5">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">5</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 6</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p5-title">Product Surface — Voice Agent · Chat UI · Analytics Dashboard</div>
+      <div class="phase-tagline" data-fip-edit="p5-tagline">The full user experience layer. Voice, chat, and visual analytics — all connected to the same governed agent backend.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-ui">React</span>
+        <span class="ptag pt-ui">WebRTC Voice</span>
+        <span class="ptag pt-ui">Streaming Chat</span>
+        <span class="ptag pt-ai">OpenAI Realtime</span>
+        <span class="ptag pt-infra">FastAPI</span>
+        <span class="ptag pt-ui">Recharts</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>What Gets Built</h4>
+      <ul>
+        <li data-fip-edit="p5-b1">Voice Agent: browser mic → WebRTC → OpenAI Realtime → governed tools → spoken answer</li>
+        <li data-fip-edit="p5-b2">Chat interface: React streaming → agent service → typed responses</li>
+        <li data-fip-edit="p5-b3">Dashboard: location heatmap · rating trend · complaint velocity chart</li>
+        <li data-fip-edit="p5-b4">Topic breakdown table · action items list · real-time refresh</li>
+        <li data-fip-edit="p5-b5">FastAPI backend: ephemeral voice sessions · chat endpoint · dashboard API</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p5-c1">voice_service.py (FastAPI + session mgmt)</li>
+        <li class="chk" data-fip-edit="p5-c2">VoiceAgent.tsx (WebRTC component)</li>
+        <li class="chk" data-fip-edit="p5-c3">ChatInterface.tsx (streaming)</li>
+        <li class="chk" data-fip-edit="p5-c4">Dashboard.tsx + LocationHeatmap.tsx</li>
+        <li class="chk" data-fip-edit="p5-c5">TrendChart.tsx · ComplaintTable.tsx · ActionItems.tsx</li>
+        <li class="chk" data-fip-edit="p5-c6">api/dashboard.py (Gold mart queries)</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p5-s1">Voice AI in production (not a demo toy)</li>
+        <li class="star" data-fip-edit="p5-s2">Full-stack AI product delivery end to end</li>
+        <li class="star" data-fip-edit="p5-s3">Real-time streaming in AI chat interfaces</li>
+        <li class="star" data-fip-edit="p5-s4">Dashboard design for operational decisions</li>
+        <li class="star" data-fip-edit="p5-s5">UX for non-technical restaurant managers</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 6 Hook</div>
+    <div class="hook-text" data-fip-edit="p5-hook">"On Day 6, a restaurant owner can ask 'Which location needs attention today?' by voice — and hear an answer grounded in real data from 25K feedback events, structured analytics, and AI reasoning. Here's what it takes to connect voice, chat, and dashboard into one coherent product surface."</div>
+  </div>
+</div>
+
+<!-- P6 -->
+<div class="phase-card ph6">
+  <div class="phase-header">
+    <div class="phase-stripe">
+      <div class="phase-num">6</div>
+      <div class="phase-label">Phase</div>
+      <div class="phase-day">Day 7</div>
+    </div>
+    <div class="phase-header-body">
+      <div class="phase-title" data-fip-edit="p6-title">Production — CI/CD · AWS EKS Deploy · Observability · Security Audit</div>
+      <div class="phase-tagline" data-fip-edit="p6-tagline">The same system, on real AWS. Full CI/CD pipeline, Grafana observability, k6 load tests, and security hardening.</div>
+      <div class="phase-tags">
+        <span class="ptag pt-ops">GitHub Actions</span>
+        <span class="ptag pt-infra">AWS EKS</span>
+        <span class="ptag pt-ops">Prometheus + Grafana</span>
+        <span class="ptag pt-ops">k6 Load Tests</span>
+        <span class="ptag pt-ops">IAM Hardening</span>
+        <span class="ptag pt-infra">ECR</span>
+      </div>
+    </div>
+  </div>
+  <div class="phase-body">
+    <div class="phase-col">
+      <h4>What Gets Built</h4>
+      <ul>
+        <li data-fip-edit="p6-b1">GitHub Actions: lint → test → Docker build → ECR push → Helm deploy</li>
+        <li data-fip-edit="p6-b2">AWS EKS deploy: same Terraform modules, real AWS provider, zero code changes</li>
+        <li data-fip-edit="p6-b3">Prometheus + Grafana + Loki: 9 platform metrics + custom dashboards</li>
+        <li data-fip-edit="p6-b4">k6 load tests: 10K events/sec · voice latency benchmarks · agent throughput</li>
+        <li data-fip-edit="p6-b5">Security audit: IAM least-privilege · network policies · secret rotation · pen-test checklist</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>Production Code Ships</h4>
+      <ul>
+        <li class="chk" data-fip-edit="p6-c1">.github/workflows/deploy.yml (full CI/CD)</li>
+        <li class="chk" data-fip-edit="p6-c2">infra/terraform/envs/prod-aws/ (complete)</li>
+        <li class="chk" data-fip-edit="p6-c3">Grafana dashboard JSON (9 panels)</li>
+        <li class="chk" data-fip-edit="p6-c4">prometheus-rules.yaml (alert rules)</li>
+        <li class="chk" data-fip-edit="p6-c5">k6/load_test.js (scenarios)</li>
+        <li class="chk" data-fip-edit="p6-c6">security/iam-policies/ · network-policies.yaml</li>
+      </ul>
+    </div>
+    <div class="phase-col">
+      <h4>LinkedIn / Interview Story</h4>
+      <ul>
+        <li class="star" data-fip-edit="p6-s1">FLOCI investment pays off: zero-change AWS deploy</li>
+        <li class="star" data-fip-edit="p6-s2">Production observability beyond just logging</li>
+        <li class="star" data-fip-edit="p6-s3">CI/CD for ML/AI systems — same as software</li>
+        <li class="star" data-fip-edit="p6-s4">Load testing AI pipelines at scale</li>
+        <li class="star" data-fip-edit="p6-s5">Security-at-scale EM thinking for interviews</li>
+      </ul>
+    </div>
+  </div>
+  <div class="phase-hook">
+    <div class="hook-label">📢 LinkedIn Day 7 Hook</div>
+    <div class="hook-text" data-fip-edit="p6-hook">"Day 7: The platform I've been building locally for 6 days is now running on real AWS — zero code changes, just a Terraform provider swap. Here's what production-grade actually looks like: CI/CD pipeline, Grafana observability stack, k6 load tests hitting 10K events/sec, and a security audit that would pass enterprise review."</div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE DECISIONS -->
+<div class="sec-title" style="margin-top:52px;">Key architecture decisions</div>
+<div class="decision-grid">
+  <div class="dc"><div class="dc-q">Why LangGraph over bare LangChain?</div><div class="dc-a" data-fip-edit="dc1">The Business Analyst Agent needs to <strong>call multiple sub-agents and combine results</strong> with conditional routing. LangGraph models this as an explicit stateful graph with edges and retry logic — LangChain alone doesn't handle multi-agent state cleanly. Stronger production story, stronger interview story.</div></div>
+  <div class="dc"><div class="dc-q">Why Qdrant over pgvector?</div><div class="dc-a" data-fip-edit="dc2">pgvector is simpler but <strong>Qdrant gives hybrid search (dense + BM25) natively</strong>, per-collection tenant isolation, payload filtering, and horizontal scale. At 100K+ vectors per tenant, pgvector query performance degrades. Qdrant scales independently of RDS.</div></div>
+  <div class="dc"><div class="dc-q">Why spaCy + OpenAI for NLP, not just OpenAI?</div><div class="dc-a" data-fip-edit="dc3"><strong>spaCy handles entity extraction and PII detection locally</strong> — no API cost, no latency, 10K docs/sec. OpenAI handles nuanced topic classification where reasoning matters. Right tool for each job = cost-efficient at pipeline scale = engineering judgment interviewers want to hear.</div></div>
+  <div class="dc"><div class="dc-q">Why dbt instead of raw SQL for Gold layer?</div><div class="dc-a" data-fip-edit="dc4"><strong>dbt gives you data lineage, model testing, documentation, and incremental runs</strong> — the analytics engineering standard. Any EM role at a data-serious company expects dbt fluency. Raw SQL models don't scale with team size or model complexity.</div></div>
+  <div class="dc"><div class="dc-q">Why hybrid search (dense + sparse)?</div><div class="dc-a" data-fip-edit="dc5">Pure vector search misses <strong>exact keyword matches</strong> (menu item names, location slugs, complaint codes). BM25 catches what embeddings miss. RRF re-ranking fuses both scores. This is how production RAG works at Elastic, Cohere, and Pinecone — not just demo RAG.</div></div>
+  <div class="dc"><div class="dc-q">Why 7 LinkedIn days not 10?</div><div class="dc-a" data-fip-edit="dc6"><strong>Shorter series = higher completion rate = more algorithm amplification</strong> on LinkedIn. A 10-post series loses momentum. Each of these 7 posts is also denser — "I built a full data platform in one post" reads more impressive than spreading it thin. Quality over quantity for positioning.</div></div>
+</div>
+
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  FIP EDIT ENGINE v2  —  Feedback Intelligence Platform
+//  Standard edit/save system embedded in every phase HTML document.
+//
+//  Features:
+//    • Edit Mode toggle (click any marked element to edit)
+//    • Auto-save to localStorage (debounced 500ms)
+//    • Edits persist across browser sessions
+//    • Edit History panel (last 60 edits, per-element restore)
+//    • Find & Replace across all editable content
+//    • Export: saves edited HTML to disk with edits baked in
+//    • Reset: wipe all edits and reload original
+//    • Keyboard shortcuts: ⌘E edit, ⌘S save, ⌘F find, Esc exit
+//    • Toast notifications for every action
+//    • Unsaved-changes warning on page close
+//
+//  Usage in any phase HTML:
+//    1. Add data-fip-edit="unique-id" to every editable element
+//    2. Paste this script at bottom of <body>
+//    3. Call FIP.init('phase-key', 'filename.html') on DOMContentLoaded
+// ═══════════════════════════════════════════════════════════════════════
+
+const FIP = (() => {
+
+  // ── Config ────────────────────────────────────────────────────────
+  let PHASE_KEY   = 'fip_phase';   // set per document via init()
+  let EXPORT_NAME = 'document.html';
+  const MAX_HIST  = 60;
+  let editMode    = false;
+  let hasChanges  = false;
+  let saveTimer   = null;
+  let historyOpen = false;
+  let findOpen    = false;
+
+  const storageKey  = () => `fip_edits__${PHASE_KEY}`;
+  const histKey     = () => `fip_hist__${PHASE_KEY}`;
+  const checkKey    = () => `fip_checks__${PHASE_KEY}`;
+
+  // ── Storage helpers ───────────────────────────────────────────────
+  const store = {
+    get:    k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } },
+    set:    (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    remove: k => localStorage.removeItem(k),
+  };
+
+  // ── Editable elements ─────────────────────────────────────────────
+  const editables = () => [...document.querySelectorAll('[data-fip-edit]')];
+
+  // ── Apply saved edits on load ─────────────────────────────────────
+  function applyEdits() {
+    const edits = store.get(storageKey()) || {};
+    editables().forEach(el => {
+      const id = el.dataset.fipEdit;
+      if (edits[id] == null) return;
+      el.tagName === 'PRE' ? (el.textContent = edits[id]) : (el.innerHTML = edits[id]);
+    });
+  }
+
+  // ── Save one element's edit ───────────────────────────────────────
+  function persistEdit(el) {
+    const id   = el.dataset.fipEdit;
+    const val  = el.tagName === 'PRE' ? el.textContent : el.innerHTML;
+    const edits = store.get(storageKey()) || {};
+    const prev  = edits[id];
+    if (prev === val) return;   // no actual change
+
+    // history entry
+    const hist = store.get(histKey()) || [];
+    hist.unshift({ id, label: labelOf(el), prev: prev ?? '', curr: val, ts: Date.now() });
+    store.set(histKey(), hist.slice(0, MAX_HIST));
+
+    edits[id] = val;
+    store.set(storageKey(), edits);
+    hasChanges = true;
+    toast('✓ Saved', 'green');
+    if (historyOpen) renderHistory();
+  }
+
+  function scheduleSave(el) {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => persistEdit(el), 500);
+  }
+
+  // ── Label helper ──────────────────────────────────────────────────
+  function labelOf(el) {
+    const sec = el.closest('[data-section-label]');
+    if (sec) return sec.dataset.sectionLabel;
+    const h = el.closest('section,div')?.querySelector('h2,h3,h4');
+    if (h) return h.textContent.trim().slice(0, 40);
+    if (el.tagName === 'PRE') return 'Code Block · ' + (el.textContent.trim().slice(0, 30));
+    return el.dataset.fipEdit;
+  }
+
+  // ── Toggle edit mode ──────────────────────────────────────────────
+  function toggleEditMode() {
+    editMode = !editMode;
+    document.body.classList.toggle('fip-edit-mode', editMode);
+    const btn = document.getElementById('fip-edit-btn');
+    if (btn) btn.textContent = editMode ? '✅ Done' : '✏️ Edit';
+    const badge = document.getElementById('fip-edit-badge');
+    if (badge) badge.style.display = editMode ? 'flex' : 'none';
+
+    editables().forEach(el => {
+      el.contentEditable = editMode ? 'true' : 'false';
+      if (el.tagName === 'PRE') {
+        el.spellcheck = false;
+        el.style.whiteSpace = 'pre';
+      }
+    });
+
+    if (editMode) {
+      // attach listeners fresh each time
+      editables().forEach(el => {
+        el._fipInput = () => scheduleSave(el);
+        el._fipBlur  = () => { clearTimeout(saveTimer); persistEdit(el); };
+        el.addEventListener('input', el._fipInput);
+        el.addEventListener('blur',  el._fipBlur);
+      });
+      toast('✏️ Edit mode on — click any highlighted area to edit', 'blue', 3000);
+    } else {
+      editables().forEach(el => {
+        if (el._fipInput) el.removeEventListener('input', el._fipInput);
+        if (el._fipBlur)  el.removeEventListener('blur',  el._fipBlur);
+      });
+      toast('Edit mode off', 'gray');
+    }
+  }
+
+  // ── Export edited HTML ────────────────────────────────────────────
+  function exportHTML() {
+    // Temporarily strip contenteditable so the export is static
+    editables().forEach(el => el.removeAttribute('contenteditable'));
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    editables().forEach(el => { el.contentEditable = editMode ? 'true' : 'false'; });
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const a    = Object.assign(document.createElement('a'), {
+      href:     URL.createObjectURL(blob),
+      download: EXPORT_NAME,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('💾 Saved as ' + EXPORT_NAME, 'green', 3000);
+    hasChanges = false;
+  }
+
+  // ── Reset all edits ───────────────────────────────────────────────
+  function resetEdits() {
+    const edits = store.get(storageKey()) || {};
+    if (!Object.keys(edits).length) { toast('Nothing to reset', 'gray'); return; }
+    if (!confirm('Reset ALL edits to the original content?\n\nThis cannot be undone — your edit history will also be cleared.')) return;
+    store.remove(storageKey());
+    store.remove(histKey());
+    hasChanges = false;
+    toast('↺ Reset — reloading…', 'orange', 1200);
+    setTimeout(() => location.reload(), 1000);
+  }
+
+  // ── Restore single edit from history ─────────────────────────────
+  function restoreEdit(idx) {
+    const hist = store.get(histKey()) || [];
+    const item = hist[idx];
+    if (!item) return;
+    const el = document.querySelector(`[data-fip-edit="${item.id}"]`);
+    if (!el) { toast('Element not found on page', 'orange'); return; }
+    el.tagName === 'PRE' ? (el.textContent = item.curr) : (el.innerHTML = item.curr);
+    persistEdit(el);
+    toast('↩ Restored: ' + item.label.slice(0, 30), 'blue');
+  }
+
+  // ── Render history panel ──────────────────────────────────────────
+  function renderHistory() {
+    const panel = document.getElementById('fip-hist-list');
+    if (!panel) return;
+    const hist  = store.get(histKey()) || [];
+    if (!hist.length) {
+      panel.innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:8px 0">No edits recorded yet.<br>Enable Edit Mode to start.</p>';
+      return;
+    }
+    panel.innerHTML = hist.map((item, i) => `
+      <div class="fip-hist-item">
+        <div class="fip-hi-label">${esc(item.label.slice(0, 38))}</div>
+        <div class="fip-hi-time">${relTime(item.ts)}</div>
+        <div class="fip-hi-preview">${esc(strip(item.curr).slice(0, 70))}…</div>
+        <div class="fip-hi-restore" onclick="FIP.restoreEdit(${i})">↩ Restore this version</div>
+      </div>`).join('');
+  }
+
+  function toggleHistory() {
+    historyOpen = !historyOpen;
+    const panel = document.getElementById('fip-hist-panel');
+    if (panel) panel.classList.toggle('fip-open', historyOpen);
+    if (historyOpen) renderHistory();
+  }
+
+  // ── Find & Replace ────────────────────────────────────────────────
+  function toggleFind() {
+    findOpen = !findOpen;
+    const panel = document.getElementById('fip-find-panel');
+    if (panel) panel.style.display = findOpen ? 'flex' : 'none';
+    if (findOpen) document.getElementById('fip-find-input')?.focus();
+  }
+
+  function doReplace() {
+    const find    = document.getElementById('fip-find-input')?.value || '';
+    const replace = document.getElementById('fip-replace-input')?.value || '';
+    if (!find) { toast('Enter search text', 'orange'); return; }
+    let count = 0;
+    editables().forEach(el => {
+      const content = el.tagName === 'PRE' ? el.textContent : el.innerHTML;
+      if (!content.includes(find)) return;
+      const updated = content.split(find).join(replace);
+      el.tagName === 'PRE' ? (el.textContent = updated) : (el.innerHTML = updated);
+      persistEdit(el);
+      count++;
+    });
+    toast(count ? `✓ Replaced in ${count} element(s)` : 'Not found', count ? 'green' : 'orange');
+  }
+
+  // ── Checklist persistence ─────────────────────────────────────────
+  function saveChecks() {
+    const state = {};
+    document.querySelectorAll('[data-check-id]').forEach(el => {
+      state[el.dataset.checkId] = el.classList.contains('fip-checked');
+    });
+    store.set(checkKey(), state);
+    updateProgress();
+  }
+
+  function loadChecks() {
+    const state = store.get(checkKey()) || {};
+    document.querySelectorAll('[data-check-id]').forEach(el => {
+      if (state[el.dataset.checkId]) {
+        el.classList.add('fip-checked');
+        const box = el.querySelector('.fip-chk-box');
+        if (box) box.textContent = '✓';
+      }
+    });
+    updateProgress();
+  }
+
+  function toggleCheck(el) {
+    const isDone = el.classList.toggle('fip-checked');
+    const box = el.querySelector('.fip-chk-box');
+    if (box) box.textContent = isDone ? '✓' : '';
+    saveChecks();
+  }
+
+  function updateProgress() {
+    const all  = document.querySelectorAll('[data-check-id]').length;
+    const done = document.querySelectorAll('[data-check-id].fip-checked').length;
+    const pct  = all ? Math.round((done / all) * 100) : 0;
+    const pctEl = document.getElementById('fip-progress-pct');
+    const bar   = document.getElementById('fip-progress-bar');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (bar)   bar.style.width   = pct + '%';
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────
+  const TOAST_COLORS = {
+    green:  ['rgba(86,211,100,0.12)',  'rgba(86,211,100,0.4)',  '#56d364'],
+    blue:   ['rgba(121,192,255,0.12)', 'rgba(121,192,255,0.4)', '#79c0ff'],
+    orange: ['rgba(255,166,87,0.12)',  'rgba(255,166,87,0.4)',  '#ffa657'],
+    gray:   ['rgba(110,118,129,0.12)', 'rgba(110,118,129,0.4)', '#8b949e'],
+  };
+
+  function toast(msg, color = 'green', duration = 2000) {
+    let el = document.getElementById('fip-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'fip-toast';
+      el.style.cssText = `
+        position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+        padding:10px 20px; border-radius:24px; font-size:13px; font-weight:600;
+        z-index:9999; pointer-events:none; opacity:0;
+        transition:all 0.25s; white-space:nowrap; border:1px solid;`;
+      document.body.appendChild(el);
+    }
+    const [bg, border, text] = TOAST_COLORS[color] || TOAST_COLORS.green;
+    Object.assign(el.style, { background: bg, borderColor: border, color: text });
+    el.textContent = msg;
+    clearTimeout(el._t1); clearTimeout(el._t2);
+    requestAnimationFrame(() => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    el._t1 = setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-50%) translateY(10px)';
+    }, duration - 300);
+  }
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────
+  function initKeyboard() {
+    document.addEventListener('keydown', e => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.key === 'e') { e.preventDefault(); toggleEditMode(); }
+      if (mod && e.key === 's') { e.preventDefault(); exportHTML(); }
+      if (mod && e.key === 'f') { e.preventDefault(); toggleFind(); }
+      if (e.key === 'Escape') {
+        if (editMode) toggleEditMode();
+        if (historyOpen) toggleHistory();
+        if (findOpen) toggleFind();
+      }
+    });
+  }
+
+  // ── Unsaved-changes warning ───────────────────────────────────────
+  function initUnloadWarning() {
+    window.addEventListener('beforeunload', e => {
+      if (hasChanges) { e.preventDefault(); e.returnValue = ''; }
+    });
+  }
+
+  // ── Utilities ─────────────────────────────────────────────────────
+  const esc  = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const strip= s => String(s).replace(/<[^>]*>/g, '');
+  const relTime = ts => {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60)  return 'just now';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    if (s < 86400) return Math.floor(s/3600) + 'h ago';
+    return new Date(ts).toLocaleDateString();
+  };
+
+  // ── Inject CSS ────────────────────────────────────────────────────
+  function injectCSS() {
+    if (document.getElementById('fip-engine-css')) return;
+    const style = document.createElement('style');
+    style.id = 'fip-engine-css';
+    style.textContent = `
+/* FIP Edit Engine Styles */
+body.fip-edit-mode [data-fip-edit]:not([contenteditable="false"]),
+body.fip-edit-mode [data-fip-edit][contenteditable="true"] {
+  outline: 2px dashed rgba(121,192,255,0.45);
+  outline-offset: 3px; border-radius: 4px; cursor: text;
+  transition: outline 0.15s;
+}
+body.fip-edit-mode [data-fip-edit][contenteditable="true"]:hover {
+  outline-color: rgba(121,192,255,0.75);
+  background: rgba(121,192,255,0.03);
+}
+body.fip-edit-mode [data-fip-edit][contenteditable="true"]:focus {
+  outline: 2px solid #79c0ff; outline-offset: 3px;
+  background: rgba(121,192,255,0.05); border-radius: 4px;
+}
+body.fip-edit-mode pre[data-fip-edit][contenteditable="true"] {
+  outline-color: rgba(255,166,87,0.5);
+}
+body.fip-edit-mode pre[data-fip-edit][contenteditable="true"]:focus {
+  outline-color: #ffa657; background: rgba(255,166,87,0.03);
+}
+/* History panel */
+#fip-hist-panel {
+  position:fixed; right:0; top:52px;
+  width:300px; height:calc(100vh - 52px);
+  background:#161b22; border-left:1px solid #30363d;
+  z-index:500; overflow-y:auto; padding:16px;
+  transform:translateX(100%); transition:transform 0.25s;
+}
+#fip-hist-panel.fip-open { transform:translateX(0); }
+#fip-hist-panel h3 { font-size:13px; font-weight:700; color:#79c0ff; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #30363d; }
+.fip-hist-item { padding:10px 12px; background:#1c2333; border:1px solid #30363d; border-radius:6px; margin-bottom:8px; }
+.fip-hi-label  { font-size:12px; font-weight:700; color:#ffa657; margin-bottom:3px; }
+.fip-hi-time   { font-size:11px; color:#6e7681; margin-bottom:4px; }
+.fip-hi-preview{ font-size:12px; color:#8b949e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fip-hi-restore{ margin-top:7px; font-size:11px; color:#79c0ff; cursor:pointer; text-decoration:underline; }
+.fip-hi-restore:hover { color:#d2a8ff; }
+/* Find panel */
+#fip-find-panel {
+  position:fixed; top:60px; left:50%; transform:translateX(-50%);
+  background:#1c2333; border:1px solid #30363d; border-radius:10px;
+  padding:14px 18px; z-index:600; display:none; gap:10px; align-items:center;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5); flex-wrap:wrap; min-width:440px;
+}
+#fip-find-panel input {
+  background:#0d1117; border:1px solid #30363d; color:#e6edf3;
+  padding:6px 12px; border-radius:6px; font-size:13px; outline:none;
+  width:160px;
+}
+#fip-find-panel input:focus { border-color:#79c0ff; }
+#fip-find-panel button {
+  padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700;
+  cursor:pointer; border:none;
+}
+.fip-btn-replace { background:#ffa657; color:#000; }
+.fip-btn-cancel  { background:#30363d; color:#8b949e; }
+/* Checklist */
+[data-check-id] { cursor:pointer; user-select:none; }
+[data-check-id].fip-checked { opacity:0.55; text-decoration:line-through; }
+[data-check-id].fip-checked .fip-chk-box { background:#56d364; border-color:#56d364; color:#000; }
+.fip-chk-box {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:18px; height:18px; border:2px solid #30363d; border-radius:4px;
+  font-size:11px; flex-shrink:0; transition:all 0.15s; margin-right:8px;
+}
+/* Toolbar extras */
+.fip-edit-badge {
+  display:none; align-items:center; gap:5px;
+  background:rgba(86,211,100,0.1); border:1px solid rgba(86,211,100,0.35);
+  color:#56d364; font-size:11px; font-weight:700; padding:3px 10px;
+  border-radius:20px; letter-spacing:0.04em;
+}
+body.fip-edit-mode .fip-edit-badge { display:flex; }
+/* KB shortcut chips */
+.fip-kbd {
+  display:inline-block; background:#1c2333; border:1px solid #30363d;
+  padding:1px 6px; border-radius:4px; font-size:11px; color:#8b949e;
+  font-family:monospace;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  // ── Inject toolbar HTML (appended to existing topbar) ─────────────
+  function injectToolbar() {
+    const bar = document.querySelector('.fip-toolbar-inject');
+    if (!bar) return;
+    bar.innerHTML = `
+      <span class="fip-edit-badge" id="fip-edit-badge">✏️ EDIT MODE</span>
+      <button onclick="FIP.toggleHistory()" title="Edit history (shows past edits)" style="background:#1c2333;color:#8b949e;border:1px solid #30363d;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🕓 History</button>
+      <button onclick="FIP.toggleFind()" title="Find & Replace (⌘F)" style="background:#1c2333;color:#8b949e;border:1px solid #30363d;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🔍 Find</button>
+      <button id="fip-edit-btn" onclick="FIP.toggleEditMode()" title="Toggle edit mode (⌘E)" style="background:#1c2333;color:#8b949e;border:1px solid #30363d;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">✏️ Edit</button>
+      <button onclick="FIP.exportHTML()" title="Save HTML to disk (⌘S)" style="background:#f78166;color:#000;border:none;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">💾 Save</button>
+      <button onclick="FIP.resetEdits()" title="Reset all edits to original" style="background:#1c2333;color:#6e7681;border:1px solid #30363d;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">↺</button>
+    `;
+  }
+
+  // Inject find panel
+  function injectFindPanel() {
+    if (document.getElementById('fip-find-panel')) return;
+    const el = document.createElement('div');
+    el.id = 'fip-find-panel';
+    el.innerHTML = `
+      <span style="font-size:12px;font-weight:700;color:#8b949e;white-space:nowrap;">Find &amp; Replace</span>
+      <input id="fip-find-input"    placeholder="Find…"    onkeydown="if(event.key==='Enter')FIP.doReplace()"/>
+      <input id="fip-replace-input" placeholder="Replace with…" onkeydown="if(event.key==='Enter')FIP.doReplace()"/>
+      <button class="fip-btn-replace" onclick="FIP.doReplace()">Replace All</button>
+      <button class="fip-btn-cancel"  onclick="FIP.toggleFind()">✕</button>
+    `;
+    document.body.appendChild(el);
+  }
+
+  // Inject history panel
+  function injectHistoryPanel() {
+    if (document.getElementById('fip-hist-panel')) return;
+    const el = document.createElement('div');
+    el.id = 'fip-hist-panel';
+    el.innerHTML = `
+      <h3>🕓 Edit History
+        <span onclick="FIP.toggleHistory()" style="float:right;cursor:pointer;color:#6e7681;font-weight:400;font-size:12px;">✕ close</span>
+      </h3>
+      <div id="fip-hist-list"></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #30363d;">
+        <p style="font-size:11px;color:#6e7681;line-height:1.6">
+          <span class="fip-kbd">⌘E</span> edit &nbsp;
+          <span class="fip-kbd">⌘S</span> save &nbsp;
+          <span class="fip-kbd">⌘F</span> find &nbsp;
+          <span class="fip-kbd">Esc</span> exit
+        </p>
+      </div>
+    `;
+    document.body.appendChild(el);
+  }
+
+  // ── Public API ────────────────────────────────────────────────────
+  function init(phaseKey, exportFilename) {
+    PHASE_KEY   = phaseKey   || 'fip_phase';
+    EXPORT_NAME = exportFilename || 'fip_document.html';
+
+    injectCSS();
+    injectToolbar();
+    injectFindPanel();
+    injectHistoryPanel();
+    applyEdits();
+    loadChecks();
+    initKeyboard();
+    initUnloadWarning();
+
+    console.log(`[FIP Edit Engine] Initialised for "${PHASE_KEY}". Editable elements: ${editables().length}`);
+  }
+
+  return {
+    init, toggleEditMode, exportHTML, resetEdits,
+    toggleHistory, renderHistory, restoreEdit,
+    toggleFind, doReplace,
+    toggleCheck, saveChecks, loadChecks, updateProgress,
+    toast,
+  };
+})();
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  FIP.init('grouping-proposal-v2', 'phase_grouping_proposal_v2_edited.html');
+});
+</script>
+</body>
+</html>

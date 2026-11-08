@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIP Phase 1 — Data Ingestion Continuation | AI Feedback Intelligence Platform</title>
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:          #0B0F1A;
+  --surface:     #111827;
+  --surface2:    #1A2235;
+  --surface3:    #1F2D44;
+  --border:      #243047;
+  --border-hi:   #2E3F60;
+
+  /* Phase 1 accent: amber-orange — ingestion, fire, first spark */
+  --accent:      #F97316;
+  --accent-dim:  #C2570D;
+  --accent-glow: rgba(249,115,22,0.16);
+  --accent2:     #3B82F6;   /* blue for code blocks */
+  --accent3:     #F59E0B;   /* amber for warnings */
+  --accent4:     #EF4444;   /* red for production dangers */
+  --accent5:     #8B5CF6;   /* purple for career content */
+
+  --text:        #E2E8F0;
+  --text-muted:  #94A3B8;
+  --text-faint:  #475569;
+
+  --radius:      8px;
+  --radius-lg:   14px;
+  --font-mono:   'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-ui:     'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── SCROLLBAR ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+/* ── PHASE STRIPE HEADER ────────────────────────────────────── */
+.phase-stripe {
+  background: linear-gradient(135deg, #F97316 0%, #FBBF24 60%, #F97316 100%);
+  padding: 0 40px;
+  display: flex;
+  align-items: stretch;
+  min-height: 9px;
+}
+
+/* ── TOP NAV ────────────────────────────────────────────────── */
+.topnav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.topnav-brand { display: flex; align-items: center; gap: 12px; }
+.topnav-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #000;
+  letter-spacing: -0.5px;
+}
+.topnav-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.topnav-sub   { font-size: 12px; color: var(--text-muted); }
+.topnav-phase { display: flex; align-items: center; gap: 8px; }
+.phase-badge {
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── HERO ───────────────────────────────────────────────────── */
+.hero {
+  padding: 64px 40px 56px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 16px;
+}
+.hero-number {
+  position: absolute; right: 30px; top: 40px;
+  font-size: 180px; font-weight: 900;
+  color: rgba(249,115,22,0.04);
+  line-height: 1; user-select: none;
+  font-family: var(--font-mono);
+}
+.hero h1 {
+  font-size: 42px; font-weight: 800;
+  line-height: 1.15; letter-spacing: -1px;
+  margin-bottom: 20px; max-width: 700px;
+}
+.hero h1 span { color: var(--accent); }
+.hero-desc {
+  font-size: 16px; color: var(--text-muted);
+  max-width: 640px; margin-bottom: 32px; line-height: 1.8;
+}
+
+/* ── STAT STRIP ─────────────────────────────────────────────── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  overflow: hidden; max-width: 780px; margin-bottom: 40px;
+}
+.stat-item { background: var(--surface); padding: 20px 24px; text-align: center; }
+.stat-item .val {
+  font-size: 26px; font-weight: 800; color: var(--accent);
+  font-family: var(--font-mono); line-height: 1; margin-bottom: 4px;
+}
+.stat-item .lbl {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted);
+}
+
+/* ── SECTION WRAPPER ────────────────────────────────────────── */
+.section-wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px 40px; }
+
+/* ── SECTION TITLE ──────────────────────────────────────────── */
+.section-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── ARCHITECTURE DIAGRAM ───────────────────────────────────── */
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px; margin-bottom: 40px; overflow-x: auto;
+}
+.arch-title {
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+  margin-bottom: 28px; text-transform: uppercase; letter-spacing: 1px;
+}
+.arch-flow {
+  display: flex; align-items: center; gap: 0;
+  min-width: 700px; flex-wrap: nowrap;
+}
+.arch-node {
+  flex: 1; background: var(--surface2);
+  border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 18px 14px; text-align: center;
+}
+.arch-node.highlight {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.arch-node-icon { font-size: 22px; margin-bottom: 6px; }
+.arch-node-name { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.arch-node-sub  { font-size: 10px; color: var(--text-muted); }
+.arch-arrow { font-size: 18px; color: var(--accent); padding: 0 8px; flex-shrink: 0; font-weight: 700; }
+
+/* ── SOURCE CARDS GRID ──────────────────────────────────────── */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px; margin: 20px 0;
+}
+.source-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+}
+.source-card.active { border-color: var(--accent); }
+.source-icon { font-size: 24px; margin-bottom: 8px; }
+.source-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.source-detail { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+.source-tag {
+  display: inline-block; margin-top: 8px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 2px 8px;
+  border-radius: 10px; background: var(--accent-glow);
+  color: var(--accent); border: 1px solid rgba(249,115,22,0.3);
+}
+
+/* ── STEP CARDS ─────────────────────────────────────────────── */
+.steps-grid { display: flex; flex-direction: column; gap: 32px; margin-bottom: 40px; }
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.step-card-header { display: flex; align-items: stretch; gap: 0; }
+.step-num-stripe {
+  width: 80px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dim) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; font-weight: 900; color: #000;
+  font-family: var(--font-mono); flex-shrink: 0;
+  letter-spacing: -1px; min-height: 90px;
+}
+.step-header-content { padding: 22px 28px; flex: 1; }
+.step-tag {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 6px;
+}
+.step-header-content h3 {
+  font-size: 19px; font-weight: 700; color: var(--text);
+  margin-bottom: 6px; line-height: 1.3;
+}
+.step-header-content p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.step-body {
+  padding: 28px 28px 28px 108px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── CODE BLOCKS ────────────────────────────────────────────── */
+.code-block {
+  background: #0D1117;
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius); overflow: hidden;
+  margin: 16px 0; font-family: var(--font-mono);
+}
+.code-header {
+  background: #161B22;
+  border-bottom: 1px solid var(--border-hi);
+  padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.code-lang   { font-size: 10px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; }
+.code-filename { font-size: 10px; color: var(--text-faint); font-family: var(--font-mono); }
+.code-block pre { padding: 18px; overflow-x: auto; font-size: 12.5px; line-height: 1.65; color: #ABB2BF; }
+.kw  { color: #C678DD; }
+.fn  { color: #61AFEF; }
+.st  { color: #98C379; }
+.cm  { color: #5C6370; font-style: italic; }
+.nm  { color: #E5C07B; }
+.nb  { color: #56B6C2; }
+.op  { color: #ABB2BF; }
+.nu  { color: #D19A66; }
+.dc  { color: #F97316; }
+
+/* ── CALLOUT BOXES ──────────────────────────────────────────── */
+.callout {
+  border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13.5px; line-height: 1.6;
+}
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.callout.warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #FCD34D; }
+.callout.warning strong { color: var(--accent3); }
+.callout.danger  { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #FCA5A5; }
+.callout.danger strong  { color: var(--accent4); }
+.callout.tip     { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.25); color: #FDBA74; }
+.callout.tip strong     { color: var(--accent); }
+.callout.info    { background: rgba(59,130,246,0.1);  border: 1px solid rgba(59,130,246,0.3);  color: #93C5FD; }
+.callout.info strong    { color: var(--accent2); }
+
+/* ── TRADEOFF TABLE ─────────────────────────────────────────── */
+.tradeoff-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.tradeoff-table th {
+  background: var(--surface2); color: var(--text-muted);
+  padding: 10px 14px; text-align: left;
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; border-bottom: 2px solid var(--border-hi);
+}
+.tradeoff-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.tradeoff-table tr:last-child td { border-bottom: none; }
+.tradeoff-table tr:hover td { background: rgba(255,255,255,0.02); }
+.tradeoff-table .chosen { color: var(--accent); font-weight: 600; }
+.tradeoff-table .pro { color: #6EE7B7; }
+.tradeoff-table .con { color: #FCA5A5; }
+
+/* ── PRODUCTION ISSUES GRID ─────────────────────────────────── */
+.prod-issues { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+.prod-issue-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px;
+}
+.prod-issue-card.severity-high { border-left: 3px solid var(--accent4); }
+.prod-issue-card.severity-med  { border-left: 3px solid var(--accent3); }
+.prod-issue-card.severity-low  { border-left: 3px solid var(--accent); }
+.prod-issue-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.prod-issue-body  { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.severity-badge {
+  display: inline-block; font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 10px; margin-bottom: 8px;
+}
+.severity-badge.high { background: rgba(239,68,68,0.2);  color: #FCA5A5; }
+.severity-badge.med  { background: rgba(245,158,11,0.2); color: #FCD34D; }
+.severity-badge.low  { background: rgba(249,115,22,0.15); color: var(--accent); }
+
+/* ── CHECKLIST ──────────────────────────────────────────────── */
+.checklist-section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 28px; margin-bottom: 40px;
+}
+.checklist-title    { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.checklist-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+.progress-bar-wrap  { background: var(--border); border-radius: 99px; height: 6px; margin-bottom: 20px; overflow: hidden; }
+.progress-bar-fill  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 0.4s ease; }
+.checklist-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); margin: 16px 0 8px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--border); cursor: pointer;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; margin-top: 3px; cursor: pointer; }
+.check-label { font-size: 13px; color: var(--text-muted); line-height: 1.5; transition: color 0.2s; }
+.check-item.done .check-label { color: var(--text-faint); text-decoration: line-through; }
+
+/* ── LINKEDIN / CAREER CARD ─────────────────────────────────── */
+.career-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(59,130,246,0.08) 100%);
+  border: 1px solid rgba(139,92,246,0.35);
+  border-radius: var(--radius-lg); padding: 28px; margin-bottom: 32px;
+}
+.career-card-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent5); margin-bottom: 14px; }
+.li-post {
+  background: #1E293B; border-radius: var(--radius); padding: 20px;
+  font-size: 13.5px; color: var(--text); line-height: 1.75;
+  white-space: pre-wrap; border: 1px solid var(--border-hi);
+}
+.li-hashtags { color: var(--accent2); }
+.interview-qa { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.qa-item { background: var(--surface2); border-radius: var(--radius); padding: 14px 18px; border-left: 3px solid var(--accent5); }
+.qa-q { font-size: 12px; font-weight: 700; color: var(--accent5); margin-bottom: 6px; }
+.qa-a { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+/* ── FIP EDIT ENGINE ────────────────────────────────────────── */
+.fip-editable { outline: none; border-radius: 4px; transition: background 0.2s, box-shadow 0.2s; }
+.fip-editable:hover { background: rgba(249,115,22,0.06); box-shadow: 0 0 0 1px rgba(249,115,22,0.2); cursor: text; }
+.fip-editable:focus { background: rgba(249,115,22,0.1);  box-shadow: 0 0 0 2px rgba(249,115,22,0.4); }
+
+.fip-toolbar { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+.fip-btn { width: 44px; height: 44px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); transition: transform 0.15s, box-shadow 0.15s; }
+.fip-btn:hover { transform: scale(1.08); }
+.fip-btn.save-btn   { background: var(--accent); color: #000; }
+.fip-btn.undo-btn   { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.search-btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.export-btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.fip-btn.edit-btn   { background: linear-gradient(135deg, var(--accent2), var(--accent5)); color: #fff; }
+
+.fip-toast { position: fixed; bottom: 80px; right: 24px; background: var(--accent); color: #000; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; opacity: 0; transform: translateY(8px); transition: all 0.3s; z-index: 9999; pointer-events: none; }
+.fip-toast.show { opacity: 1; transform: translateY(0); }
+
+.fip-search-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; }
+.fip-search-modal.open { display: flex; }
+.fip-search-box { background: var(--surface); border: 1px solid var(--border-hi); border-radius: var(--radius-lg); padding: 24px; width: 440px; display: flex; flex-direction: column; gap: 12px; }
+.fip-search-box h4 { color: var(--text); font-size: 15px; font-weight: 700; }
+.fip-search-box input { background: var(--surface2); border: 1px solid var(--border-hi); border-radius: var(--radius); padding: 9px 14px; color: var(--text); font-size: 13px; font-family: var(--font-ui); outline: none; }
+.fip-search-box input:focus { border-color: var(--accent); }
+.fip-search-box .modal-btns { display: flex; gap: 8px; }
+.modal-btn { flex: 1; padding: 8px; border: none; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 600; }
+.modal-btn.primary   { background: var(--accent); color: #000; }
+.modal-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+
+/* ── RATE LIMIT TABLE ───────────────────────────────────────── */
+.rate-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.rate-table th { background: var(--surface2); color: var(--text-muted); padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-bottom: 2px solid var(--border-hi); }
+.rate-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.rate-table tr:last-child td { border-bottom: none; }
+.rate-table tr:hover td { background: rgba(255,255,255,0.02); }
+.badge-green  { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; background: rgba(16,185,129,0.2); color: #6EE7B7; }
+.badge-yellow { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; background: rgba(245,158,11,0.2); color: #FCD34D; }
+.badge-red    { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; background: rgba(239,68,68,0.2);  color: #FCA5A5; }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero { padding: 40px 20px; }
+  .hero h1 { font-size: 28px; }
+  .hero-number { display: none; }
+  .section-wrap { padding: 0 20px 32px; }
+  .step-body { padding: 20px; }
+  .topnav { padding: 12px 20px; }
+  .arch-flow { min-width: 500px; }
+}
+
+
+/* ── FIP COURSE UX UPGRADE: sidebar, copy, collapse, navigation ───────────── */
+.fip-course-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  z-index: 90;
+  background: rgba(13,17,23,0.96);
+  border-right: 1px solid var(--border, #243047);
+  padding: 18px 14px;
+  overflow-y: auto;
+  backdrop-filter: blur(12px);
+}
+.fip-course-sidebar .fip-side-brand {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent, #79c0ff);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.fip-course-sidebar .fip-side-sub {
+  font-size: 11px;
+  color: var(--text-muted, #94A3B8);
+  line-height: 1.4;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border, #243047);
+  margin-bottom: 12px;
+}
+.fip-course-sidebar .fip-side-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-faint, #6e7681);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin: 14px 0 6px;
+}
+.fip-course-sidebar a {
+  display: block;
+  text-decoration: none;
+  color: var(--text-muted, #94A3B8);
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 7px 9px;
+  border-radius: 7px;
+  border-left: 2px solid transparent;
+  transition: all .15s ease;
+}
+.fip-course-sidebar a:hover,
+.fip-course-sidebar a.active {
+  color: var(--text, #E2E8F0);
+  background: var(--surface2, #1A2235);
+  border-left-color: var(--accent, #79c0ff);
+}
+.fip-course-sidebar .fip-mini-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.fip-course-sidebar .fip-mini-nav a {
+  text-align: center;
+  border: 1px solid var(--border, #243047);
+  border-left: 1px solid var(--border, #243047);
+  font-weight: 700;
+}
+.fip-prereq-banner {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+  padding: 0 40px;
+}
+.fip-prereq-card {
+  border: 1px solid rgba(121,192,255,.28);
+  background: linear-gradient(135deg, rgba(121,192,255,.08), rgba(210,168,255,.05));
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.fip-prereq-icon { font-size: 20px; flex-shrink: 0; }
+.fip-prereq-title {
+  font-size: 12px;
+  color: var(--accent, #79c0ff);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 4px;
+}
+.fip-prereq-text {
+  font-size: 13px;
+  color: var(--text-muted, #94A3B8);
+  line-height: 1.55;
+}
+.code-header, .code-block .code-header {
+  gap: 10px;
+}
+.fip-code-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.fip-copy-btn, .fip-collapse-btn {
+  background: transparent;
+  border: 1px solid var(--border-hi, var(--border, #30363d));
+  color: var(--text-muted, #94A3B8);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s ease;
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+.fip-copy-btn:hover, .fip-collapse-btn:hover {
+  border-color: var(--accent, #79c0ff);
+  color: var(--accent, #79c0ff);
+}
+.fip-copy-btn.copied {
+  border-color: #56d364;
+  color: #56d364;
+}
+.code-block pre.fip-collapsed {
+  max-height: 360px;
+  overflow: hidden;
+  position: relative;
+}
+.code-block.fip-has-collapse pre.fip-collapsed::after {
+  content: '';
+  position: sticky;
+  display: block;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 72px;
+  margin-top: -72px;
+  background: linear-gradient(180deg, rgba(13,17,23,0), #0D1117 85%);
+  pointer-events: none;
+}
+.fip-phase-nav {
+  max-width: 1100px;
+  margin: 48px auto 24px;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.fip-phase-nav a, .fip-phase-nav .fip-nav-disabled {
+  border: 1px solid var(--border, #243047);
+  background: var(--surface, #111827);
+  border-radius: 12px;
+  padding: 16px 18px;
+  text-decoration: none;
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.fip-phase-nav a:hover {
+  border-color: var(--accent, #79c0ff);
+  background: var(--surface2, #1A2235);
+}
+.fip-nav-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-faint, #475569);
+  margin-bottom: 4px;
+}
+.fip-nav-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text, #E2E8F0);
+}
+.fip-nav-disabled { opacity: .45; }
+@media (min-width: 1180px) {
+  body.fip-has-generated-sidebar { padding-left: 260px; }
+  body.fip-has-generated-sidebar .topnav { left: 260px; width: calc(100% - 260px); }
+}
+@media (max-width: 1179px) {
+  .fip-course-sidebar { display: none; }
+}
+@media (max-width: 768px) {
+  .fip-prereq-banner, .fip-phase-nav { padding: 0 20px; }
+  .fip-phase-nav { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- PHASE STRIPE -->
+<div class="phase-stripe"></div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-logo">FIP</div>
+    <div>
+      <div class="topnav-title">AI Feedback Intelligence Platform</div>
+      <div class="topnav-sub">curry_bowl_express · 12 Bay Area Locations</div>
+    </div>
+  </div>
+  <div class="topnav-phase">
+    <span class="phase-badge">Phase 01 · Data Ingestion</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-number">01</div>
+  <div class="hero-eyebrow">Phase 01 / 07 · Continuation of Phase 0 FLOCI Foundation</div>
+  <h1>Extending the <span>FLOCI Foundation</span><br>with Data Ingestion</h1>
+  <p class="hero-desc" contenteditable="false" data-fip-edit="hero-desc">
+    Phase 1 does not recreate infrastructure. It continues from Phase 0 by reusing the already running FLOCI AWS-parity foundation: FLOCI MSK, FLOCI S3, FLOCI EKS, FLOCI Secrets Manager, IAM, CloudWatch, and Helm base services. This phase adds connector services, ingestion workers, Kafka topics, schema contracts, dummy data generation, and validation flows on top of that foundation.
+  </p>
+  <div class="stat-strip">
+    <div class="stat-item"><div class="val">5</div><div class="lbl">Source Platforms</div></div>
+    <div class="stat-item"><div class="val">7</div><div class="lbl">Prod Issues Covered</div></div>
+    <div class="stat-item"><div class="val">Phase0</div><div class="lbl">Foundation Reused</div></div>
+    <div class="stat-item"><div class="val">FLOCI MSK</div><div class="lbl">Event Bus</div></div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE OVERVIEW -->
+<div class="section-wrap">
+  <div class="section-title">End-to-End Architecture — Phase 1 Focus</div>
+  <div class="arch-diagram">
+    <div class="arch-title">Data Flow: External APIs → Connectors on FLOCI EKS → FLOCI MSK → Bronze on FLOCI S3 (Phase 2)</div>
+    <div class="arch-flow">
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🌐</div>
+        <div class="arch-node-name">External APIs</div>
+        <div class="arch-node-sub">Google · Yelp<br>DoorDash · Uber Eats<br>TripAdvisor</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔌</div>
+        <div class="arch-node-name">Connectors</div>
+        <div class="arch-node-sub">Poll + Webhook<br>Rate-limited, retried</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">⚙️</div>
+        <div class="arch-node-name">Normalizer</div>
+        <div class="arch-node-sub">Unified schema<br>Avro serialized</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">📨</div>
+        <div class="arch-node-name">FLOCI MSK</div>
+        <div class="arch-node-sub">feedback.raw.events<br>feedback.dlq.events</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🔷</div>
+        <div class="arch-node-name">Bronze Layer</div>
+        <div class="arch-node-sub">Phase 2 →<br>FLOCI S3 Parquet</div>
+      </div>
+    </div>
+
+    <!-- Source platform cards -->
+    <div style="margin-top: 28px;">
+      <div class="arch-title" style="margin-bottom:14px;">Ingestion Sources</div>
+      <div class="source-grid">
+        <div class="source-card active">
+          <div class="source-icon">🗺️</div>
+          <div class="source-name">Google Maps</div>
+          <div class="source-detail">Places API v3 · Polling every 4h · 2,500 req/day free tier</div>
+          <span class="source-tag">Polling</span>
+        </div>
+        <div class="source-card active">
+          <div class="source-icon">⭐</div>
+          <div class="source-name">Yelp</div>
+          <div class="source-detail">Fusion API · 5,000 calls/day · 72h batch delivery lag</div>
+          <span class="source-tag">Polling</span>
+        </div>
+        <div class="source-card active">
+          <div class="source-icon">🚗</div>
+          <div class="source-name">DoorDash</div>
+          <div class="source-detail">Merchant API · Webhook delivery · HMAC-SHA256 signed</div>
+          <span class="source-tag">Webhook</span>
+        </div>
+        <div class="source-card active">
+          <div class="source-icon">🛵</div>
+          <div class="source-name">Uber Eats</div>
+          <div class="source-detail">Restaurant Manager API · Webhook · Retry on 2xx only</div>
+          <span class="source-tag">Webhook</span>
+        </div>
+        <div class="source-card active">
+          <div class="source-icon">🧳</div>
+          <div class="source-name">TripAdvisor</div>
+          <div class="source-detail">Content API · Poll every 12h · Strict rate: 200/min</div>
+          <span class="source-tag">Polling</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 0 CONTINUATION CONTRACT -->
+  <div class="section-title">Phase 0 Continuation Contract</div>
+  <div class="arch-diagram">
+    <div class="arch-title">Phase 1 must reuse the foundation, not restart it</div>
+    <table class="tradeoff-table">
+      <thead><tr><th>Foundation Asset from Phase 0</th><th>How Phase 1 Uses It</th><th>Do Not Do This</th></tr></thead>
+      <tbody>
+        <tr><td><strong>FLOCI MSK</strong></td><td>Create ingestion topics and publish normalized feedback events</td><td>Do not start FLOCI Terraform/Helm Kafka or Redpanda</td></tr>
+        <tr><td><strong>FLOCI S3</strong></td><td>Store raw replay samples, connector checkpoints, and later Bronze handoff files</td><td>Do not use local filesystem as the durable data lake</td></tr>
+        <tr><td><strong>FLOCI EKS</strong></td><td>Deploy connector pods, ingestion worker, webhook API, and dummy generator through Helm</td><td>Do not run long-lived services from the laptop terminal</td></tr>
+        <tr><td><strong>FLOCI Secrets Manager</strong></td><td>Load API keys, webhook secrets, DB credentials, and OpenAI keys</td><td>Do not put secrets in .env except local placeholders</td></tr>
+        <tr><td><strong>Terraform Modules</strong></td><td>Add topics, IAM permissions, secrets, bucket prefixes, and CloudWatch log groups</td><td>Do not manually create infrastructure through ad-hoc CLI commands</td></tr>
+        <tr><td><strong>Helm Base Chart</strong></td><td>Add Phase 1 workloads under the same namespace and values pattern</td><td>Do not create a second deployment style</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body"><strong>Execution Rule</strong>
+      Phase 0 is the platform bootstrap. Phase 1 is only an incremental application and data-flow layer. The right command is <code>make phase1</code>, not a new repo, new Kafka, or new FLOCI Terraform/Helm stack.</div>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="section-title">Step-by-Step Implementation</div>
+  <div class="steps-grid">
+
+    <!-- ═══ STEP 1 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">01</div>
+        <div class="step-header-content">
+          <div class="step-tag">Continuation Setup</div>
+          <h3>Reuse Phase 0 FLOCI Foundation, Then Add Phase 1 Ingestion Assets</h3>
+          <p>Do not create a second project or local Kafka stack. Phase 1 continues inside <code>feedback-intelligence-platform</code> and reuses FLOCI MSK, FLOCI S3, FLOCI EKS, Secrets Manager, IAM, CloudWatch, Terraform, and Helm from Phase 0.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🚫</div>
+          <div class="callout-body"><strong>Important Correction</strong>
+          The previous Phase 1 flow incorrectly created <code>fip-ingestion</code> and started standalone Kafka + Schema Registry outside the Phase 0 foundation. That breaks the FLOCI-first architecture. The corrected flow adds ingestion code, Terraform topic definitions, and Helm workloads into the existing Phase 0 repository.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><span class="code-filename">terminal — continue from phase0 repo</span></div>
+          <pre><span class="cm"># Start from the existing Phase 0 repository</span>
+cd feedback-intelligence-platform
+
+<span class="cm"># Phase 0 must already be bootstrapped</span>
+make floci-status
+make tf-outputs
+kubectl get ns
+kubectl get pods -A
+
+<span class="cm"># Add Phase 1 code without creating a new repo</span>
+mkdir -p services/{connectors,data-generator,ingestion-worker,webhook-ingestion}
+mkdir -p services/connectors/{google,yelp,doordash,ubereats,tripadvisor,common}
+mkdir -p shared/schemas/{pydantic,avro}
+mkdir -p infra/terraform/modules/msk/topics
+mkdir -p infra/terraform/modules/iam/ingestion
+mkdir -p infra/helm/ingestion/{templates,config}
+mkdir -p tests/{unit,integration,e2e}
+mkdir -p scripts/phase1
+
+echo "✅ Phase 1 folders added to existing Phase 0 repo"</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">makefile</span><span class="code-filename">Makefile — append Phase 1 targets</span></div>
+          <pre><span class="cm"># Phase 1 continues from Phase 0. It assumes make bootstrap already ran.</span>
+.PHONY: floci-status tf-outputs phase1 phase1-tf phase1-helm phase1-smoke phase1-dummy
+
+<span class="fn">floci-status</span>:
+	floci status
+	eval $$(floci env)
+	aws sts get-caller-identity
+	aws s3 ls
+
+<span class="fn">tf-outputs</span>:
+	cd infra/terraform/envs/local-floci && terraform output
+
+<span class="fn">phase1</span>: phase1-tf phase1-helm phase1-smoke
+	@echo "✅ Phase 1 ingestion layer deployed on top of Phase 0 FLOCI foundation"
+
+<span class="fn">phase1-tf</span>:
+	cd infra/terraform/envs/local-floci && terraform apply -auto-approve \
+	  -target=module.msk_topics \
+	  -target=module.ingestion_iam \
+	  -target=module.ingestion_secrets \
+	  -target=module.ingestion_observability
+
+<span class="fn">phase1-helm</span>:
+	helm upgrade --install ingestion infra/helm/ingestion \
+	  --namespace feedback --create-namespace \
+	  -f infra/helm/ingestion/values-local.yaml
+
+<span class="fn">phase1-smoke</span>:
+	kubectl -n feedback rollout status deploy/ingestion-worker
+	kubectl -n feedback rollout status deploy/data-generator
+	kubectl -n feedback logs deploy/ingestion-worker --tail=50
+
+<span class="fn">phase1-dummy</span>:
+	kubectl -n feedback create job phase1-dummy-$$(date +%s) \
+	  --from=cronjob/data-generator</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">hcl</span><span class="code-filename">infra/terraform/envs/local-floci/main.tf — Phase 1 additions</span></div>
+          <pre><span class="cm"># Existing Phase 0 modules remain untouched.</span>
+<span class="cm"># Phase 1 only adds ingestion-specific infrastructure.</span>
+
+module "msk_topics" {
+  source = "../../modules/msk/topics"
+
+  bootstrap_brokers = module.msk.bootstrap_brokers
+  environment       = var.environment
+
+  topics = {
+    "feedback.raw.events" = {
+      partitions        = 12
+      replication_factor = 1
+      retention_ms      = 604800000
+      compression_type  = "snappy"
+    }
+    "feedback.dlq.events" = {
+      partitions        = 3
+      replication_factor = 1
+      retention_ms      = 1209600000
+      compression_type  = "snappy"
+    }
+    "feedback.connector.checkpoints" = {
+      partitions        = 3
+      replication_factor = 1
+      retention_ms      = 2592000000
+      compression_type  = "snappy"
+    }
+  }
+}
+
+module "ingestion_secrets" {
+  source      = "../../modules/secrets"
+  environment = var.environment
+
+  secrets = {
+    "/feedback/local/google_api_key"       = "replace-me-local"
+    "/feedback/local/yelp_api_key"         = "replace-me-local"
+    "/feedback/local/doordash_hmac_secret" = "replace-me-local"
+    "/feedback/local/ubereats_hmac_secret" = "replace-me-local"
+  }
+}
+
+module "ingestion_iam" {
+  source      = "../../modules/iam/ingestion"
+  environment = var.environment
+  buckets     = module.s3.bucket_names
+  topics      = module.msk_topics.topic_names
+}
+
+module "ingestion_observability" {
+  source      = "../../modules/observability"
+  environment = var.environment
+  service     = "ingestion"
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">yaml</span><span class="code-filename">infra/helm/ingestion/values-local.yaml</span></div>
+          <pre>global:
+  environment: local
+  awsEndpointUrl: http://localhost:4566
+  awsRegion: us-west-2
+  tenantId: curry_bowl_express
+
+kafka:
+  bootstrapServers: ${FLOCI_MSK_BOOTSTRAP_SERVERS}
+  rawTopic: feedback.raw.events
+  dlqTopic: feedback.dlq.events
+  checkpointTopic: feedback.connector.checkpoints
+
+services:
+  dataGenerator:
+    enabled: true
+    recordsPerRun: 25000
+    schedule: "*/30 * * * *"
+
+  ingestionWorker:
+    enabled: true
+    replicas: 2
+    manualOffsetCommit: true
+    maxPollRecords: 250
+
+  connectors:
+    google:
+      enabled: true
+      pollInterval: "4h"
+      secretName: "/feedback/local/google_api_key"
+    yelp:
+      enabled: true
+      pollInterval: "6h"
+      secretName: "/feedback/local/yelp_api_key"
+    tripadvisor:
+      enabled: true
+      pollInterval: "12h"
+    doordash:
+      enabled: true
+      mode: webhook
+      hmacSecretName: "/feedback/local/doordash_hmac_secret"
+    ubereats:
+      enabled: true
+      mode: webhook
+      hmacSecretName: "/feedback/local/ubereats_hmac_secret"</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Partition Count is Still a One-Way Door</strong>
+          The topic definitions now belong in Terraform, not shell scripts. You can increase Kafka partitions later but cannot safely decrease them. For 12 restaurant locations, 12 partitions keeps the mental model simple: one partition per location today, scalable later.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 2 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">02</div>
+        <div class="step-header-content">
+          <div class="step-tag">Unified Schema</div>
+          <h3>Pydantic Event Model & Avro Schema Definition</h3>
+          <p>Every platform speaks a different schema. Define the canonical <code>FeedbackEvent</code> once. Validate with Pydantic at ingestion time. Serialize to Avro for Kafka. Any event that fails validation goes to the DLQ — never silently dropped.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #1: Platform Schema Mismatch at 3 AM</strong>
+          Google Maps changed <code>rating</code> from an integer (1–5) to a float (4.6) in their API v3 response without announcement. Our Pydantic model expected <code>int</code>, threw a <code>ValidationError</code> for every Google review, and the connector silently dropped 800 reviews before the on-call alert fired. Fix: accept <code>float</code>, coerce to float, and validate range — never assume int from rating APIs.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">normalizer/event_model.py</span></div>
+          <pre><span class="cm">"""
+Canonical FeedbackEvent — the unified schema all connectors produce.
+Every field has a documented reason for its type choice.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">import</span> uuid
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> typing <span class="kw">import</span> Literal, Optional
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field, field_validator, model_validator
+
+<span class="nm">Platform</span> = <span class="fn">Literal</span>[<span class="st">"google"</span>, <span class="st">"yelp"</span>, <span class="st">"doordash"</span>, <span class="st">"ubereats"</span>, <span class="st">"tripadvisor"</span>]
+
+<span class="nm">VALID_LOCATION_IDS</span> = {
+    <span class="st">"cb-mission"</span>, <span class="st">"cb-castro"</span>, <span class="st">"cb-soma"</span>, <span class="st">"cb-tenderloin"</span>,
+    <span class="st">"cb-richmond"</span>, <span class="st">"cb-sunset"</span>, <span class="st">"cb-oakland"</span>, <span class="st">"cb-berkeley"</span>,
+    <span class="st">"cb-sj-downtown"</span>, <span class="st">"cb-sj-willow"</span>, <span class="st">"cb-sunnyvale"</span>, <span class="st">"cb-fremont"</span>,
+}
+
+<span class="kw">class</span> <span class="nm">FeedbackEvent</span>(<span class="nm">BaseModel</span>):
+    <span class="cm"># ── Identity ────────────────────────────────────────────────</span>
+    event_id:        str = <span class="fn">Field</span>(default_factory=<span class="kw">lambda</span>: <span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()))
+    source_event_id: str                  <span class="cm"># platform's own review ID</span>
+    source_platform: <span class="nm">Platform</span>
+
+    <span class="cm"># ── Location ─────────────────────────────────────────────────</span>
+    location_id:     str
+    location_name:   Optional[str] = <span class="kw">None</span>
+
+    <span class="cm"># ── Review content ───────────────────────────────────────────</span>
+    review_text:     str
+    <span class="cm"># float not int — Google Maps API v3 returns floats like 4.6</span>
+    star_rating:     float
+    review_date:     datetime
+    reviewer_name:   Optional[str] = <span class="kw">None</span>
+    reviewer_id:     Optional[str] = <span class="kw">None</span>
+    language:        str = <span class="st">"en"</span>
+
+    <span class="cm"># ── Delivery metadata ────────────────────────────────────────</span>
+    ingested_at:     datetime = <span class="fn">Field</span>(default_factory=<span class="kw">lambda</span>: datetime.<span class="fn">now</span>(timezone.utc))
+    raw_payload:     Optional[str] = <span class="kw">None</span>   <span class="cm"># original JSON, for audit/reprocessing</span>
+    schema_version:  str = <span class="st">"1.0"</span>
+
+    <span class="dc">@field_validator</span>(<span class="st">"star_rating"</span>)
+    <span class="dc">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">validate_rating</span>(cls, v: float) -> float:
+        <span class="kw">if not</span> <span class="nu">1.0</span> <= v <= <span class="nu">5.0</span>:
+            <span class="kw">raise</span> <span class="nm">ValueError</span>(f<span class="st">"star_rating must be 1.0–5.0, got </span><span class="kw">{v}</span><span class="st">"</span>)
+        <span class="cm"># Normalize to 1 decimal place for consistency</span>
+        <span class="kw">return</span> <span class="fn">round</span>(v, <span class="nu">1</span>)
+
+    <span class="dc">@field_validator</span>(<span class="st">"review_text"</span>)
+    <span class="dc">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">validate_text</span>(cls, v: str) -> str:
+        v = v.<span class="fn">strip</span>()
+        <span class="kw">if</span> <span class="fn">len</span>(v) < <span class="nu">3</span>:
+            <span class="kw">raise</span> <span class="nm">ValueError</span>(<span class="st">"review_text too short (min 3 chars)"</span>)
+        <span class="kw">if</span> <span class="fn">len</span>(v) > <span class="nu">10_000</span>:
+            <span class="cm"># Truncate, don't reject — some platforms allow very long reviews</span>
+            <span class="kw">return</span> v[:<span class="nu">10_000</span>]
+        <span class="kw">return</span> v
+
+    <span class="dc">@field_validator</span>(<span class="st">"location_id"</span>)
+    <span class="dc">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">validate_location</span>(cls, v: str) -> str:
+        <span class="kw">if</span> v <span class="kw">not in</span> <span class="nm">VALID_LOCATION_IDS</span>:
+            <span class="kw">raise</span> <span class="nm">ValueError</span>(f<span class="st">"Unknown location_id: </span><span class="kw">{v}</span><span class="st">. Check VALID_LOCATION_IDS."</span>)
+        <span class="kw">return</span> v
+
+    <span class="dc">@field_validator</span>(<span class="st">"review_date"</span>)
+    <span class="dc">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">validate_date</span>(cls, v: datetime) -> datetime:
+        <span class="cm"># Reject future dates — data pipeline bug indicator</span>
+        now = datetime.<span class="fn">now</span>(timezone.utc)
+        <span class="kw">if</span> v.tzinfo <span class="kw">is None</span>:
+            v = v.<span class="fn">replace</span>(tzinfo=timezone.utc)
+        <span class="kw">if</span> v > now:
+            <span class="kw">raise</span> <span class="nm">ValueError</span>(f<span class="st">"review_date </span><span class="kw">{v}</span><span class="st"> is in the future — likely a parsing bug"</span>)
+        <span class="kw">return</span> v
+
+    <span class="kw">def</span> <span class="fn">to_avro_dict</span>(self) -> dict:
+        <span class="cm">"""Serialize to Avro-compatible dict (datetimes as ISO strings)."""</span>
+        d = self.<span class="fn">model_dump</span>()
+        d[<span class="st">"review_date"</span>]  = self.review_date.<span class="fn">isoformat</span>()
+        d[<span class="st">"ingested_at"</span>]  = self.ingested_at.<span class="fn">isoformat</span>()
+        <span class="kw">return</span> d</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">json</span><span class="code-filename">kafka/schemas/feedback_event_v1.avsc</span></div>
+          <pre>{
+  <span class="st">"type"</span>: <span class="st">"record"</span>,
+  <span class="st">"name"</span>: <span class="st">"FeedbackEvent"</span>,
+  <span class="st">"namespace"</span>: <span class="st">"com.currybowl.fip"</span>,
+  <span class="st">"doc"</span>: <span class="st">"v1: initial schema. All new fields MUST have default values (backward compat)."</span>,
+  <span class="st">"fields"</span>: [
+    { <span class="st">"name"</span>: <span class="st">"event_id"</span>,        <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"source_event_id"</span>, <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"source_platform"</span>, <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"location_id"</span>,     <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"location_name"</span>,   <span class="st">"type"</span>: [<span class="st">"null"</span>, <span class="st">"string"</span>], <span class="st">"default"</span>: null },
+    { <span class="st">"name"</span>: <span class="st">"review_text"</span>,     <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"star_rating"</span>,     <span class="st">"type"</span>: <span class="st">"float"</span> },
+    { <span class="st">"name"</span>: <span class="st">"review_date"</span>,     <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"reviewer_name"</span>,   <span class="st">"type"</span>: [<span class="st">"null"</span>, <span class="st">"string"</span>], <span class="st">"default"</span>: null },
+    { <span class="st">"name"</span>: <span class="st">"reviewer_id"</span>,     <span class="st">"type"</span>: [<span class="st">"null"</span>, <span class="st">"string"</span>], <span class="st">"default"</span>: null },
+    { <span class="st">"name"</span>: <span class="st">"language"</span>,        <span class="st">"type"</span>: <span class="st">"string"</span>,              <span class="st">"default"</span>: <span class="st">"en"</span> },
+    { <span class="st">"name"</span>: <span class="st">"ingested_at"</span>,    <span class="st">"type"</span>: <span class="st">"string"</span> },
+    { <span class="st">"name"</span>: <span class="st">"raw_payload"</span>,    <span class="st">"type"</span>: [<span class="st">"null"</span>, <span class="st">"string"</span>], <span class="st">"default"</span>: null },
+    { <span class="st">"name"</span>: <span class="st">"schema_version"</span>, <span class="st">"type"</span>: <span class="st">"string"</span>,              <span class="st">"default"</span>: <span class="st">"1.0"</span> }
+  ]
+}</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 3 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">03</div>
+        <div class="step-header-content">
+          <div class="step-tag">Polling Connectors</div>
+          <h3>Google Maps & Yelp: Rate-Limited Polling with Exponential Backoff</h3>
+          <p>Polling connectors must survive API rate limits, network timeouts, partial failures, and daily quota exhaustion — all without losing a single review or duplicating it on restart.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #2: API Rate Limit Cascade</strong>
+          Without a token bucket or leaky bucket, a burst of reviews at midnight (restaurant closes → customers review) triggers simultaneous requests across all 12 locations → 429 Too Many Requests from Google → connector crashes → entire batch lost. Fix: <code>tenacity</code> with exponential backoff + jitter, per-connector rate state persisted across restarts.</div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #3: Cursor State Lost on Restart</strong>
+          Every polling connector needs to remember where it stopped — the last <code>page_token</code> or <code>since_timestamp</code>. If this state lives only in memory, a crash means re-fetching from the beginning → duplicates in Kafka. Fix: persist cursor state to Redis or a simple JSON file on disk, read it on startup.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">connectors/base_connector.py</span></div>
+          <pre><span class="cm">"""
+BaseConnector: shared logic for all polling connectors.
+Handles rate limiting, retry with backoff+jitter, cursor persistence,
+and DLQ routing. Every platform connector extends this.
+"""</span>
+<span class="kw">import</span> json, time, hashlib
+<span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> typing <span class="kw">import</span> Iterator, Optional
+<span class="kw">import</span> structlog
+<span class="kw">from</span> tenacity <span class="kw">import</span> (
+    retry, stop_after_attempt, wait_exponential_jitter,
+    retry_if_exception_type, before_sleep_log
+)
+<span class="kw">import</span> requests
+<span class="kw">from</span> normalizer.event_model <span class="kw">import</span> FeedbackEvent
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="kw">class</span> <span class="nm">BaseConnector</span>(<span class="nm">ABC</span>):
+    <span class="nm">PLATFORM</span>: str          <span class="cm"># subclass must declare e.g. "google"</span>
+    <span class="nm">REQUESTS_PER_MINUTE</span>: int = <span class="nu">30</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: dict, cursor_dir: str = <span class="st">".cursors"</span>):
+        self.config     = config
+        self.cursor_dir = Path(cursor_dir)
+        self.cursor_dir.<span class="fn">mkdir</span>(exist_ok=<span class="kw">True</span>)
+        self.session    = requests.<span class="fn">Session</span>()
+        self._min_interval = <span class="nu">60.0</span> / self.<span class="nm">REQUESTS_PER_MINUTE</span>
+        self._last_request_time = <span class="nu">0.0</span>
+
+    <span class="cm"># ── Cursor persistence ──────────────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">_cursor_path</span>(self, location_id: str) -> Path:
+        <span class="kw">return</span> self.cursor_dir / f<span class="st">"</span><span class="kw">{self.PLATFORM}</span><span class="st">_</span><span class="kw">{location_id}</span><span class="st">.json"</span>
+
+    <span class="kw">def</span> <span class="fn">load_cursor</span>(self, location_id: str) -> dict:
+        path = self.<span class="fn">_cursor_path</span>(location_id)
+        <span class="kw">if</span> path.<span class="fn">exists</span>():
+            <span class="kw">return</span> json.<span class="fn">loads</span>(path.<span class="fn">read_text</span>())
+        <span class="kw">return</span> {<span class="st">"since_timestamp"</span>: <span class="st">"2024-01-01T00:00:00Z"</span>, <span class="st">"page_token"</span>: <span class="kw">None</span>}
+
+    <span class="kw">def</span> <span class="fn">save_cursor</span>(self, location_id: str, cursor: dict) -> <span class="kw">None</span>:
+        path = self.<span class="fn">_cursor_path</span>(location_id)
+        <span class="cm"># Atomic write: write to temp file, then rename (prevents corrupt cursor)</span>
+        tmp = path.<span class="fn">with_suffix</span>(<span class="st">".tmp"</span>)
+        tmp.<span class="fn">write_text</span>(json.<span class="fn">dumps</span>(cursor, indent=<span class="nu">2</span>))
+        tmp.<span class="fn">rename</span>(path)
+
+    <span class="cm"># ── Rate limiting ───────────────────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">_rate_limit_wait</span>(self) -> <span class="kw">None</span>:
+        elapsed = time.<span class="fn">monotonic</span>() - self._last_request_time
+        gap     = self._min_interval - elapsed
+        <span class="kw">if</span> gap > <span class="nu">0</span>:
+            time.<span class="fn">sleep</span>(gap)
+        self._last_request_time = time.<span class="fn">monotonic</span>()
+
+    <span class="cm"># ── HTTP with retry ─────────────────────────────────────────</span>
+    <span class="dc">@retry</span>(
+        retry=<span class="fn">retry_if_exception_type</span>((requests.<span class="nm">HTTPError</span>, requests.<span class="nm">Timeout</span>)),
+        stop=<span class="fn">stop_after_attempt</span>(<span class="nu">5</span>),
+        wait=<span class="fn">wait_exponential_jitter</span>(initial=<span class="nu">2</span>, max=<span class="nu">120</span>, jitter=<span class="nu">10</span>),
+        before_sleep=<span class="fn">before_sleep_log</span>(log, log.<span class="fn">warning</span>),
+    )
+    <span class="kw">def</span> <span class="fn">_get</span>(self, url: str, **kwargs) -> requests.<span class="nm">Response</span>:
+        self.<span class="fn">_rate_limit_wait</span>()
+        resp = self.session.<span class="fn">get</span>(url, timeout=<span class="nu">30</span>, **kwargs)
+        <span class="kw">if</span> resp.status_code == <span class="nu">429</span>:
+            <span class="cm"># Respect Retry-After header if provided</span>
+            retry_after = <span class="fn">int</span>(resp.headers.<span class="fn">get</span>(<span class="st">"Retry-After"</span>, <span class="nu">60</span>))
+            log.<span class="fn">warning</span>(<span class="st">"rate_limited"</span>, platform=self.<span class="nm">PLATFORM</span>, retry_after=retry_after)
+            time.<span class="fn">sleep</span>(retry_after)
+            resp.<span class="fn">raise_for_status</span>()   <span class="cm"># triggers tenacity retry</span>
+        resp.<span class="fn">raise_for_status</span>()
+        <span class="kw">return</span> resp
+
+    <span class="cm"># ── Dedup fingerprint ───────────────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">_fingerprint</span>(self, source_event_id: str, location_id: str) -> str:
+        raw = f<span class="st">"</span><span class="kw">{self.PLATFORM}</span><span class="st">|</span><span class="kw">{source_event_id}</span><span class="st">|</span><span class="kw">{location_id}</span><span class="st">"</span>
+        <span class="kw">return</span> hashlib.<span class="fn">sha256</span>(raw.<span class="fn">encode</span>()).<span class="fn">hexdigest</span>()
+
+    <span class="dc">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">fetch_reviews</span>(self, location_id: str) -> Iterator[FeedbackEvent]:
+        <span class="cm">"""Yield FeedbackEvent objects for the given location."""</span>
+        ...</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">connectors/google_connector.py</span></div>
+          <pre><span class="cm">"""
+Google Maps Places API v3 Connector.
+Endpoint: places/{place_id}/reviews
+Quota: 2,500 requests/day on free tier; 25,000 with billing enabled.
+Pagination via pageToken; cursor persisted to disk between runs.
+"""</span>
+<span class="kw">import</span> json
+<span class="kw">from</span> typing <span class="kw">import</span> Iterator
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> pydantic <span class="kw">import</span> ValidationError
+<span class="kw">import</span> structlog
+<span class="kw">from</span> connectors.base_connector <span class="kw">import</span> BaseConnector
+<span class="kw">from</span> normalizer.event_model <span class="kw">import</span> FeedbackEvent
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="cm"># location_id → Google place_id mapping</span>
+<span class="nm">LOCATION_PLACE_IDS</span> = {
+    <span class="st">"cb-mission"</span>:    <span class="st">"ChIJ7cv00DwsDogRAMDACa2m4K8"</span>,
+    <span class="st">"cb-castro"</span>:     <span class="st">"ChIJIQBpAG2ahYAR_6128GcTUEo"</span>,
+    <span class="st">"cb-soma"</span>:       <span class="st">"ChIJYXlyIr-Aj4ARpkXvtnbCreo"</span>,
+    <span class="st">"cb-tenderloin"</span>: <span class="st">"ChIJ0RhLU9OAhYARNGWBkiM9jLw"</span>,
+    <span class="cm"># ... all 12 locations</span>
+}
+
+<span class="kw">class</span> <span class="nm">GoogleMapsConnector</span>(<span class="nm">BaseConnector</span>):
+    <span class="nm">PLATFORM</span>              = <span class="st">"google"</span>
+    <span class="nm">REQUESTS_PER_MINUTE</span>   = <span class="nu">20</span>    <span class="cm"># conservative: 2500/day ÷ 12 locations</span>
+    <span class="nm">BASE_URL</span>              = <span class="st">"https://places.googleapis.com/v1"</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: dict):
+        <span class="fn">super</span>().__init__(config)
+        self.api_key = config[<span class="st">"google_api_key"</span>]
+        self.session.headers.<span class="fn">update</span>({
+            <span class="st">"X-Goog-Api-Key"</span>:    self.api_key,
+            <span class="st">"X-Goog-FieldMask"</span>:  <span class="st">"reviews,nextPageToken"</span>,
+            <span class="st">"Content-Type"</span>:      <span class="st">"application/json"</span>,
+        })
+
+    <span class="kw">def</span> <span class="fn">_parse_review</span>(self, raw: dict, location_id: str) -> FeedbackEvent | <span class="kw">None</span>:
+        <span class="kw">try</span>:
+            <span class="kw">return</span> <span class="fn">FeedbackEvent</span>(
+                source_event_id = raw[<span class="st">"name"</span>],   <span class="cm"># "places/{id}/reviews/{review_id}"</span>
+                source_platform = <span class="st">"google"</span>,
+                location_id     = location_id,
+                location_name   = raw.<span class="fn">get</span>(<span class="st">"authorAttribution"</span>, {}).<span class="fn">get</span>(<span class="st">"displayName"</span>),
+                review_text     = raw.<span class="fn">get</span>(<span class="st">"text"</span>, {}).<span class="fn">get</span>(<span class="st">"text"</span>, <span class="st">""</span>),
+                <span class="cm"># Google returns float (e.g. 4.0) — BaseModel handles coercion</span>
+                star_rating     = <span class="fn">float</span>(raw[<span class="st">"rating"</span>]),
+                review_date     = datetime.<span class="fn">fromisoformat</span>(
+                    raw[<span class="st">"publishTime"</span>].<span class="fn">replace</span>(<span class="st">"Z"</span>, <span class="st">"+00:00"</span>)
+                ),
+                reviewer_name   = raw.<span class="fn">get</span>(<span class="st">"authorAttribution"</span>, {}).<span class="fn">get</span>(<span class="st">"displayName"</span>),
+                reviewer_id     = raw.<span class="fn">get</span>(<span class="st">"authorAttribution"</span>, {}).<span class="fn">get</span>(<span class="st">"uri"</span>),
+                raw_payload     = json.<span class="fn">dumps</span>(raw),
+            )
+        <span class="kw">except</span> (<span class="nm">ValidationError</span>, <span class="nm">KeyError</span>) <span class="kw">as</span> e:
+            log.<span class="fn">error</span>(<span class="st">"google_parse_error"</span>, location=location_id,
+                      error=<span class="fn">str</span>(e), raw_keys=<span class="fn">list</span>(raw.<span class="fn">keys</span>()))
+            <span class="kw">return None</span>   <span class="cm"># caller routes to DLQ</span>
+
+    <span class="kw">def</span> <span class="fn">fetch_reviews</span>(self, location_id: str) -> Iterator[FeedbackEvent]:
+        place_id = <span class="nm">LOCATION_PLACE_IDS</span>.<span class="fn">get</span>(location_id)
+        <span class="kw">if not</span> place_id:
+            log.<span class="fn">error</span>(<span class="st">"unknown_location"</span>, location_id=location_id); <span class="kw">return</span>
+
+        cursor = self.<span class="fn">load_cursor</span>(location_id)
+        page_token = cursor.<span class="fn">get</span>(<span class="st">"page_token"</span>)
+        fetched, skipped = <span class="nu">0</span>, <span class="nu">0</span>
+
+        <span class="kw">while True</span>:
+            params = {<span class="st">"pageSize"</span>: <span class="nu">50</span>}
+            <span class="kw">if</span> page_token:
+                params[<span class="st">"pageToken"</span>] = page_token
+
+            resp = self.<span class="fn">_get</span>(
+                f<span class="st">"</span><span class="kw">{self.BASE_URL}</span><span class="st">/places/</span><span class="kw">{place_id}</span><span class="st">/reviews"</span>, params=params
+            )
+            data       = resp.<span class="fn">json</span>()
+            reviews    = data.<span class="fn">get</span>(<span class="st">"reviews"</span>, [])
+            page_token = data.<span class="fn">get</span>(<span class="st">"nextPageToken"</span>)
+
+            <span class="kw">for</span> raw <span class="kw">in</span> reviews:
+                event = self.<span class="fn">_parse_review</span>(raw, location_id)
+                <span class="kw">if</span> event:
+                    fetched += <span class="nu">1</span>
+                    <span class="kw">yield</span> event
+                <span class="kw">else</span>:
+                    skipped += <span class="nu">1</span>
+
+            <span class="cm"># Persist cursor after every page — crash-safe incremental progress</span>
+            self.<span class="fn">save_cursor</span>(location_id, {
+                <span class="st">"page_token"</span>: page_token,
+                <span class="st">"last_fetched_at"</span>: datetime.<span class="fn">now</span>(timezone.utc).<span class="fn">isoformat</span>(),
+                <span class="st">"fetched_total"</span>: fetched,
+            })
+
+            <span class="kw">if not</span> page_token:
+                <span class="kw">break</span>
+
+        log.<span class="fn">info</span>(<span class="st">"google_fetch_complete"</span>, location=location_id,
+                  fetched=fetched, skipped=skipped)</pre>
+        </div>
+
+        <table class="rate-table">
+          <tr><th>Platform</th><th>Quota</th><th>Strategy</th><th>Risk</th></tr>
+          <tr><td>Google Maps</td><td>2,500/day free</td><td>Poll every 4h, 20 req/min</td><td class="badge-yellow">Med — quota exhaustion</td></tr>
+          <tr><td>Yelp</td><td>5,000/day</td><td>Poll every 6h, 30 req/min</td><td class="badge-green">Low</td></tr>
+          <tr><td>TripAdvisor</td><td>200/min</td><td>Poll every 12h, 150 req/min</td><td class="badge-yellow">Med — strict burst limit</td></tr>
+          <tr><td>DoorDash</td><td>Webhook push</td><td>HMAC verify, idempotent</td><td class="badge-red">High — replay attacks</td></tr>
+          <tr><td>Uber Eats</td><td>Webhook push</td><td>HMAC verify, 2xx-only retry</td><td class="badge-red">High — duplicate delivery</td></tr>
+        </table>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 4 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">04</div>
+        <div class="step-header-content">
+          <div class="step-tag">Webhook Connectors</div>
+          <h3>DoorDash & Uber Eats: Webhook Receiver with HMAC Verification</h3>
+          <p>Webhooks push data to you — which means attackers can too. Every incoming request must be HMAC-verified before processing. Replays, race conditions, and the idempotency key pattern are covered here.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #4: Webhook Replay Attacks & Duplicates</strong>
+          DoorDash retries webhook delivery if it doesn't receive a 2xx within 5 seconds. A slow Kafka producer causes a timeout → DoorDash retries → you receive the same review twice. Without idempotency keys checked against a seen-set (Redis), you get duplicate reviews in Kafka. Fix: HMAC verify → idempotency key check → then produce to Kafka → return 200 immediately.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">connectors/webhook_receiver.py</span></div>
+          <pre><span class="cm">"""
+Webhook receiver for DoorDash and Uber Eats review events.
+FastAPI endpoint: lightweight, async, responds 200 within milliseconds.
+HMAC verification happens synchronously; Kafka produce is fire-and-forget.
+Idempotency keys stored in Redis with 7-day TTL.
+"""</span>
+<span class="kw">import</span> hashlib, hmac, json, time
+<span class="kw">from</span> typing <span class="kw">import</span> Annotated
+<span class="kw">import</span> redis
+<span class="kw">import</span> structlog
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, Header, HTTPException, Request, BackgroundTasks
+<span class="kw">from</span> pydantic <span class="kw">import</span> ValidationError
+<span class="kw">from</span> confluent_kafka <span class="kw">import</span> Producer
+<span class="kw">from</span> normalizer.event_model <span class="kw">import</span> FeedbackEvent
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+app = <span class="fn">FastAPI</span>(title=<span class="st">"FIP Webhook Receiver"</span>)
+
+<span class="kw">class</span> <span class="nm">WebhookConfig</span>:
+    doordash_secret: str
+    ubereats_secret: str
+    kafka_brokers:   str
+    redis_url:       str = <span class="st">"redis://localhost:6379"</span>
+
+cfg    = <span class="nm">WebhookConfig</span>()
+rdb    = redis.<span class="fn">from_url</span>(cfg.redis_url, decode_responses=<span class="kw">True</span>)
+producer = <span class="fn">Producer</span>({
+    <span class="st">"bootstrap.servers"</span>: cfg.kafka_brokers,
+    <span class="st">"enable.idempotence"</span>: <span class="kw">True</span>,   <span class="cm"># producer-side exactly-once</span>
+    <span class="st">"acks"</span>: <span class="st">"all"</span>,                  <span class="cm"># wait for all ISR replicas</span>
+    <span class="st">"retries"</span>: <span class="nu">5</span>,
+    <span class="st">"delivery.timeout.ms"</span>: <span class="nu">10_000</span>,
+})
+
+<span class="kw">def</span> <span class="fn">verify_hmac_sha256</span>(body: bytes, signature: str, secret: str) -> bool:
+    <span class="cm">"""
+    Constant-time HMAC comparison. Never use == for signature comparison.
+    Timing attacks can determine the correct signature byte-by-byte
+    if you use regular string equality.
+    """</span>
+    expected = hmac.<span class="fn">new</span>(
+        secret.<span class="fn">encode</span>(), body, hashlib.sha256
+    ).<span class="fn">hexdigest</span>()
+    <span class="kw">return</span> hmac.<span class="fn">compare_digest</span>(expected, signature)
+
+<span class="kw">def</span> <span class="fn">is_duplicate</span>(idempotency_key: str) -> bool:
+    <span class="cm">"""Check + set atomically (SETNX). 7-day TTL matches DoorDash retry window."""</span>
+    redis_key = f<span class="st">"webhook:seen:</span><span class="kw">{idempotency_key}</span><span class="st">"</span>
+    was_new   = rdb.<span class="fn">set</span>(redis_key, <span class="st">"1"</span>, nx=<span class="kw">True</span>, ex=<span class="nu">604_800</span>)  <span class="cm"># 7 days</span>
+    <span class="kw">return</span> was_new <span class="kw">is None</span>   <span class="cm"># None = key already existed = duplicate</span>
+
+<span class="kw">def</span> <span class="fn">produce_to_kafka</span>(event: FeedbackEvent) -> <span class="kw">None</span>:
+    <span class="cm"># Partition key = location_id → same location → same partition → ordered</span>
+    producer.<span class="fn">produce</span>(
+        topic=<span class="st">"feedback.raw.events"</span>,
+        key=event.location_id,
+        value=json.<span class="fn">dumps</span>(event.<span class="fn">to_avro_dict</span>()).<span class="fn">encode</span>(),
+        on_delivery=<span class="kw">lambda</span> err, msg: log.<span class="fn">error</span>(<span class="st">"kafka_delivery_failed"</span>, error=<span class="fn">str</span>(err)) <span class="kw">if</span> err <span class="kw">else None</span>
+    )
+    producer.<span class="fn">poll</span>(<span class="nu">0</span>)   <span class="cm"># non-blocking flush of internal queue</span>
+
+<span class="dc">@app.post</span>(<span class="st">"/webhooks/doordash"</span>)
+<span class="kw">async def</span> <span class="fn">doordash_webhook</span>(
+    request:        Request,
+    background_tasks: BackgroundTasks,
+    x_doordash_signature: Annotated[str | <span class="kw">None</span>, <span class="fn">Header</span>()] = <span class="kw">None</span>,
+):
+    body = <span class="kw">await</span> request.<span class="fn">body</span>()
+
+    <span class="cm"># ── Step 1: HMAC verification (synchronous — reject before any processing) ──</span>
+    <span class="kw">if not</span> x_doordash_signature:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(<span class="nu">401</span>, <span class="st">"Missing signature"</span>)
+    <span class="kw">if not</span> <span class="fn">verify_hmac_sha256</span>(body, x_doordash_signature, cfg.doordash_secret):
+        log.<span class="fn">warning</span>(<span class="st">"hmac_verification_failed"</span>, source=<span class="st">"doordash"</span>)
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(<span class="nu">401</span>, <span class="st">"Invalid signature"</span>)
+
+    payload          = json.<span class="fn">loads</span>(body)
+    idempotency_key  = payload.<span class="fn">get</span>(<span class="st">"event_id"</span>) <span class="kw">or</span> payload.<span class="fn">get</span>(<span class="st">"review_id"</span>)
+
+    <span class="cm"># ── Step 2: Idempotency check (prevents duplicate on DoorDash retry) ──</span>
+    <span class="kw">if not</span> idempotency_key <span class="kw">or</span> <span class="fn">is_duplicate</span>(f<span class="st">"doordash:</span><span class="kw">{idempotency_key}</span><span class="st">"</span>):
+        log.<span class="fn">info</span>(<span class="st">"webhook_duplicate_skipped"</span>, key=idempotency_key)
+        <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"note"</span>: <span class="st">"duplicate"</span>}   <span class="cm"># still 200 — stops retry storm</span>
+
+    <span class="cm"># ── Step 3: Parse & validate ──────────────────────────────────────────────</span>
+    <span class="kw">try</span>:
+        event = <span class="fn">FeedbackEvent</span>(
+            source_event_id = <span class="fn">str</span>(payload[<span class="st">"review_id"</span>]),
+            source_platform = <span class="st">"doordash"</span>,
+            location_id     = payload[<span class="st">"store_id"</span>],
+            review_text     = payload[<span class="st">"rating_details"</span>].<span class="fn">get</span>(<span class="st">"comment"</span>, <span class="st">""</span>),
+            star_rating     = payload[<span class="st">"rating_details"</span>][<span class="st">"score"</span>],
+            review_date     = payload[<span class="st">"created_at"</span>],
+            raw_payload     = body.<span class="fn">decode</span>(),
+        )
+    <span class="kw">except</span> (<span class="nm">ValidationError</span>, <span class="nm">KeyError</span>) <span class="kw">as</span> e:
+        log.<span class="fn">error</span>(<span class="st">"doordash_parse_failed"</span>, error=<span class="fn">str</span>(e))
+        <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>, <span class="st">"note"</span>: <span class="st">"routed_to_dlq"</span>}   <span class="cm"># still 200 — don't trigger retries</span>
+
+    <span class="cm"># ── Step 4: Produce to Kafka in background (respond 200 FIRST) ───────────</span>
+    <span class="cm"># Return 200 within milliseconds. DoorDash's 5s timeout is the enemy.</span>
+    background_tasks.<span class="fn">add_task</span>(produce_to_kafka, event)
+    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"accepted"</span>}</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 5 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">05</div>
+        <div class="step-header-content">
+          <div class="step-tag">Kafka Producer</div>
+          <h3>Idempotent Avro Producer with Dead Letter Queue Routing</h3>
+          <p>The producer is the last gate before data enters the pipeline. Idempotent mode, delivery callbacks, and DLQ routing for messages that fail serialization or schema validation.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout danger">
+          <div class="callout-icon">🔥</div>
+          <div class="callout-body"><strong>Production Issue #5: Silent Producer Failures</strong>
+          Without a delivery callback, <code>producer.produce()</code> returns immediately and buffers the message internally. If Kafka is temporarily unavailable, the internal buffer fills up and messages are silently dropped with no error in your logs. Fix: always register a <code>on_delivery</code> callback, monitor the error metric, and alert on non-zero delivery failures.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">kafka/producer.py</span></div>
+          <pre><span class="cm">"""
+FIP Kafka Producer — wraps confluent-kafka with:
+- Idempotent delivery (enable.idempotence=True)
+- Avro serialization via Schema Registry
+- Delivery callbacks with Prometheus metrics
+- DLQ routing for unserializable messages
+"""</span>
+<span class="kw">import</span> json
+<span class="kw">from</span> typing <span class="kw">import</span> Optional, Callable
+<span class="kw">import</span> structlog
+<span class="kw">from</span> confluent_kafka <span class="kw">import</span> Producer, KafkaException
+<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient
+<span class="kw">from</span> confluent_kafka.schema_registry.avro <span class="kw">import</span> AvroSerializer
+<span class="kw">from</span> confluent_kafka.serialization <span class="kw">import</span> SerializationContext, MessageField
+<span class="kw">from</span> prometheus_client <span class="kw">import</span> Counter, Histogram
+<span class="kw">from</span> normalizer.event_model <span class="kw">import</span> FeedbackEvent
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="cm"># ── Prometheus metrics ──────────────────────────────────────────</span>
+<span class="nm">EVENTS_PRODUCED</span> = <span class="fn">Counter</span>(
+    <span class="st">"fip_events_produced_total"</span>, <span class="st">"Events successfully delivered to Kafka"</span>,
+    [<span class="st">"platform"</span>, <span class="st">"location_id"</span>]
+)
+<span class="nm">EVENTS_FAILED</span> = <span class="fn">Counter</span>(
+    <span class="st">"fip_events_failed_total"</span>, <span class="st">"Events that failed Kafka delivery"</span>,
+    [<span class="st">"platform"</span>, <span class="st">"reason"</span>]
+)
+<span class="nm">PRODUCE_LATENCY</span> = <span class="fn">Histogram</span>(
+    <span class="st">"fip_produce_latency_seconds"</span>, <span class="st">"Time from produce() call to delivery callback"</span>
+)
+
+<span class="kw">class</span> <span class="nm">FIPProducer</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: dict):
+        self.topic    = config.<span class="fn">get</span>(<span class="st">"topic"</span>, <span class="st">"feedback.raw.events"</span>)
+        self.dlq      = config.<span class="fn">get</span>(<span class="st">"dlq_topic"</span>, <span class="st">"feedback.dlq.events"</span>)
+
+        sr_client = <span class="fn">SchemaRegistryClient</span>({<span class="st">"url"</span>: config[<span class="st">"schema_registry_url"</span>]})
+        <span class="kw">with</span> <span class="fn">open</span>(<span class="st">"kafka/schemas/feedback_event_v1.avsc"</span>) <span class="kw">as</span> f:
+            schema_str = f.<span class="fn">read</span>()
+
+        self.serializer = <span class="fn">AvroSerializer</span>(
+            sr_client, schema_str,
+            to_dict=<span class="kw">lambda</span> obj, ctx: obj.<span class="fn">to_avro_dict</span>()
+        )
+
+        self.producer = <span class="fn">Producer</span>({
+            <span class="st">"bootstrap.servers"</span>:           config[<span class="st">"kafka_brokers"</span>],
+            <span class="cm"># ─── Idempotent mode: prevents duplicates from producer retries ───</span>
+            <span class="st">"enable.idempotence"</span>:           <span class="kw">True</span>,
+            <span class="cm"># ─────────────────────────────────────────────────────────────────</span>
+            <span class="st">"acks"</span>:                         <span class="st">"all"</span>,     <span class="cm"># wait for all ISR replicas</span>
+            <span class="st">"retries"</span>:                       <span class="nu">10</span>,
+            <span class="st">"max.in.flight.requests.per.connection"</span>: <span class="nu">5</span>,
+            <span class="st">"compression.type"</span>:             <span class="st">"snappy"</span>,
+            <span class="st">"linger.ms"</span>:                    <span class="nu">5</span>,         <span class="cm"># batch for 5ms for throughput</span>
+            <span class="st">"batch.size"</span>:                   <span class="nu">65536</span>,    <span class="cm"># 64 KB batches</span>
+            <span class="st">"delivery.timeout.ms"</span>:          <span class="nu">30_000</span>,   <span class="cm"># fail loudly after 30s</span>
+        })
+
+    <span class="kw">def</span> <span class="fn">_delivery_callback</span>(self, err, msg, event: FeedbackEvent, start_time: float):
+        latency = __import__(<span class="st">'time'</span>).<span class="fn">monotonic</span>() - start_time
+        <span class="kw">if</span> err:
+            log.<span class="fn">error</span>(<span class="st">"kafka_delivery_failed"</span>,
+                      event_id=event.event_id, platform=event.source_platform,
+                      error=<span class="fn">str</span>(err))
+            <span class="nm">EVENTS_FAILED</span>.<span class="fn">labels</span>(platform=event.source_platform, reason=<span class="fn">str</span>(err)).<span class="fn">inc</span>()
+        <span class="kw">else</span>:
+            <span class="nm">EVENTS_PRODUCED</span>.<span class="fn">labels</span>(
+                platform=event.source_platform,
+                location_id=event.location_id
+            ).<span class="fn">inc</span>()
+            <span class="nm">PRODUCE_LATENCY</span>.<span class="fn">observe</span>(latency)
+
+    <span class="kw">def</span> <span class="fn">produce</span>(self, event: FeedbackEvent) -> <span class="kw">None</span>:
+        <span class="kw">import</span> time as _time
+        start = _time.<span class="fn">monotonic</span>()
+        <span class="kw">try</span>:
+            serialized = self.serializer(
+                event,
+                <span class="fn">SerializationContext</span>(self.topic, MessageField.VALUE)
+            )
+            self.producer.<span class="fn">produce</span>(
+                topic    = self.topic,
+                key      = event.location_id,   <span class="cm"># partition by location → ordered per location</span>
+                value    = serialized,
+                on_delivery = <span class="kw">lambda</span> err, msg: self.<span class="fn">_delivery_callback</span>(err, msg, event, start),
+            )
+            self.producer.<span class="fn">poll</span>(<span class="nu">0</span>)
+
+        <span class="kw">except</span> <span class="nm">Exception</span> <span class="kw">as</span> e:
+            log.<span class="fn">error</span>(<span class="st">"produce_error"</span>, event_id=event.event_id, error=<span class="fn">str</span>(e))
+            self.<span class="fn">_send_to_dlq</span>(event, reason=<span class="fn">str</span>(e))
+
+    <span class="kw">def</span> <span class="fn">_send_to_dlq</span>(self, event: FeedbackEvent, reason: str) -> <span class="kw">None</span>:
+        <span class="cm">"""Poison messages go to DLQ with reason metadata. NEVER drop silently."""</span>
+        dlq_payload = {
+            <span class="st">"original_event"</span>: event.<span class="fn">to_avro_dict</span>(),
+            <span class="st">"dlq_reason"</span>:     reason,
+            <span class="st">"dlq_timestamp"</span>:  __import__(<span class="st">'datetime'</span>).datetime.<span class="fn">utcnow</span>().<span class="fn">isoformat</span>(),
+        }
+        self.producer.<span class="fn">produce</span>(
+            topic = self.dlq,
+            key   = event.location_id,
+            value = json.<span class="fn">dumps</span>(dlq_payload).<span class="fn">encode</span>(),
+        )
+        <span class="nm">EVENTS_FAILED</span>.<span class="fn">labels</span>(platform=event.source_platform, reason=<span class="st">"dlq"</span>).<span class="fn">inc</span>()
+
+    <span class="kw">def</span> <span class="fn">flush</span>(self, timeout: float = <span class="nu">30.0</span>) -> <span class="kw">None</span>:
+        remaining = self.producer.<span class="fn">flush</span>(timeout)
+        <span class="kw">if</span> remaining > <span class="nu">0</span>:
+            log.<span class="fn">error</span>(<span class="st">"producer_flush_incomplete"</span>, remaining_messages=remaining)
+            <span class="kw">raise</span> <span class="nm">RuntimeError</span>(f<span class="st">"</span><span class="kw">{remaining}</span><span class="st"> messages not delivered after </span><span class="kw">{timeout}</span><span class="st">s flush"</span>)</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 6 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">06</div>
+        <div class="step-header-content">
+          <div class="step-tag">Orchestration</div>
+          <h3>Ingestion Runner: Wiring All Connectors with Graceful Shutdown</h3>
+          <p>The main runner that schedules polling connectors, starts the webhook server, handles SIGTERM gracefully, and drains the Kafka producer buffer on shutdown.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #6: SIGTERM Without Graceful Drain</strong>
+          Kubernetes sends SIGTERM before killing a pod. Without a signal handler, Python exits immediately, the Kafka producer buffer is discarded, and the last batch of reviews from that poll cycle is lost. Fix: register SIGTERM → set shutdown flag → wait for current poll to finish → call <code>producer.flush(30)</code> before exit.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">connectors/ingestion_runner.py</span></div>
+          <pre><span class="cm">"""
+Main ingestion runner — orchestrates all polling connectors on a schedule.
+Designed to run as a single long-lived process (Kubernetes Deployment).
+Polling connectors run in a simple loop; webhook server runs in a thread.
+"""</span>
+<span class="kw">import</span> signal, sys, time, threading
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">import</span> structlog
+<span class="kw">from</span> confluent_kafka <span class="kw">import</span> Producer
+<span class="kw">from</span> connectors.google_connector <span class="kw">import</span> GoogleMapsConnector
+<span class="kw">from</span> connectors.yelp_connector <span class="kw">import</span> YelpConnector
+<span class="kw">from</span> connectors.tripadvisor_connector <span class="kw">import</span> TripAdvisorConnector
+<span class="kw">from</span> kafka.producer <span class="kw">import</span> FIPProducer
+<span class="kw">import</span> uvicorn
+<span class="kw">from</span> connectors.webhook_receiver <span class="kw">import</span> app <span class="kw">as</span> webhook_app
+
+log = <span class="fn">structlog</span>.<span class="fn">get_logger</span>(__name__)
+
+<span class="nm">POLL_INTERVALS</span> = {
+    <span class="st">"google"</span>:      <span class="nu">4</span> * <span class="nu">3600</span>,    <span class="cm"># 4 hours</span>
+    <span class="st">"yelp"</span>:        <span class="nu">6</span> * <span class="nu">3600</span>,    <span class="cm"># 6 hours</span>
+    <span class="st">"tripadvisor"</span>: <span class="nu">12</span> * <span class="nu">3600</span>,   <span class="cm"># 12 hours</span>
+}
+
+<span class="nm">LOCATION_IDS</span> = [
+    <span class="st">"cb-mission"</span>, <span class="st">"cb-castro"</span>, <span class="st">"cb-soma"</span>, <span class="st">"cb-tenderloin"</span>,
+    <span class="st">"cb-richmond"</span>, <span class="st">"cb-sunset"</span>, <span class="st">"cb-oakland"</span>, <span class="st">"cb-berkeley"</span>,
+    <span class="st">"cb-sj-downtown"</span>, <span class="st">"cb-sj-willow"</span>, <span class="st">"cb-sunnyvale"</span>, <span class="st">"cb-fremont"</span>,
+]
+
+<span class="kw">class</span> <span class="nm">IngestionRunner</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: dict):
+        self.config     = config
+        self.producer   = <span class="fn">FIPProducer</span>(config)
+        self._shutdown  = <span class="kw">False</span>
+        self._last_poll: dict[str, float] = {}
+
+        self.connectors = {
+            <span class="st">"google"</span>:      <span class="fn">GoogleMapsConnector</span>(config),
+            <span class="st">"yelp"</span>:        <span class="fn">YelpConnector</span>(config),
+            <span class="st">"tripadvisor"</span>: <span class="fn">TripAdvisorConnector</span>(config),
+        }
+
+        <span class="cm"># Graceful shutdown on SIGTERM (Kubernetes) or SIGINT (Ctrl+C)</span>
+        <span class="kw">for</span> sig <span class="kw">in</span> (signal.SIGTERM, signal.SIGINT):
+            signal.<span class="fn">signal</span>(sig, self.<span class="fn">_handle_shutdown</span>)
+
+    <span class="kw">def</span> <span class="fn">_handle_shutdown</span>(self, signum, frame):
+        log.<span class="fn">info</span>(<span class="st">"shutdown_signal_received"</span>, signal=signum)
+        self._shutdown = <span class="kw">True</span>
+
+    <span class="kw">def</span> <span class="fn">_should_poll</span>(self, platform: str) -> bool:
+        last     = self._last_poll.<span class="fn">get</span>(platform, <span class="nu">0</span>)
+        interval = <span class="nm">POLL_INTERVALS</span>[platform]
+        <span class="kw">return</span> (time.<span class="fn">monotonic</span>() - last) >= interval
+
+    <span class="kw">def</span> <span class="fn">_poll_platform</span>(self, platform: str, connector) -> <span class="kw">None</span>:
+        log.<span class="fn">info</span>(<span class="st">"poll_start"</span>, platform=platform)
+        total = <span class="nu">0</span>
+        <span class="kw">for</span> location_id <span class="kw">in</span> <span class="nm">LOCATION_IDS</span>:
+            <span class="kw">if</span> self._shutdown: <span class="kw">break</span>
+            <span class="kw">try</span>:
+                <span class="kw">for</span> event <span class="kw">in</span> connector.<span class="fn">fetch_reviews</span>(location_id):
+                    self.producer.<span class="fn">produce</span>(event)
+                    total += <span class="nu">1</span>
+            <span class="kw">except</span> <span class="nm">Exception</span> <span class="kw">as</span> e:
+                <span class="cm"># Log and continue — one bad location should not stop others</span>
+                log.<span class="fn">error</span>(<span class="st">"poll_location_failed"</span>,
+                           platform=platform, location=location_id, error=<span class="fn">str</span>(e))
+
+        self._last_poll[platform] = time.<span class="fn">monotonic</span>()
+        log.<span class="fn">info</span>(<span class="st">"poll_complete"</span>, platform=platform, events_produced=total)
+
+    <span class="kw">def</span> <span class="fn">_start_webhook_server</span>(self) -> threading.<span class="nm">Thread</span>:
+        t = threading.<span class="fn">Thread</span>(
+            target=uvicorn.<span class="fn">run</span>,
+            kwargs={<span class="st">"app"</span>: webhook_app, <span class="st">"host"</span>: <span class="st">"0.0.0.0"</span>, <span class="st">"port"</span>: <span class="nu">8080</span>, <span class="st">"log_level"</span>: <span class="st">"warning"</span>},
+            daemon=<span class="kw">True</span>,
+        )
+        t.<span class="fn">start</span>()
+        log.<span class="fn">info</span>(<span class="st">"webhook_server_started"</span>, port=<span class="nu">8080</span>)
+        <span class="kw">return</span> t
+
+    <span class="kw">def</span> <span class="fn">run</span>(self) -> <span class="kw">None</span>:
+        self.<span class="fn">_start_webhook_server</span>()
+        log.<span class="fn">info</span>(<span class="st">"ingestion_runner_started"</span>)
+
+        <span class="kw">while not</span> self._shutdown:
+            <span class="kw">for</span> platform, connector <span class="kw">in</span> self.connectors.<span class="fn">items</span>():
+                <span class="kw">if</span> self._shutdown: <span class="kw">break</span>
+                <span class="kw">if</span> self.<span class="fn">_should_poll</span>(platform):
+                    self.<span class="fn">_poll_platform</span>(platform, connector)
+            time.<span class="fn">sleep</span>(<span class="nu">30</span>)   <span class="cm"># check every 30s whether any connector is due</span>
+
+        <span class="cm"># ── Graceful drain before exit ──────────────────────────────
+        # CRITICAL: without this, last batch is lost on SIGTERM</span>
+        log.<span class="fn">info</span>(<span class="st">"draining_kafka_producer"</span>)
+        self.producer.<span class="fn">flush</span>(timeout=<span class="nu">30.0</span>)
+        log.<span class="fn">info</span>(<span class="st">"shutdown_complete"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+    <span class="kw">import</span> os
+    <span class="fn">load_dotenv</span>()
+    config = {
+        <span class="st">"kafka_brokers"</span>:        os.<span class="fn">getenv</span>(<span class="st">"KAFKA_BROKERS"</span>, <span class="st">"localhost:9092"</span>),
+        <span class="st">"schema_registry_url"</span>:  os.<span class="fn">getenv</span>(<span class="st">"SCHEMA_REGISTRY_URL"</span>, <span class="st">"http://localhost:8081"</span>),
+        <span class="st">"google_api_key"</span>:       os.<span class="fn">getenv</span>(<span class="st">"GOOGLE_API_KEY"</span>),
+        <span class="st">"yelp_api_key"</span>:         os.<span class="fn">getenv</span>(<span class="st">"YELP_API_KEY"</span>),
+        <span class="st">"doordash_secret"</span>:      os.<span class="fn">getenv</span>(<span class="st">"DOORDASH_WEBHOOK_SECRET"</span>),
+        <span class="st">"ubereats_secret"</span>:      os.<span class="fn">getenv</span>(<span class="st">"UBEREATS_WEBHOOK_SECRET"</span>),
+    }
+    <span class="fn">IngestionRunner</span>(config).<span class="fn">run</span>()</pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ STEP 7 ═══ -->
+    <div class="step-card">
+      <div class="step-card-header">
+        <div class="step-num-stripe">07</div>
+        <div class="step-header-content">
+          <div class="step-tag">Testing</div>
+          <h3>Unit Tests: Mocked HTTP, Schema Validation, HMAC Verification</h3>
+          <p>Tests are not optional — they are the only way to safely refactor connectors when a platform changes its API. Cover the three most failure-prone areas: schema validation edge cases, HMAC verification, and rate-limit retry behavior.</p>
+        </div>
+      </div>
+      <div class="step-body">
+
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body"><strong>Production Issue #7: Untested Edge Cases That Bite in Prod</strong>
+          The three cases that always slip through without tests: (1) Google rating as float instead of int, (2) empty <code>review_text</code> field (some platforms send <code>null</code>), (3) HMAC verification using non-constant-time comparison that's vulnerable to timing attacks. Write a test for each before deploying.</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">tests/unit/test_event_model.py</span></div>
+          <pre><span class="kw">import</span> pytest
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> pydantic <span class="kw">import</span> ValidationError
+<span class="kw">from</span> normalizer.event_model <span class="kw">import</span> FeedbackEvent
+
+<span class="cm"># ── Happy path ──────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">make_valid_event</span>(**overrides) -> dict:
+    base = {
+        <span class="st">"source_event_id"</span>: <span class="st">"rev-001"</span>,
+        <span class="st">"source_platform"</span>: <span class="st">"google"</span>,
+        <span class="st">"location_id"</span>:     <span class="st">"cb-mission"</span>,
+        <span class="st">"review_text"</span>:     <span class="st">"Great biryani!"</span>,
+        <span class="st">"star_rating"</span>:     <span class="nu">4.0</span>,
+        <span class="st">"review_date"</span>:     datetime(<span class="nu">2024</span>, <span class="nu">6</span>, <span class="nu">1</span>, tzinfo=timezone.utc),
+    }
+    <span class="kw">return</span> {**base, **overrides}
+
+<span class="kw">def</span> <span class="fn">test_valid_event_parses</span>():
+    e = <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>())
+    <span class="kw">assert</span> e.star_rating == <span class="nu">4.0</span>
+    <span class="kw">assert</span> e.source_platform == <span class="st">"google"</span>
+
+<span class="cm"># ── The float-vs-int edge case that burned us in prod ───────────</span>
+<span class="kw">def</span> <span class="fn">test_google_float_rating_accepted</span>():
+    <span class="cm">"Google API v3 returns floats like 4.6 — must not raise"</span>
+    e = <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(star_rating=<span class="nu">4.6</span>))
+    <span class="kw">assert</span> e.star_rating == <span class="nu">4.6</span>
+
+<span class="kw">def</span> <span class="fn">test_rating_out_of_range_raises</span>():
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="nm">ValidationError</span>, match=<span class="st">"1.0–5.0"</span>):
+        <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(star_rating=<span class="nu">6.0</span>))
+
+<span class="kw">def</span> <span class="fn">test_zero_rating_raises</span>():
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="nm">ValidationError</span>):
+        <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(star_rating=<span class="nu">0</span>))
+
+<span class="cm"># ── Null/empty text edge cases ──────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">test_empty_text_raises</span>():
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="nm">ValidationError</span>):
+        <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(review_text=<span class="st">""</span>))
+
+<span class="kw">def</span> <span class="fn">test_whitespace_only_text_raises</span>():
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="nm">ValidationError</span>):
+        <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(review_text=<span class="st">"   "</span>))
+
+<span class="kw">def</span> <span class="fn">test_very_long_text_truncated</span>():
+    long_text = <span class="st">"x"</span> * <span class="nu">15_000</span>
+    e = <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(review_text=long_text))
+    <span class="kw">assert</span> <span class="fn">len</span>(e.review_text) == <span class="nu">10_000</span>   <span class="cm"># truncated, not rejected</span>
+
+<span class="cm"># ── Future date rejection ───────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">test_future_date_raises</span>():
+    future = datetime(<span class="nu">2099</span>, <span class="nu">1</span>, <span class="nu">1</span>, tzinfo=timezone.utc)
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="nm">ValidationError</span>, match=<span class="st">"future"</span>):
+        <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(review_date=future))
+
+<span class="cm"># ── Unknown location rejection ──────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">test_unknown_location_raises</span>():
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="nm">ValidationError</span>, match=<span class="st">"Unknown location_id"</span>):
+        <span class="fn">FeedbackEvent</span>(**<span class="fn">make_valid_event</span>(location_id=<span class="st">"cb-fake-location"</span>))</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">python</span><span class="code-filename">tests/unit/test_webhook_hmac.py</span></div>
+          <pre><span class="kw">import</span> hashlib, hmac
+<span class="kw">import</span> pytest
+<span class="kw">from</span> connectors.webhook_receiver <span class="kw">import</span> verify_hmac_sha256
+
+<span class="nm">SECRET</span> = <span class="st">"test-secret-key"</span>
+
+<span class="kw">def</span> <span class="fn">make_sig</span>(body: bytes, secret: str = <span class="nm">SECRET</span>) -> str:
+    <span class="kw">return</span> hmac.<span class="fn">new</span>(secret.<span class="fn">encode</span>(), body, hashlib.sha256).<span class="fn">hexdigest</span>()
+
+<span class="kw">def</span> <span class="fn">test_valid_signature_passes</span>():
+    body = <span class="st">b'{"review_id": "123"}'</span>
+    <span class="kw">assert</span> <span class="fn">verify_hmac_sha256</span>(body, <span class="fn">make_sig</span>(body), <span class="nm">SECRET</span>) <span class="kw">is True</span>
+
+<span class="kw">def</span> <span class="fn">test_wrong_signature_rejected</span>():
+    body = <span class="st">b'{"review_id": "123"}'</span>
+    <span class="kw">assert</span> <span class="fn">verify_hmac_sha256</span>(body, <span class="st">"wrong-sig"</span>, <span class="nm">SECRET</span>) <span class="kw">is False</span>
+
+<span class="kw">def</span> <span class="fn">test_tampered_body_rejected</span>():
+    body          = <span class="st">b'{"review_id": "123"}'</span>
+    tampered_body = <span class="st">b'{"review_id": "456"}'</span>   <span class="cm"># different body, same sig</span>
+    sig           = <span class="fn">make_sig</span>(body)
+    <span class="kw">assert</span> <span class="fn">verify_hmac_sha256</span>(tampered_body, sig, <span class="nm">SECRET</span>) <span class="kw">is False</span>
+
+<span class="kw">def</span> <span class="fn">test_wrong_secret_rejected</span>():
+    body = <span class="st">b'{"review_id": "123"}'</span>
+    <span class="kw">assert</span> <span class="fn">verify_hmac_sha256</span>(body, <span class="fn">make_sig</span>(body), <span class="st">"different-secret"</span>) <span class="kw">is False</span>
+
+<span class="kw">def</span> <span class="fn">test_empty_signature_rejected</span>():
+    body = <span class="st">b'{"review_id": "123"}'</span>
+    <span class="kw">assert</span> <span class="fn">verify_hmac_sha256</span>(body, <span class="st">""</span>, <span class="nm">SECRET</span>) <span class="kw">is False</span></pre>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /steps-grid -->
+
+  <!-- PRODUCTION ISSUES SUMMARY -->
+  <div class="section-title">Production Issues Reference Map</div>
+  <div class="prod-issues">
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#1 Schema Mismatch at Runtime</div>
+      <div class="prod-issue-body">Google changed rating from int to float. Strict type validation drops 800+ reviews silently. Fix: accept float everywhere, validate range, never assume int from rating APIs.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#2 Rate Limit Cascade</div>
+      <div class="prod-issue-body">Burst requests across 12 locations → 429 from Google → connector crashes → batch lost. Fix: token bucket rate limiter + tenacity exponential backoff with jitter.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#3 Cursor State Lost on Restart</div>
+      <div class="prod-issue-body">In-memory page_token is lost on crash → full re-fetch from start → thousands of Kafka duplicates. Fix: atomic cursor write to disk (tmp → rename) after every page.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#4 Webhook Replay Duplicates</div>
+      <div class="prod-issue-body">Slow Kafka produce → DoorDash 5s timeout → retry → same review twice in Kafka. Fix: idempotency key in Redis (SETNX, 7-day TTL) before any processing, return 200 immediately.</div>
+    </div>
+    <div class="prod-issue-card severity-high">
+      <div class="severity-badge high">High Severity</div>
+      <div class="prod-issue-title">#5 Silent Producer Failures</div>
+      <div class="prod-issue-body">produce() returns immediately, buffers internally. Kafka unavailable → buffer full → messages dropped with no logs. Fix: on_delivery callback + Prometheus counter alert on failures.</div>
+    </div>
+    <div class="prod-issue-card severity-med">
+      <div class="severity-badge med">Medium Severity</div>
+      <div class="prod-issue-title">#6 SIGTERM Without Drain</div>
+      <div class="prod-issue-body">Kubernetes kills pod after SIGTERM with no handler → Kafka buffer discarded → last batch lost. Fix: signal handler sets shutdown flag, producer.flush(30) called before exit.</div>
+    </div>
+    <div class="prod-issue-card severity-med">
+      <div class="severity-badge med">Medium Severity</div>
+      <div class="prod-issue-title">#7 Untested Edge Cases</div>
+      <div class="prod-issue-body">Float ratings, empty text fields, non-constant-time HMAC comparisons all bypass code review. Fix: explicit unit tests for each edge case before first deployment.</div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="section-title">Phase 1 Implementation Checklist</div>
+  <div class="checklist-section">
+    <div class="checklist-title">Phase 1 — Data Ingestion</div>
+    <div class="checklist-subtitle">Track your implementation progress. Auto-saved to browser.</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <span id="progress-label" style="font-size:12px;color:var(--text-muted)">0 / 0 completed</span>
+
+    <div class="checklist-group-label">Step 1 — Environment & Kafka</div>
+    <label class="check-item" id="ci-1"><input type="checkbox" data-ci="ci-1"> <span class="check-label">Phase 1 folders added inside existing feedback-intelligence-platform repo</span></label>
+    <label class="check-item" id="ci-2"><input type="checkbox" data-ci="ci-2"> <span class="check-label">Phase 0 FLOCI MSK/EKS/S3/Secrets verified with make floci-status and make tf-outputs</span></label>
+    <label class="check-item" id="ci-3"><input type="checkbox" data-ci="ci-3"> <span class="check-label">Terraform applied: feedback.raw.events, feedback.dlq.events, and feedback.connector.checkpoints created on FLOCI MSK</span></label>
+
+    <div class="checklist-group-label">Step 2 — Unified Schema</div>
+    <label class="check-item" id="ci-4"><input type="checkbox" data-ci="ci-4"> <span class="check-label">FeedbackEvent Pydantic model implemented with all validators</span></label>
+    <label class="check-item" id="ci-5"><input type="checkbox" data-ci="ci-5"> <span class="check-label">Avro schema v1 defined with null defaults on all optional fields</span></label>
+    <label class="check-item" id="ci-6"><input type="checkbox" data-ci="ci-6"> <span class="check-label">Avro schema committed under shared/schemas/avro and compatibility rule documented for Phase 0 schema service</span></label>
+
+    <div class="checklist-group-label">Step 3 — Polling Connectors</div>
+    <label class="check-item" id="ci-7"><input type="checkbox" data-ci="ci-7"> <span class="check-label">BaseConnector implemented: rate limiting, retry backoff, cursor persistence</span></label>
+    <label class="check-item" id="ci-8"><input type="checkbox" data-ci="ci-8"> <span class="check-label">GoogleMapsConnector: Places API v3, pageToken pagination, cursor saved per page</span></label>
+    <label class="check-item" id="ci-9"><input type="checkbox" data-ci="ci-9"> <span class="check-label">YelpConnector: Fusion API, offset pagination, 72h late-data awareness</span></label>
+    <label class="check-item" id="ci-10"><input type="checkbox" data-ci="ci-10"> <span class="check-label">TripAdvisorConnector: Content API, strict 200/min rate limit respected</span></label>
+    <label class="check-item" id="ci-11"><input type="checkbox" data-ci="ci-11"> <span class="check-label">Location → platform ID mapping tables populated for all 12 locations</span></label>
+
+    <div class="checklist-group-label">Step 4 — Webhook Connectors</div>
+    <label class="check-item" id="ci-12"><input type="checkbox" data-ci="ci-12"> <span class="check-label">FastAPI webhook receiver running on port 8080</span></label>
+    <label class="check-item" id="ci-13"><input type="checkbox" data-ci="ci-13"> <span class="check-label">HMAC-SHA256 verification using hmac.compare_digest (constant time)</span></label>
+    <label class="check-item" id="ci-14"><input type="checkbox" data-ci="ci-14"> <span class="check-label">Redis idempotency key check (SETNX, 7-day TTL) before Kafka produce</span></label>
+    <label class="check-item" id="ci-15"><input type="checkbox" data-ci="ci-15"> <span class="check-label">Webhook returns 200 before Kafka produce (background task pattern)</span></label>
+
+    <div class="checklist-group-label">Step 5 — Kafka Producer</div>
+    <label class="check-item" id="ci-16"><input type="checkbox" data-ci="ci-16"> <span class="check-label">FIPProducer: enable.idempotence=True, acks=all configured</span></label>
+    <label class="check-item" id="ci-17"><input type="checkbox" data-ci="ci-17"> <span class="check-label">on_delivery callback implemented with Prometheus metrics</span></label>
+    <label class="check-item" id="ci-18"><input type="checkbox" data-ci="ci-18"> <span class="check-label">DLQ routing: failed serializations routed to feedback.dlq.events, never dropped</span></label>
+
+    <div class="checklist-group-label">Step 6–7 — Runner & Tests</div>
+    <label class="check-item" id="ci-19"><input type="checkbox" data-ci="ci-19"> <span class="check-label">IngestionRunner: SIGTERM handler + producer.flush(30) on shutdown</span></label>
+    <label class="check-item" id="ci-20"><input type="checkbox" data-ci="ci-20"> <span class="check-label">Poll intervals configured: Google 4h, Yelp 6h, TripAdvisor 12h</span></label>
+    <label class="check-item" id="ci-21"><input type="checkbox" data-ci="ci-21"> <span class="check-label">Unit tests: float rating, empty text, future date, unknown location all covered</span></label>
+    <label class="check-item" id="ci-22"><input type="checkbox" data-ci="ci-22"> <span class="check-label">Unit tests: HMAC valid sig, wrong sig, tampered body, wrong secret all covered</span></label>
+    <label class="check-item" id="ci-23"><input type="checkbox" data-ci="ci-23"> <span class="check-label">End-to-end smoke test: Helm workloads running on FLOCI EKS and events visible in feedback.raw.events</span></label>
+  </div>
+
+  <!-- LINKEDIN / CAREER SECTION -->
+  <div class="section-title">LinkedIn Content & Career Positioning</div>
+  <div class="career-card">
+    <div class="career-card-label">📣 LinkedIn Post — Phase 1 Completion</div>
+    <div class="li-post" contenteditable="false" data-fip-edit="li-post-p1">I extended my Phase 0 FLOCI AWS-parity foundation with a production data ingestion layer that pulls reviews from 5 platforms into FLOCI MSK for a restaurant AI platform.
+
+Here are 3 things that would have caused 3 AM incidents if we hadn't caught them first:
+
+🔥 Google quietly changed their rating field
+Google Maps API v3 started returning star ratings as floats (4.6) instead of integers (4). Our Pydantic model expected int, threw a ValidationError, and our connector silently dropped 800 reviews in testing before we caught it.
+
+The fix was simple: accept float everywhere, validate range (1.0–5.0), normalize to 1 decimal. The lesson was harder: never assume an external API's types are stable. Always test at the boundary.
+
+🔥 DoorDash retries will duplicate your data
+DoorDash expects a 2xx response within 5 seconds or it retries. If your Kafka produce is slow, you get the same review twice. Without an idempotency key check in Redis, those duplicates flow all the way into your analytics.
+
+Fix: HMAC verify → Redis SETNX idempotency check → return 200 IMMEDIATELY → Kafka produce in background. The 200 stops the retry. The idempotency key stops the duplicate.
+
+🔥 Your Kafka producer can fail silently
+producer.produce() returns immediately. It buffers internally. If Kafka is briefly unavailable, the buffer fills and messages are dropped with zero noise in your logs.
+
+Fix: always register an on_delivery callback. Always expose a Prometheus counter for delivery failures. Alert at 1 error per hour.
+
+Phase 1 of 7 complete. No duplicate local stack. No standalone Kafka. Just incremental Terraform + Helm on top of the Phase 0 FLOCI foundation: 5 platform connectors, unified Avro schema, DLQ routing, idempotent production.
+
+<span class="li-hashtags">#DataEngineering #Kafka #Python #Pydantic #BuildingInPublic #AIEngineering #MLOps</span></div>
+
+    <div style="margin-top:20px;">
+      <div class="career-card-label">🎯 Interview Q&A — Senior Data / AI Engineer</div>
+      <div class="interview-qa">
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you design a multi-source ingestion pipeline that handles different API contracts?</div>
+          <div class="qa-a">Define a canonical event schema first — in our case a Pydantic model called FeedbackEvent — and make every connector responsible for mapping its platform's schema to that canonical form. This isolates platform-specific parsing behind a connector boundary: if Google changes their API, only GoogleMapsConnector changes, not the Kafka producer or the downstream lakehouse. The Pydantic model enforces invariants (rating range, minimum text length, no future dates) at the boundary so corrupt data is caught at ingestion, not discovered weeks later in an analytics dashboard.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you prevent duplicates from webhook platforms that retry on timeout?</div>
+          <div class="qa-a">Two layers: first, always respond 200 within the platform's timeout window (DoorDash is 5 seconds). We do HMAC verification synchronously, then return 200, then produce to Kafka in a background task. Second, we maintain an idempotency key store in Redis using SETNX with a TTL that exceeds the platform's retry window (7 days for DoorDash). If the same event_id arrives twice, the second SETNX returns nil, we return 200 without producing, and the duplicate is dead. This pattern handles both timeout-driven retries and any manual re-sends from the platform.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: How do you handle rate limits across multiple API sources without a central coordinator?</div>
+          <div class="qa-a">Each polling connector maintains its own rate state — a monotonic timestamp of the last request and a minimum inter-request interval derived from the platform's quota. For Google at 2,500 requests/day across 12 locations, that's ~208 per location per day, so we set 20 requests/minute as a conservative cap. The BaseConnector's _rate_limit_wait() method enforces this locally. We pair it with tenacity retry logic that respects the platform's Retry-After header when a 429 is returned. For bursty conditions, we add jitter to the retry wait so all 12 location pollers don't wake up and hammer the API in lockstep after a rate limit event.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">Q: What's your strategy for crash recovery in a polling connector?</div>
+          <div class="qa-a">Every page of results gets its cursor (page_token or since_timestamp) persisted to disk via an atomic write — write to a .tmp file, then rename — before we process the next page. On restart, we load the cursor and resume from the last known good position. This gives us at-most-once data loss on crash (we might re-fetch the current page) which we handle with dedup in the Silver layer. We intentionally avoid storing cursor in memory only. Rename is the key: it's atomic on every major filesystem, so there's no window where the file is partially written or missing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE ROADMAP STRIP -->
+  <div class="section-title">7-Phase Roadmap</div>
+  <div class="arch-diagram">
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-node-icon">✅</div>
+        <div class="arch-node-name">Phase 00</div>
+        <div class="arch-node-sub">Foundation<br>Complete</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node highlight">
+        <div class="arch-node-icon">🔌</div>
+        <div class="arch-node-name">Phase 01</div>
+        <div class="arch-node-sub">Data Ingestion<br>← You are here</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🔷</div>
+        <div class="arch-node-name">Phase 02</div>
+        <div class="arch-node-sub">Data Platform<br>Next →</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🔍</div>
+        <div class="arch-node-name">Phase 03</div>
+        <div class="arch-node-sub">RAG Layer<br>Upcoming</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🤖</div>
+        <div class="arch-node-name">Phase 04</div>
+        <div class="arch-node-sub">Agents<br>Upcoming</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-icon">🚀</div>
+        <div class="arch-node-name">Phase 05–06</div>
+        <div class="arch-node-sub">UI + Deploy<br>Upcoming</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section-wrap -->
+
+<!-- FIP EDIT ENGINE TOOLBAR -->
+<div class="fip-toolbar">
+  <button class="fip-btn edit-btn"   id="fip-edit-toggle" title="Toggle edit mode (Ctrl+E)">✏️</button>
+  <button class="fip-btn save-btn"   id="fip-save"        title="Save to browser (Ctrl+S)">💾</button>
+  <button class="fip-btn undo-btn"   id="fip-undo"        title="Undo last change (Ctrl+Z)">↩️</button>
+  <button class="fip-btn search-btn" id="fip-search-open" title="Find & Replace">🔎</button>
+  <button class="fip-btn export-btn" id="fip-export"      title="Export HTML">📤</button>
+</div>
+<div class="fip-toast" id="fip-toast"></div>
+
+<!-- FIND & REPLACE MODAL -->
+<div class="fip-search-modal" id="fip-search-modal">
+  <div class="fip-search-box">
+    <h4>🔎 Find &amp; Replace</h4>
+    <input type="text" id="fip-find-input"    placeholder="Find text…">
+    <input type="text" id="fip-replace-input" placeholder="Replace with…">
+    <div class="modal-btns">
+      <button class="modal-btn primary"   id="fip-replace-btn">Replace All</button>
+      <button class="modal-btn secondary" id="fip-modal-close">Cancel</button>
+    </div>
+    <div id="fip-replace-result" style="font-size:12px;color:var(--text-muted);"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   FIP EDIT ENGINE — Phase 1 Data Ingestion
+   localStorage key: fip-phase1-data-ingestion
+═══════════════════════════════════════════════════════════════ */
+const LS_KEY      = 'fip-phase1-data-ingestion';
+const HISTORY_KEY = 'fip-phase1-history';
+const CHECK_KEY   = 'fip-phase1-checks';
+const MAX_HIST    = 30;
+let editMode      = false;
+let editHistory   = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+function toast(msg, duration = 2200) {
+  const el = document.getElementById('fip-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    data[el.dataset.fipEdit] = el.innerHTML;
+  });
+  editHistory.push(JSON.stringify(data));
+  if (editHistory.length > MAX_HIST) editHistory.shift();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+  toast('💾 Saved to browser');
+}
+
+function restoreSaved() {
+  const raw = localStorage.getItem(LS_KEY);
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    if (data[el.dataset.fipEdit] !== undefined) el.innerHTML = data[el.dataset.fipEdit];
+  });
+}
+
+function undoLast() {
+  if (editHistory.length < 2) { toast('Nothing to undo'); return; }
+  editHistory.pop();
+  const prev = JSON.parse(editHistory[editHistory.length - 1] || '{}');
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    if (prev[el.dataset.fipEdit] !== undefined) el.innerHTML = prev[el.dataset.fipEdit];
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(editHistory));
+  toast('↩️ Undone');
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    el.contentEditable = editMode ? 'true' : 'false';
+  });
+  toast(editMode ? '✏️ Edit mode ON — click any text to edit' : '🔒 Edit mode OFF');
+}
+
+function exportHTML() {
+  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'fip-phase1-data-ingestion.html';
+  a.click();
+  toast('📤 Exported!');
+}
+
+function doFindReplace() {
+  const find    = document.getElementById('fip-find-input').value;
+  const replace = document.getElementById('fip-replace-input').value;
+  if (!find) return;
+  let count = 0;
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    const before = el.innerHTML;
+    const after  = before.split(find).join(replace);
+    if (before !== after) { el.innerHTML = after; count++; }
+  });
+  document.getElementById('fip-replace-result').textContent =
+    count > 0 ? `✓ Replaced in ${count} element(s)` : 'No matches found';
+  if (count) saveAll();
+}
+
+function initChecklist() {
+  const saved = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+  const items = document.querySelectorAll('.check-item input[type="checkbox"]');
+  items.forEach(cb => {
+    const key = cb.dataset.ci;
+    if (saved[key]) { cb.checked = true; cb.closest('.check-item').classList.add('done'); }
+    cb.addEventListener('change', () => {
+      cb.closest('.check-item').classList.toggle('done', cb.checked);
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      state[key] = cb.checked;
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const all  = document.querySelectorAll('.check-item input[type="checkbox"]');
+  const done = document.querySelectorAll('.check-item input[type="checkbox"]:checked');
+  const pct  = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done.length} / ${all.length} completed`;
+}
+
+document.getElementById('fip-edit-toggle').addEventListener('click', toggleEditMode);
+document.getElementById('fip-save').addEventListener('click', saveAll);
+document.getElementById('fip-undo').addEventListener('click', undoLast);
+document.getElementById('fip-export').addEventListener('click', exportHTML);
+document.getElementById('fip-search-open').addEventListener('click', () => {
+  document.getElementById('fip-search-modal').classList.add('open');
+});
+document.getElementById('fip-modal-close').addEventListener('click', () => {
+  document.getElementById('fip-search-modal').classList.remove('open');
+});
+document.getElementById('fip-replace-btn').addEventListener('click', doFindReplace);
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveAll(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoLast(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); toggleEditMode(); }
+  if (e.key === 'Escape') document.getElementById('fip-search-modal').classList.remove('open');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  restoreSaved();
+  initChecklist();
+  document.querySelectorAll('[data-fip-edit]').forEach(el => {
+    el.contentEditable = 'false';
+  });
+});
+</script>
+
+
+<nav class="fip-phase-nav" id="fip-bottom-nav">
+  <a href="fip-phase0-foundation-final.html"><span class="fip-nav-kicker">← Previous Phase</span><span class="fip-nav-title">Phase 0 — Foundation</span></a>
+  <a href="fip-phase2-data-platform-final.html"><span class="fip-nav-kicker">Next Phase →</span><span class="fip-nav-title">Phase 2 — Data Platform</span></a>
+</nav>
+
+
+
+<script>
+/* ── FIP COURSE UX UPGRADE: auto sidebar, copy buttons, collapsible code ───── */
+(function() {
+  const phaseNumber = 1;
+  const phaseLabel = 'Phase 1';
+  const phaseTitle = 'Data Ingestion';
+
+  function slugify(text) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'section';
+  }
+
+  function ensureUniqueId(el, base) {
+    let id = base;
+    let i = 2;
+    while (document.getElementById(id) && document.getElementById(id) !== el) {
+      id = base + '-' + i++;
+    }
+    el.id = id;
+    return id;
+  }
+
+  function enhanceCodeBlocks() {
+    document.querySelectorAll('.code-block').forEach((block, idx) => {
+      const pre = block.querySelector('pre');
+      if (!pre) return;
+
+      let header = block.querySelector('.code-header');
+      if (!header) {
+        header = document.createElement('div');
+        header.className = 'code-header';
+        const lang = document.createElement('span');
+        lang.className = 'code-lang';
+        lang.textContent = 'code';
+        header.appendChild(lang);
+        block.insertBefore(header, block.firstChild);
+      }
+
+      if (header.querySelector('.fip-code-actions')) return;
+
+      const actions = document.createElement('div');
+      actions.className = 'fip-code-actions';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'fip-copy-btn';
+      copyBtn.textContent = '📋 Copy';
+      copyBtn.addEventListener('click', async () => {
+        const text = pre.innerText.replace(/\n{3,}/g, '\n\n').trim() + '\n';
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (err) {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        copyBtn.textContent = '✓ Copied';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = '📋 Copy';
+          copyBtn.classList.remove('copied');
+        }, 1800);
+      });
+
+      actions.appendChild(copyBtn);
+
+      // Collapse long snippets by default so pages stay easy to scan.
+      requestAnimationFrame(() => {
+        if (pre.scrollHeight > 520) {
+          block.classList.add('fip-has-collapse');
+          pre.classList.add('fip-collapsed');
+          const collapseBtn = document.createElement('button');
+          collapseBtn.type = 'button';
+          collapseBtn.className = 'fip-collapse-btn';
+          collapseBtn.textContent = 'Expand';
+          collapseBtn.addEventListener('click', () => {
+            const collapsed = pre.classList.toggle('fip-collapsed');
+            collapseBtn.textContent = collapsed ? 'Expand' : 'Collapse';
+          });
+          actions.insertBefore(collapseBtn, copyBtn);
+        }
+      });
+
+      header.appendChild(actions);
+    });
+  }
+
+  function buildGeneratedSidebar() {
+    // Phase 0 already has a native sidebar. Keep it and avoid duplicate navigation.
+    if (document.querySelector('.sidebar')) return;
+
+    const sidebar = document.createElement('aside');
+    sidebar.className = 'fip-course-sidebar';
+    sidebar.innerHTML = `
+      <div class="fip-side-brand">Feedback Intelligence Platform</div>
+      <div class="fip-side-sub">${phaseLabel} · ${phaseTitle}<br>Incremental 7-phase build</div>
+      <div class="fip-side-label">Topics</div>
+      <div class="fip-side-links"></div>
+      <div class="fip-side-label">Navigation</div>
+      <div class="fip-mini-nav">
+        <a href="#top">Top</a>
+        <a href="#fip-bottom-nav">Bottom</a>
+      </div>
+    `;
+    document.body.insertBefore(sidebar, document.body.firstChild);
+    document.body.classList.add('fip-has-generated-sidebar');
+
+    const links = sidebar.querySelector('.fip-side-links');
+    const candidates = [];
+
+    document.querySelectorAll('.section-title, .section-header h2, .step-header-content h3, h2.subsection, h3.subsection').forEach(el => {
+      const text = el.textContent.trim().replace(/\s+/g, ' ');
+      if (!text || text.length < 3) return;
+      if (candidates.some(c => c.text === text)) return;
+      const id = ensureUniqueId(el, slugify(text));
+      candidates.push({ id, text });
+    });
+
+    candidates.slice(0, 28).forEach((item, i) => {
+      const a = document.createElement('a');
+      a.href = '#' + item.id;
+      a.textContent = item.text.length > 42 ? item.text.slice(0, 39) + '…' : item.text;
+      links.appendChild(a);
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        sidebar.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+        const active = sidebar.querySelector(`a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0.01 });
+
+    candidates.forEach(item => {
+      const el = document.getElementById(item.id);
+      if (el) observer.observe(el);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.id = document.body.id || 'top';
+    enhanceCodeBlocks();
+    buildGeneratedSidebar();
+  });
+})();
+</script>
+
+</body>
+</html>

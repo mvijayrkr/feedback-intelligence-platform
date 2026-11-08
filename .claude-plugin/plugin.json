@@ -1,0 +1,9 @@
+{
+  "name": "fip-platform",
+  "version": "1.0.0",
+  "description": "Feedback Intelligence Platform — FLOCI phase workflows, deploy skills, and safety hooks for local EKS/MSK/RDS development.",
+  "author": {
+    "name": "FIP Project"
+  },
+  "keywords": ["fip", "floci", "terraform", "eks", "data-platform", "ingestion"]
+}

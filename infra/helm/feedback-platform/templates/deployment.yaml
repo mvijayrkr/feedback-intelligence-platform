@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "feedback-platform.apiName" . | quote }}
+  namespace: {{ default "feedback" .Values.namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ include "feedback-platform.apiName" . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+spec:
+  replicas: {{ default 1 .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "feedback-platform.apiName" . | quote }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "feedback-platform.apiName" . | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    spec:
+      containers:
+        - name: {{ include "feedback-platform.apiName" . | quote }}
+          image: "{{ default "nginx" .Values.api.image.repository }}:{{ default "1.25" .Values.api.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" .Values.api.image.pullPolicy }}
+          ports:
+            - containerPort: {{ default 80 .Values.api.containerPort }}
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ default 80 .Values.api.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ default 80 .Values.api.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 20
